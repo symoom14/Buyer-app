@@ -1,4 +1,5 @@
 import { Stack, usePathname } from "expo-router";
+import { View } from "react-native";
 import FloatingCartButton from "../../src/components/FloatingCartButton";
 
 export default function CustomerLayout() {
@@ -10,7 +11,7 @@ export default function CustomerLayout() {
     pathname.includes("/customer/invoice");
 
   return (
-    <>
+    <View style={{ flex: 1 }}>
       <Stack>
         <Stack.Screen
           name="home"
@@ -50,6 +51,6 @@ export default function CustomerLayout() {
       </Stack>
 
       {!hideCartButton && <FloatingCartButton />}
-    </>
+    </View>
   );
 }
