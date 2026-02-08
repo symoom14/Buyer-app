@@ -30,10 +30,41 @@ export function CartProvider({ children }) {
     });
   };
 
+  const increment = (productId) => {
+    setCart((prev) =>
+      prev.map((p) =>
+        p.productId === productId ? { ...p, quantity: p.quantity + 1 } : p,
+      ),
+    );
+  };
+
+  const decrement = (productId) => {
+    setCart((prev) =>
+      prev
+        .map((p) =>
+          p.productId === productId ? { ...p, quantity: p.quantity - 1 } : p,
+        )
+        .filter((p) => p.quantity > 0),
+    );
+  };
+
+  const removeFromCart = (productId) => {
+    setCart((prev) => prev.filter((p) => p.productId !== productId));
+  };
+
   const clearCart = () => setCart([]);
 
   return (
-    <CartContext.Provider value={{ cart, addToCart, clearCart }}>
+    <CartContext.Provider
+      value={{
+        cart,
+        addToCart,
+        increment,
+        decrement,
+        removeFromCart,
+        clearCart,
+      }}
+    >
       {children}
     </CartContext.Provider>
   );

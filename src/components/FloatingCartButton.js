@@ -1,5 +1,5 @@
 import { useRouter } from "expo-router";
-import { StyleSheet, Text, TouchableOpacity } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useCart } from "../context/CartContext";
 
 export default function FloatingCartButton() {
@@ -9,23 +9,29 @@ export default function FloatingCartButton() {
   if (cart.length === 0) return null;
 
   return (
-    <TouchableOpacity
-      style={styles.button}
-      onPress={() => router.push("/customer/cart")}
-    >
-      <Text style={styles.text}>🛒 {cart.length}</Text>
-    </TouchableOpacity>
+    <View style={styles.container}>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => router.push("/customer/cart")}
+      >
+        <Text style={styles.text}> Cart ({cart.length})</Text>
+      </TouchableOpacity>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  button: {
+  container: {
     position: "absolute",
     right: 16,
-    bottom: 24,
+    bottom: 32,
+  },
+  button: {
     backgroundColor: "#000",
-    padding: 14,
-    borderRadius: 28,
+    paddingVertical: 14,
+    paddingHorizontal: 18,
+    borderRadius: 999,
+    elevation: 5,
   },
   text: {
     color: "#fff",
