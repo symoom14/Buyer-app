@@ -36,6 +36,20 @@ yarn-error.*
 # typescript
 *.tsbuildinfo
 
+# Node
+node_modules/
+
+# Expo
+.expo/
+.expo-shared/
+
+# Environment variables
+.env
+
+# OS
+.DS_Store
+
+
 app-example
 
 # generated native folders
