@@ -3,12 +3,28 @@ import { Stack } from "expo-router";
 export default function MerchantLayout() {
   return (
     <Stack>
-      {/* Root merchant screen */}
+      {/* Merchant home dashboard */}
       <Stack.Screen
         name="dashboard"
         options={{
-          title: "My Stores",
+          title: "Dashboard",
           headerBackVisible: false,
+        }}
+      />
+
+      {/* Stores management */}
+      <Stack.Screen
+        name="stores"
+        options={{
+          title: "My Stores",
+        }}
+      />
+
+      {/* Orders */}
+      <Stack.Screen
+        name="orders"
+        options={{
+          title: "Orders",
         }}
       />
 
@@ -20,7 +36,7 @@ export default function MerchantLayout() {
         }}
       />
 
-      {/* Add Product page */}
+      {/* Add Product */}
       <Stack.Screen
         name="store/add-product/[storeId]"
         options={{

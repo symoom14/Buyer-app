@@ -23,7 +23,17 @@ export default function CustomerLayout() {
             title: "Home",
             headerBackVisible: false,
             headerRight: () => (
-              <Pressable onPress={() => router.push("/customer/profile")}>
+              <Pressable
+                onPress={() => router.push("/customer/profile")}
+                style={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: 16,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginLeft: 2.25,
+                }}
+              >
                 <Ionicons
                   name="person-circle-outline"
                   size={28}
