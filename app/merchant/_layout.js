@@ -38,6 +38,12 @@ export default function MerchantLayout() {
           title: "Orders",
         }}
       />
+      <Stack.Screen
+        name="orders/[orderId]"
+        options={{
+          title: "Order Details",
+        }}
+      />
 
       {/* Store page */}
       <Stack.Screen

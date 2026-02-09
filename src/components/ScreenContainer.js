@@ -1,7 +1,11 @@
 import { StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-export default function ScreenContainer({ children }) {
+export default function ScreenContainer({
+  children,
+  disableBottomInset = false,
+  bottomPadding = 16,
+}) {
   const insets = useSafeAreaInsets();
 
   return (
@@ -10,7 +14,7 @@ export default function ScreenContainer({ children }) {
         styles.container,
         {
           paddingTop: 16,
-          paddingBottom: insets.bottom + 16,
+          paddingBottom: (disableBottomInset ? 0 : insets.bottom) + bottomPadding,
         },
       ]}
     >

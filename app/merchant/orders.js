@@ -1,17 +1,33 @@
+// app/merchant/orders.js
 import { useFocusEffect, useRouter } from "expo-router";
 import { onAuthStateChanged } from "firebase/auth";
 import { collection, doc, getDoc, getDocs } from "firebase/firestore";
 import { useCallback, useMemo, useState } from "react";
 import {
-    FlatList,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  FlatList,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
+import AppIcon from "../../src/components/AppIcon";
 import { auth, db } from "../../src/firebase/firebaseConfig";
+
+const STATUS_COLORS = {
+  pending: "#FFB300",
+  accepted: "#2196F3",
+  completed: "#4CAF50",
+  cancelled: "#F44336",
+};
+
+const STATUS_ICONS = {
+  pending: "receipt-clock",
+  accepted: "receipt-text-arrow-right",
+  completed: "receipt-text-check",
+  cancelled: "close-box",
+};
 
 export default function MerchantOrdersScreen() {
   const [orders, setOrders] = useState([]);
@@ -24,7 +40,6 @@ export default function MerchantOrdersScreen() {
     try {
       setError("");
 
-      // Get all orders
       const snapshot = await getDocs(collection(db, "orders"));
 
       const filteredOrders = snapshot.docs
@@ -48,10 +63,10 @@ export default function MerchantOrdersScreen() {
             total: data.total,
             customerId: data.customerId,
             totalItems,
+            status: data.status || "pending",
           };
         })
         .filter(Boolean)
-        // Sort newest → oldest
         .sort((a, b) => {
           const aTime = a.createdAt?.toMillis?.() || 0;
           const bTime = b.createdAt?.toMillis?.() || 0;
@@ -60,7 +75,6 @@ export default function MerchantOrdersScreen() {
 
       setOrders(filteredOrders);
 
-      // Resolve customer usernames
       const uniqueCustomerIds = [
         ...new Set(filteredOrders.map((o) => o.customerId)),
       ];
@@ -86,7 +100,6 @@ export default function MerchantOrdersScreen() {
     }
   };
 
-  // Refresh every time screen gains focus
   useFocusEffect(
     useCallback(() => {
       const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -103,7 +116,6 @@ export default function MerchantOrdersScreen() {
     }, []),
   );
 
-  // Search filtering (by customer username)
   const visibleOrders = useMemo(() => {
     if (!searchQuery.trim()) return orders;
 
@@ -133,11 +145,17 @@ export default function MerchantOrdersScreen() {
           </Text>
 
           <Text style={styles.meta}>Order ID: {item.id}</Text>
-
           <Text style={styles.meta}>Items: {item.totalItems}</Text>
         </View>
 
         <View style={styles.right}>
+          <AppIcon
+            name={STATUS_ICONS[item.status]}
+            variant="community"
+            size={26}
+            color={STATUS_COLORS[item.status]}
+          />
+
           <Text style={styles.price}>${item.total?.toFixed(2)}</Text>
         </View>
       </TouchableOpacity>
@@ -194,6 +212,7 @@ const styles = StyleSheet.create({
   right: {
     justifyContent: "center",
     alignItems: "flex-end",
+    gap: 6,
   },
   date: {
     fontSize: 14,

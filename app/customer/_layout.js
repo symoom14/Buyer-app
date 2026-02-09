@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Stack, usePathname, useRouter } from "expo-router";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, View } from "react-native";
 import FloatingCartButton from "../../src/components/FloatingCartButton";
 
 export default function CustomerLayout() {
@@ -18,7 +18,7 @@ export default function CustomerLayout() {
       <Stack
         screenOptions={{
           headerStyle: {
-            backgroundColor: "#FFC107",
+            backgroundColor: "#ffae00",
           },
           headerTintColor: "#000",
           headerTitleStyle: {
@@ -40,10 +40,28 @@ export default function CustomerLayout() {
         />
 
         <Stack.Screen name="profile" options={{ title: "Profile" }} />
+        <Stack.Screen name="product" options={{ title: "Latest Products" }} />
         <Stack.Screen
           name="product/[productId]"
           options={{ title: "Product Details" }}
         />
+        <Stack.Screen
+          name="in-progress"
+          options={{ title: "In progress" }}
+        />
+        <Stack.Screen
+          name="completed-orders"
+          options={{ title: "Completed orders" }}
+        />
+        <Stack.Screen
+          name="cancelled-orders"
+          options={{ title: "Cancelled orders" }}
+        />
+        <Stack.Screen
+          name="orders/[orderId]"
+          options={{ title: "Order Details" }}
+        />
+        <Stack.Screen name="orders" options={{ title: "All orders" }} />
         <Stack.Screen name="cart" options={{ title: "Cart" }} />
         <Stack.Screen name="checkout" options={{ title: "Checkout" }} />
         <Stack.Screen name="invoice/[orderId]" options={{ title: "Invoice" }} />

@@ -1,10 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { collection, getDocs, orderBy, query } from "firebase/firestore";
-import { useEffect, useState } from "react";
 import {
-  ActivityIndicator,
-  FlatList,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -12,74 +9,20 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import DashboardSection from "../../src/components/DashboardSection";
 import ScreenContainer from "../../src/components/ScreenContainer";
-import { db } from "../../src/firebase/firebaseConfig";
 
 export default function CustomerHome() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  const fetchData = async () => {
-    try {
-      const productsQuery = query(
-        collection(db, "products"),
-        orderBy("createdAt", "desc"),
-      );
-      const productSnapshot = await getDocs(productsQuery);
-
-      const rawProducts = productSnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-
-      const storeSnapshot = await getDocs(collection(db, "stores"));
-      const storeMap = {};
-      storeSnapshot.docs.forEach((doc) => {
-        storeMap[doc.id] = doc.data().name;
-      });
-
-      const userSnapshot = await getDocs(collection(db, "users"));
-      const merchantMap = {};
-      userSnapshot.docs.forEach((doc) => {
-        const data = doc.data();
-        if (data.role === "merchant") {
-          merchantMap[doc.id] = data.username;
-        }
-      });
-
-      const enrichedProducts = rawProducts.map((product) => ({
-        ...product,
-        storeName: storeMap[product.storeId] || "Unknown Store",
-        sellerName: merchantMap[product.merchantId] || "Unknown Seller",
-      }));
-
-      setProducts(enrichedProducts);
-    } catch (error) {
-      console.error("Error loading customer home data:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  if (loading) {
-    return (
-      <ScreenContainer>
-        <ActivityIndicator size="large" />
-      </ScreenContainer>
-    );
-  }
 
   return (
     <ScreenContainer>
-      <View style={[styles.hero, { paddingTop: insets.top + 12 }]}>
+      {/* Fake header */}
+      <View style={[styles.hero, { paddingTop: insets.top + 28 }]}>
         <View style={styles.heroRow}>
           <Text style={styles.heroTitle}>Buyer</Text>
+
           <TouchableOpacity
             style={styles.profileBtn}
             onPress={() => router.push("/customer/profile")}
@@ -89,45 +32,113 @@ export default function CustomerHome() {
         </View>
       </View>
 
-      <Text style={styles.title}>Latest Products</Text>
+      {/* Dashboard content */}
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.content}
+      >
+        <DashboardSection
+          title="Browse products"
+          tiles={[
+            {
+              title: "Latest products",
+              onPress: () => router.push("/customer/product"),
+              icon: "shimmer",
+              iconVariant: "community",
+              backgroundColor: "#FFE9C6",
+              iconColor: "#8A5B00",
+              textColor: "#5C3B00",
+            },
+            {
+              title: "Browse stores",
+              icon: "store",
+              iconVariant: "community",
+              backgroundColor: "#DFF2FF",
+              iconColor: "#0B6BE0",
+              textColor: "#0A4AA3",
+            },
+          ]}
+        />
 
-      <FlatList
-        data={products}
-        keyExtractor={(item) => item.id}
-        ListEmptyComponent={
-          <Text style={styles.empty}>No products available</Text>
-        }
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            style={styles.card}
-            onPress={() => router.push(`/customer/product/${item.id}`)}
-          >
-            <Text style={styles.productName}>{item.name}</Text>
+        <DashboardSection
+          title="Your orders"
+          layout="grid"
+          tiles={[
+            {
+              title: "Recent orders",
+              onPress: () => router.push("/customer/orders"),
+              icon: "receipt-clock",
+              iconVariant: "community",
+              backgroundColor: "#FFE7D6",
+              iconColor: "#C04A00",
+              textColor: "#8A3400",
+            },
+            {
+              title: "In progress",
+              onPress: () => router.push("/customer/in-progress"),
+              icon: "progress-clock",
+              iconVariant: "community",
+              backgroundColor: "#F2E8FF",
+              iconColor: "#6B2DE0",
+              textColor: "#4A1EA3",
+            },
+            {
+              title: "Completed orders",
+              onPress: () => router.push("/customer/completed-orders"),
+              icon: "receipt-text-check",
+              iconVariant: "community",
+              backgroundColor: "#E8F7EC",
+              iconColor: "#1E8E3E",
+              textColor: "#146C2E",
+            },
+            {
+              title: "Cancelled orders",
+              onPress: () => router.push("/customer/cancelled-orders"),
+              icon: "close-box",
+              iconVariant: "community",
+              backgroundColor: "#FDE4E4",
+              iconColor: "#C62828",
+              textColor: "#8E1C1C",
+            },
+          ]}
+        />
 
-            <Text style={styles.meta}>
-              Store: <Text style={styles.bold}>{item.storeName}</Text>
-            </Text>
-
-            <Text style={styles.meta}>
-              Seller: <Text style={styles.bold}>{item.sellerName}</Text>
-            </Text>
-
-            <Text style={styles.price}>${item.price}</Text>
-          </TouchableOpacity>
-        )}
-      />
+        <DashboardSection
+          title="Favourites"
+          onShowMore={() => {}}
+          tiles={[
+            {
+              title: "Saved products",
+              icon: "heart",
+              iconVariant: "community",
+              backgroundColor: "#FFE0E6",
+              iconColor: "#C62828",
+              textColor: "#8E1C1C",
+            },
+            {
+              title: "Saved stores",
+              icon: "store-check",
+              iconVariant: "community",
+              backgroundColor: "#E7F6FF",
+              iconColor: "#1565C0",
+              textColor: "#0D47A1",
+            },
+          ]}
+          disabled
+        />
+      </ScrollView>
     </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
   hero: {
-    backgroundColor: "#FFC107",
+    backgroundColor: "#ffae00",
     marginHorizontal: -16,
     marginTop: -16,
     paddingHorizontal: 16,
-    paddingBottom: 20,
-    marginBottom: 12,
+    paddingBottom: 50,
+    marginBottom: 20,
     borderBottomLeftRadius: 16,
     borderBottomRightRadius: 16,
   },
@@ -137,7 +148,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   heroTitle: {
-    fontSize: 32,
+    fontSize: 42,
     fontWeight: "800",
     color: "#000",
   },
@@ -148,38 +159,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  title: {
-    fontSize: 24,
-    fontWeight: "600",
-    marginBottom: 16,
-  },
-  card: {
-    padding: 16,
-    borderWidth: 1,
-    borderColor: "#eee",
-    borderRadius: 8,
-    marginBottom: 12,
-    backgroundColor: "#fff",
-  },
-  productName: {
-    fontSize: 16,
-    fontWeight: "600",
-    marginBottom: 6,
-  },
-  meta: {
-    fontSize: 14,
-    color: "#555",
-  },
-  bold: {
-    fontWeight: "500",
-  },
-  price: {
-    marginTop: 8,
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  empty: {
-    color: "#666",
-    marginTop: 20,
+  content: {
+    paddingBottom: 16,
   },
 });
