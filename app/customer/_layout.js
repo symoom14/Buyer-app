@@ -1,14 +1,18 @@
-import { Stack, usePathname } from "expo-router";
-import { View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { Stack, usePathname, useRouter } from "expo-router";
+import { Pressable, View } from "react-native";
+
 import FloatingCartButton from "../../src/components/FloatingCartButton";
 
 export default function CustomerLayout() {
   const pathname = usePathname();
+  const router = useRouter();
 
   const hideCartButton =
     pathname.includes("/customer/cart") ||
     pathname.includes("/customer/checkout") ||
-    pathname.includes("/customer/invoice");
+    pathname.includes("/customer/invoice") ||
+    pathname.includes("/customer/profile");
 
   return (
     <View style={{ flex: 1 }}>
@@ -18,36 +22,30 @@ export default function CustomerLayout() {
           options={{
             title: "Home",
             headerBackVisible: false,
+            headerRight: () => (
+              <Pressable onPress={() => router.push("/customer/profile")}>
+                <Ionicons
+                  name="person-circle-outline"
+                  size={28}
+                  color="#007AFF"
+                />
+              </Pressable>
+            ),
           }}
         />
+
+        <Stack.Screen name="profile" options={{ title: "Profile" }} />
 
         <Stack.Screen
           name="product/[productId]"
-          options={{
-            title: "Product Details",
-          }}
+          options={{ title: "Product Details" }}
         />
 
-        <Stack.Screen
-          name="cart"
-          options={{
-            title: "Your Cart",
-          }}
-        />
+        <Stack.Screen name="cart" options={{ title: "Your Cart" }} />
 
-        <Stack.Screen
-          name="checkout"
-          options={{
-            title: "Checkout",
-          }}
-        />
+        <Stack.Screen name="checkout" options={{ title: "Checkout" }} />
 
-        <Stack.Screen
-          name="invoice/[orderId]"
-          options={{
-            title: "Invoice",
-          }}
-        />
+        <Stack.Screen name="invoice/[orderId]" options={{ title: "Invoice" }} />
       </Stack>
 
       {!hideCartButton && <FloatingCartButton />}

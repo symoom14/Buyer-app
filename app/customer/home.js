@@ -8,7 +8,6 @@ import {
   Text,
   TouchableOpacity,
 } from "react-native";
-import LogoutButton from "../../src/components/LogoutButton";
 import ScreenContainer from "../../src/components/ScreenContainer";
 import { db } from "../../src/firebase/firebaseConfig";
 
@@ -106,8 +105,6 @@ export default function CustomerHome() {
           </TouchableOpacity>
         )}
       />
-
-      <LogoutButton />
     </ScreenContainer>
   );
 }
