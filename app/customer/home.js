@@ -1,3 +1,4 @@
+import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { collection, getDocs, orderBy, query } from "firebase/firestore";
 import { useEffect, useState } from "react";
@@ -7,18 +8,21 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
+  View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
 import ScreenContainer from "../../src/components/ScreenContainer";
 import { db } from "../../src/firebase/firebaseConfig";
 
 export default function CustomerHome() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const fetchData = async () => {
     try {
-      //Fetch products
       const productsQuery = query(
         collection(db, "products"),
         orderBy("createdAt", "desc"),
@@ -30,26 +34,21 @@ export default function CustomerHome() {
         ...doc.data(),
       }));
 
-      //Fetch stores
       const storeSnapshot = await getDocs(collection(db, "stores"));
       const storeMap = {};
       storeSnapshot.docs.forEach((doc) => {
         storeMap[doc.id] = doc.data().name;
       });
 
-      //Fetch users (merchants only)
       const userSnapshot = await getDocs(collection(db, "users"));
       const merchantMap = {};
-
       userSnapshot.docs.forEach((doc) => {
         const data = doc.data();
-
         if (data.role === "merchant") {
           merchantMap[doc.id] = data.username;
         }
       });
 
-      //Enrich products
       const enrichedProducts = rawProducts.map((product) => ({
         ...product,
         storeName: storeMap[product.storeId] || "Unknown Store",
@@ -78,6 +77,18 @@ export default function CustomerHome() {
 
   return (
     <ScreenContainer>
+      <View style={[styles.hero, { paddingTop: insets.top + 12 }]}>
+        <View style={styles.heroRow}>
+          <Text style={styles.heroTitle}>Buyer</Text>
+          <TouchableOpacity
+            style={styles.profileBtn}
+            onPress={() => router.push("/customer/profile")}
+          >
+            <Ionicons name="person-circle-outline" size={30} color="#000" />
+          </TouchableOpacity>
+        </View>
+      </View>
+
       <Text style={styles.title}>Latest Products</Text>
 
       <FlatList
@@ -110,6 +121,33 @@ export default function CustomerHome() {
 }
 
 const styles = StyleSheet.create({
+  hero: {
+    backgroundColor: "#FFC107",
+    marginHorizontal: -16,
+    marginTop: -16,
+    paddingHorizontal: 16,
+    paddingBottom: 20,
+    marginBottom: 12,
+    borderBottomLeftRadius: 16,
+    borderBottomRightRadius: 16,
+  },
+  heroRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  heroTitle: {
+    fontSize: 32,
+    fontWeight: "800",
+    color: "#000",
+  },
+  profileBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   title: {
     fontSize: 24,
     fontWeight: "600",
@@ -121,6 +159,7 @@ const styles = StyleSheet.create({
     borderColor: "#eee",
     borderRadius: 8,
     marginBottom: 12,
+    backgroundColor: "#fff",
   },
   productName: {
     fontSize: 16,

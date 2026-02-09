@@ -2,12 +2,23 @@ import { Stack } from "expo-router";
 
 export default function MerchantLayout() {
   return (
-    <Stack>
+    <Stack
+      screenOptions={{
+        headerStyle: {
+          backgroundColor: "#0b6be0",
+        },
+        headerTintColor: "#fff",
+        headerTitleStyle: {
+          fontWeight: "700",
+        },
+      }}
+    >
       {/* Merchant home dashboard */}
       <Stack.Screen
         name="dashboard"
         options={{
           title: "Dashboard",
+          headerShown: false,
           headerBackVisible: false,
         }}
       />
