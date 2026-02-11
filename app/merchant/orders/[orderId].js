@@ -1,6 +1,5 @@
-import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams } from "expo-router";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs, updateDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -11,6 +10,7 @@ import {
   View,
 } from "react-native";
 
+import AppIcon from "../../../src/components/AppIcon";
 import ScreenContainer from "../../../src/components/ScreenContainer";
 import { auth, db } from "../../../src/firebase/firebaseConfig";
 
@@ -37,6 +37,7 @@ export default function MerchantOrderDetailsScreen() {
   const [customerName, setCustomerName] = useState("");
   const [loading, setLoading] = useState(true);
   const [updatingStatus, setUpdatingStatus] = useState(false);
+  const [outOfStockItems, setOutOfStockItems] = useState([]);
 
   useEffect(() => {
     fetchOrder();
@@ -56,12 +57,71 @@ export default function MerchantOrderDetailsScreen() {
           setCustomerName(userSnap.data().username);
         }
       }
+
     } catch (err) {
       console.error("Failed to load order:", err);
     } finally {
       setLoading(false);
     }
   };
+
+  const checkStock = async (orderData) => {
+    const merchantId = auth.currentUser?.uid;
+    if (!merchantId) {
+      setOutOfStockItems([]);
+      return;
+    }
+
+    const merchantItems = (orderData?.items || []).filter(
+      (item) => item.merchantId === merchantId,
+    );
+    const ordersSnap = await getDocs(collection(db, "orders"));
+    const orderedByProduct = {};
+    ordersSnap.docs.forEach((docSnap) => {
+      const data = docSnap.data();
+      const items = (data.items || []).filter(
+        (item) => item.merchantId === merchantId,
+      );
+      items.forEach((item) => {
+        const status =
+          data.merchantStatuses?.[merchantId]?.status || data.status || "pending";
+        if (status === "cancelled") return;
+        if (!item.productId) return;
+        orderedByProduct[item.productId] =
+          (orderedByProduct[item.productId] || 0) + (item.quantity || 0);
+      });
+    });
+    const productDocs = await Promise.all(
+      merchantItems.map((item) =>
+        item.productId ? getDoc(doc(db, "products", item.productId)) : null,
+      ),
+    );
+
+    const stockByProduct = {};
+    productDocs.forEach((productSnap, idx) => {
+      const item = merchantItems[idx];
+      if (!item?.productId || !productSnap || !productSnap.exists()) return;
+      stockByProduct[item.productId] = productSnap.data().quantity ?? 0;
+    });
+
+    const outOfStock = merchantItems
+      .filter((item) => {
+        if (!item.productId) return true;
+        const initial = stockByProduct[item.productId] ?? 0;
+        const ordered = orderedByProduct[item.productId] ?? 0;
+        const remaining = initial - ordered;
+        return remaining < 0 || remaining < (item.quantity || 0);
+      })
+      .map((item) => item.name)
+      .filter(Boolean);
+    setOutOfStockItems(outOfStock);
+  };
+
+  useEffect(() => {
+    if (order) {
+      checkStock(order);
+    }
+  }, [order]);
 
   const updateStatus = async (newStatus) => {
     if (!order || updatingStatus) return;
@@ -104,6 +164,10 @@ export default function MerchantOrderDetailsScreen() {
 
     // Can't update if order is cancelled
     if (currentStatus === "cancelled") {
+      return false;
+    }
+
+    if (outOfStockItems.length > 0) {
       return false;
     }
 
@@ -209,6 +273,13 @@ export default function MerchantOrderDetailsScreen() {
   const isCancelled = currentStatus === "cancelled";
   const canCancel =
     currentStatus !== "cancelled" && currentStatus !== "completed";
+  const STATUS_STEP_ICONS = {
+    pending: "progress-clock",
+    accepted: "account-check",
+    completed: "truck-fast",
+  };
+  const STEP_ACTIVE_COLOR = "#4CAF50";
+  const STEP_IDLE_COLOR = "#BDBDBD";
 
   return (
     <ScreenContainer>
@@ -218,7 +289,7 @@ export default function MerchantOrderDetailsScreen() {
       </View>
 
       {/* Timeline Stepper */}
-      {!isCancelled ? (
+      {!isCancelled && outOfStockItems.length === 0 ? (
         <View style={styles.timelineContainer}>
           <View style={styles.timeline}>
             {STATUS_ORDER.map((status, index) => {
@@ -249,10 +320,12 @@ export default function MerchantOrderDetailsScreen() {
                         isClickable && styles.stepCircleClickable,
                       ]}
                     >
-                      {isActive && !isCurrent && (
-                        <Ionicons name="checkmark" size={18} color="#fff" />
-                      )}
-                      {isCurrent && <View style={styles.currentDot} />}
+                      <AppIcon
+                        name={STATUS_STEP_ICONS[status]}
+                        variant="community"
+                        size={18}
+                        color={isActive ? STEP_ACTIVE_COLOR : STEP_IDLE_COLOR}
+                      />
                     </View>
 
                     {/* Label */}
@@ -281,21 +354,49 @@ export default function MerchantOrderDetailsScreen() {
           {/* Cancel Button */}
           {canCancel && (
             <Pressable style={styles.cancelButton} onPress={handleCancelOrder}>
-              <Ionicons name="close-circle-outline" size={18} color="#F44336" />
+              <AppIcon
+                name="close-circle-outline"
+                variant="community"
+                size={18}
+                color="#F44336"
+              />
               <Text style={styles.cancelButtonText}>Cancel Order</Text>
             </Pressable>
           )}
         </View>
       ) : (
         // Cancelled Status Display
-        <View style={styles.cancelledBanner}>
-          <Ionicons name="close-circle" size={24} color="#fff" />
-          <Text style={styles.cancelledText}>Order Cancelled</Text>
-          <Pressable style={styles.reopenButton} onPress={handleReopenOrder}>
-            <Ionicons name="refresh" size={18} color="#F44336" />
-            <Text style={styles.reopenText}>Reopen Order</Text>
-          </Pressable>
-        </View>
+        <>
+          {isCancelled ? (
+            <View style={styles.cancelledBanner}>
+              <AppIcon
+                name="close-circle"
+                variant="community"
+                size={24}
+                color="#fff"
+              />
+              <Text style={styles.cancelledText}>Order Cancelled</Text>
+              <Pressable style={styles.reopenButton} onPress={handleReopenOrder}>
+                <AppIcon
+                  name="refresh"
+                  variant="community"
+                  size={18}
+                  color="#F44336"
+                />
+                <Text style={styles.reopenText}>Reopen Order</Text>
+              </Pressable>
+            </View>
+          ) : (
+            <View style={styles.outOfStockBanner}>
+              {outOfStockItems.map((name, idx) => (
+                <Text key={`${name}-${idx}`} style={styles.outOfStockText}>
+                  {name} is out of stock. Please re-stock the product to be
+                  able to process the order
+                </Text>
+              ))}
+            </View>
+          )}
+        </>
       )}
 
       {/* Meta */}
@@ -410,21 +511,16 @@ const styles = StyleSheet.create({
     borderColor: "#fff",
   },
   stepCircleActive: {
-    backgroundColor: "#4CAF50",
+    backgroundColor: "#e8f5e9",
+    borderColor: "#4CAF50",
   },
   stepCircleCurrent: {
-    backgroundColor: "#2196F3",
-    borderColor: "#2196F3",
+    backgroundColor: "#e8f5e9",
+    borderColor: "#4CAF50",
     borderWidth: 4,
   },
   stepCircleClickable: {
     opacity: 1,
-  },
-  currentDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    backgroundColor: "#fff",
   },
   stepLabel: {
     marginTop: 8,
@@ -469,6 +565,20 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontWeight: "600",
+  },
+  outOfStockBanner: {
+    marginBottom: 24,
+    padding: 14,
+    backgroundColor: "#fff3e0",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#ffcc80",
+  },
+  outOfStockText: {
+    color: "#e65100",
+    fontSize: 14,
+    fontWeight: "600",
+    marginBottom: 6,
   },
   reopenButton: {
     flexDirection: "row",

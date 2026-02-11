@@ -10,19 +10,20 @@ import {
 import { useCallback, useState } from "react";
 import {
   FlatList,
+  Pressable,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
 import { Swipeable } from "react-native-gesture-handler";
-import ScreenContainer from "../../../src/components/ScreenContainer";
 import { db } from "../../../src/firebase/firebaseConfig";
 
 export default function StorePage() {
   const { storeId } = useLocalSearchParams();
   const router = useRouter();
   const [products, setProducts] = useState([]);
+  const [soldCounts, setSoldCounts] = useState({});
 
   const fetchProducts = async () => {
     const q = query(
@@ -37,6 +38,18 @@ export default function StorePage() {
     }));
 
     setProducts(list);
+
+    const orderSnap = await getDocs(collection(db, "orders"));
+    const counts = {};
+    orderSnap.docs.forEach((docSnap) => {
+      const data = docSnap.data();
+      (data.items || []).forEach((item) => {
+        if (!item.productId) return;
+        counts[item.productId] =
+          (counts[item.productId] || 0) + (item.quantity || 0);
+      });
+    });
+    setSoldCounts(counts);
   };
 
   useFocusEffect(
@@ -60,7 +73,7 @@ export default function StorePage() {
   );
 
   return (
-    <ScreenContainer>
+    <View style={styles.container}>
       <Text style={styles.title}>Store Products</Text>
 
       <FlatList
@@ -69,12 +82,36 @@ export default function StorePage() {
         ListEmptyComponent={<Text style={styles.empty}>No products yet</Text>}
         renderItem={({ item }) => (
           <Swipeable renderRightActions={() => renderRightActions(item.id)}>
-            <View style={styles.productCard}>
+            <Pressable
+              style={styles.productCard}
+              onPress={() =>
+                router.push(`/merchant/store/edit-product/${item.id}`)
+              }
+            >
               <Text style={styles.productName}>{item.name}</Text>
-              <Text>
+              <Text style={styles.productMeta}>
                 ${item.price} · Qty: {item.quantity}
               </Text>
-            </View>
+              <Text style={styles.productMeta}>
+                Ordered: {soldCounts[item.id] || 0}
+              </Text>
+              <Text
+                style={[
+                  styles.stockStatus,
+                  item.quantity < 5
+                    ? styles.stockCritical
+                    : item.quantity <= 10
+                      ? styles.stockLow
+                      : styles.stockGood,
+                ]}
+              >
+                {item.quantity < 5
+                  ? "Restock required!"
+                  : item.quantity <= 10
+                    ? "Low stock"
+                    : "Stocked up"}
+              </Text>
+            </Pressable>
           </Swipeable>
         )}
       />
@@ -85,11 +122,16 @@ export default function StorePage() {
       >
         <Text style={styles.fabText}>+ Add Product</Text>
       </TouchableOpacity>
-    </ScreenContainer>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 16,
+    backgroundColor: "#F2F2F7",
+  },
   title: {
     fontSize: 24,
     fontWeight: "600",
@@ -98,13 +140,29 @@ const styles = StyleSheet.create({
   productCard: {
     padding: 14,
     backgroundColor: "#fff",
-    borderWidth: 1,
-    borderColor: "#eee",
-    borderRadius: 8,
+    borderRadius: 12,
     marginBottom: 12,
   },
   productName: {
     fontWeight: "600",
+    fontSize: 16,
+  },
+  productMeta: {
+    marginTop: 4,
+    color: "#555",
+  },
+  stockStatus: {
+    marginTop: 6,
+    fontWeight: "600",
+  },
+  stockCritical: {
+    color: "#C62828",
+  },
+  stockLow: {
+    color: "#EF6C00",
+  },
+  stockGood: {
+    color: "#2E7D32",
   },
   empty: {
     color: "#666",

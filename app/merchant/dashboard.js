@@ -1,80 +1,106 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import LogoutButton from "../../src/components/LogoutButton";
+
+import DashboardSection from "../../src/components/DashboardSection";
+import ScreenContainer from "../../src/components/ScreenContainer";
 
 export default function MerchantDashboard() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
   return (
-    <View style={styles.container}>
-      <View style={[styles.hero, { paddingTop: insets.top + 12 }]}>
-        <Text style={styles.heroTitle}>Merchant</Text>
+    <ScreenContainer>
+      <View style={[styles.hero, { paddingTop: insets.top + 28 }]}>
+        <View style={styles.heroRow}>
+          <Text style={styles.heroTitle}>Merchant</Text>
+          <TouchableOpacity
+            style={styles.profileBtn}
+            onPress={() => router.push("/merchant/profile")}
+          >
+            <Ionicons name="person-circle-outline" size={30} color="#fff" />
+          </TouchableOpacity>
+        </View>
       </View>
 
-      <Pressable
-        style={styles.card}
-        onPress={() => router.push("/merchant/stores")}
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.content}
       >
-        <Ionicons name="storefront-outline" size={28} color="#0b6be0" />
-        <Text style={styles.cardTitle}>My Stores</Text>
-        <Text style={styles.cardSubtitle}>
-          Manage stores, products, and availability
-        </Text>
-      </Pressable>
-
-      <Pressable
-        style={styles.card}
-        onPress={() => router.push("/merchant/orders")}
-      >
-        <Ionicons name="receipt-outline" size={28} color="#0b6be0" />
-        <Text style={styles.cardTitle}>Orders</Text>
-        <Text style={styles.cardSubtitle}>
-          View customer orders across all stores
-        </Text>
-      </Pressable>
-      <LogoutButton />
-    </View>
+        <DashboardSection
+          title="Manage"
+          layout="grid"
+          tiles={[
+            {
+              title: "My stores",
+              onPress: () => router.push("/merchant/stores"),
+              icon: "store",
+              iconVariant: "community",
+              backgroundColor: "#DFF2FF",
+              iconColor: "#0b6be0",
+              textColor: "#0A4AA3",
+            },
+            {
+              title: "Orders",
+              onPress: () => router.push("/merchant/orders"),
+              icon: "receipt-text",
+              iconVariant: "community",
+              backgroundColor: "#FFF1CC",
+              iconColor: "#9C6B00",
+              textColor: "#6B4A00",
+            },
+            {
+              title: "Restock",
+              onPress: () => router.push("/merchant/restock"),
+              icon: "package-variant-plus",
+              iconVariant: "community",
+              backgroundColor: "#E8F7EC",
+              iconColor: "#1E8E3E",
+              textColor: "#146C2E",
+            },
+          ]}
+        />
+      </ScrollView>
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: "#F2F2F7",
-  },
   hero: {
     backgroundColor: "#0b6be0",
-    marginHorizontal: -20,
-    marginTop: -20,
-    paddingHorizontal: 20,
-    paddingBottom: 20,
-    marginBottom: 16,
+    marginHorizontal: -16,
+    marginTop: -16,
+    paddingHorizontal: 16,
+    paddingBottom: 50,
+    marginBottom: 20,
     borderBottomLeftRadius: 16,
     borderBottomRightRadius: 16,
   },
   heroTitle: {
-    fontSize: 32,
+    fontSize: 42,
     fontWeight: "800",
     color: "#fff",
   },
-  card: {
-    backgroundColor: "#FFFFFF",
-    padding: 20,
+  heroRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  profileBtn: {
+    width: 32,
+    height: 32,
     borderRadius: 16,
-    marginBottom: 16,
+    alignItems: "center",
+    justifyContent: "center",
   },
-  cardTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    marginTop: 12,
-  },
-  cardSubtitle: {
-    fontSize: 14,
-    color: "#666",
-    marginTop: 4,
+  content: {
+    paddingBottom: 16,
   },
 });

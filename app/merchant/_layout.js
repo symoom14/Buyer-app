@@ -22,12 +22,37 @@ export default function MerchantLayout() {
           headerBackVisible: false,
         }}
       />
+      <Stack.Screen name="profile" options={{ title: "Profile" }} />
 
       {/* Stores management */}
       <Stack.Screen
         name="stores"
         options={{
           title: "My Stores",
+        }}
+      />
+      <Stack.Screen
+        name="stores/manage"
+        options={{
+          title: "Manage Stores",
+        }}
+      />
+      <Stack.Screen
+        name="stores/products"
+        options={{
+          title: "All Products",
+        }}
+      />
+      <Stack.Screen
+        name="stores/add"
+        options={{
+          title: "Add Store",
+        }}
+      />
+      <Stack.Screen
+        name="stores/analytics"
+        options={{
+          title: "Store Analytics",
         }}
       />
 
@@ -52,12 +77,24 @@ export default function MerchantLayout() {
           title: "Store",
         }}
       />
+      <Stack.Screen
+        name="restock"
+        options={{
+          title: "Restock",
+        }}
+      />
 
       {/* Add Product */}
       <Stack.Screen
         name="store/add-product/[storeId]"
         options={{
           title: "Add Product",
+        }}
+      />
+      <Stack.Screen
+        name="store/edit-product/[productId]"
+        options={{
+          title: "Edit Product",
         }}
       />
     </Stack>

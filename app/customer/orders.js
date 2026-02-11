@@ -1,8 +1,8 @@
+import * as Haptics from "expo-haptics";
 import { useFocusEffect, useRouter } from "expo-router";
 import { onAuthStateChanged } from "firebase/auth";
 import { collection, getDocs } from "firebase/firestore";
 import { useCallback, useMemo, useState } from "react";
-import * as Haptics from "expo-haptics";
 import {
   FlatList,
   LayoutAnimation,
@@ -37,8 +37,13 @@ export default function CustomerOrders() {
   const router = useRouter();
   const [expandedId, setExpandedId] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState("all");
+  const [searchFocused, setSearchFocused] = useState(false);
 
-  if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
+  if (
+    Platform.OS === "android" &&
+    UIManager.setLayoutAnimationEnabledExperimental
+  ) {
     UIManager.setLayoutAnimationEnabledExperimental(true);
   }
 
@@ -97,16 +102,54 @@ export default function CustomerOrders() {
 
   const visibleOrders = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
-    if (!q) return orders;
+    const filteredByStatus =
+      selectedStatus === "all"
+        ? orders
+        : orders.filter((o) => o.status === selectedStatus);
 
-    return orders.filter((order) => {
+    if (!q) return filteredByStatus;
+
+    return filteredByStatus.filter((order) => {
       const merchant = (order.merchantName || "").toLowerCase();
       const itemNames = (order.items || [])
         .map((item) => (item?.name || "").toLowerCase())
         .join(" ");
       return merchant.includes(q) || itemNames.includes(q);
     });
-  }, [orders, searchQuery]);
+  }, [orders, searchQuery, selectedStatus]);
+
+  const statusFilters = [
+    {
+      key: "all",
+      label: "All",
+      light: "#E5E5EA",
+      dark: "#6E6E73",
+    },
+    {
+      key: "pending",
+      label: "Pending",
+      light: "#FFF4CC",
+      dark: "#B38300",
+    },
+    {
+      key: "accepted",
+      label: "Accepted",
+      light: "#DDEEFF",
+      dark: "#0B5ED7",
+    },
+    {
+      key: "completed",
+      label: "Completed",
+      light: "#DFF7E6",
+      dark: "#1E8E3E",
+    },
+    {
+      key: "cancelled",
+      label: "Cancelled",
+      light: "#FFE0E0",
+      dark: "#C62828",
+    },
+  ];
 
   return (
     <View style={styles.container}>
@@ -116,7 +159,47 @@ export default function CustomerOrders() {
         onChangeText={setSearchQuery}
         style={styles.search}
         clearButtonMode="while-editing"
+        onFocus={() => setSearchFocused(true)}
+        onBlur={() => setSearchFocused(false)}
       />
+      <View style={styles.filters}>
+        {statusFilters.map((filter) => {
+          const isSelected = selectedStatus === filter.key;
+          const isInactive = searchFocused;
+          return (
+            <Pressable
+              key={filter.key}
+              style={[
+                styles.filterPill,
+                isInactive && styles.filterInactive,
+                !isInactive &&
+                  !isSelected && {
+                    backgroundColor: filter.light,
+                    borderColor: "transparent",
+                  },
+                !isInactive &&
+                  isSelected && {
+                    backgroundColor: filter.dark,
+                    borderColor: filter.light,
+                  },
+              ]}
+              onPress={() => setSelectedStatus(filter.key)}
+              disabled={isInactive}
+            >
+              <Text
+                style={[
+                  styles.filterText,
+                  isInactive && styles.filterTextInactive,
+                  !isInactive && !isSelected && { color: filter.dark },
+                  !isInactive && isSelected && { color: "#fff" },
+                ]}
+              >
+                {filter.label}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </View>
       <FlatList
         data={visibleOrders}
         keyExtractor={(item) => item.id}
@@ -135,7 +218,9 @@ export default function CustomerOrders() {
                 }
                 onLongPress={() => {
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                  LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+                  LayoutAnimation.configureNext(
+                    LayoutAnimation.Presets.easeInEaseOut,
+                  );
                   setExpandedId((prev) => (prev === item.id ? null : item.id));
                 }}
               >
@@ -171,7 +256,10 @@ export default function CustomerOrders() {
                     <Text style={styles.previewValue}>{item.totalItems}</Text>
                   </View>
                   {previewItems.map((p, idx) => (
-                    <Text key={`${item.id}-p-${idx}`} style={styles.previewItem}>
+                    <Text
+                      key={`${item.id}-p-${idx}`}
+                      style={styles.previewItem}
+                    >
                       {p.name} × {p.quantity}
                     </Text>
                   ))}
@@ -203,6 +291,31 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     fontSize: 16,
     marginBottom: 12,
+  },
+  filters: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    marginBottom: 12,
+  },
+  filterPill: {
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+    borderRadius: 999,
+    borderWidth: 0,
+    marginTop: 5,
+    marginBottom: 7,
+  },
+  filterInactive: {
+    backgroundColor: "#E6E6EA",
+    borderColor: "transparent",
+  },
+  filterText: {
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  filterTextInactive: {
+    color: "#777",
   },
   card: {
     flexDirection: "row",
