@@ -8,18 +8,30 @@ import AppIcon from "../../../src/components/AppIcon";
 
 import { db } from "../../../src/firebase/firebaseConfig";
 
-const STATUS_COLORS = {
-  pending: "#FFB300",
-  accepted: "#2196F3",
-  completed: "#4CAF50",
-  cancelled: "#F44336",
-};
-
 const STATUS_LABELS = {
   pending: "Pending",
   accepted: "Accepted",
   completed: "Completed",
   cancelled: "Cancelled",
+};
+const STATUS_ORDER = ["pending", "accepted", "completed"];
+const STATUS_STEP_ICONS = {
+  pending: "progress-clock",
+  accepted: "account-check",
+  completed: "truck-fast",
+  cancelled: "close-circle",
+};
+const STEP_ACTIVE_COLORS = {
+  pending: "#FFB300",
+  accepted: "#2196F3",
+  completed: "#4CAF50",
+  cancelled: "#F44336",
+};
+const STEP_ACTIVE_BACKGROUNDS = {
+  pending: "#fff3e0",
+  accepted: "#e3f2fd",
+  completed: "#e8f5e9",
+  cancelled: "#fdecec",
 };
 
 export default function CustomerOrderDetails() {
@@ -46,6 +58,29 @@ export default function CustomerOrderDetails() {
   const items = (order.items || []).filter((i) => i.merchantId === merchantId);
 
   const status = order.merchantStatuses?.[merchantId]?.status || "pending";
+  const isCancelled = status === "cancelled";
+  const merchantStatus = order.merchantStatuses?.[merchantId] || {};
+
+  const lastPositiveStatus =
+    [
+      merchantStatus.lastNonCancelledStatus,
+      merchantStatus.previousStatus,
+      merchantStatus.lastStatus,
+      order.lastNonCancelledStatus,
+      order.previousStatus,
+    ].find((value) => STATUS_ORDER.includes(value)) || "pending";
+
+  const lastPositiveIndex = Math.max(STATUS_ORDER.indexOf(lastPositiveStatus), 0);
+  const timelineStatuses = isCancelled
+    ? [...STATUS_ORDER.slice(0, lastPositiveIndex + 1), "cancelled"]
+    : STATUS_ORDER;
+
+  const currentIndex = isCancelled
+    ? timelineStatuses.length - 1
+    : STATUS_ORDER.indexOf(status);
+
+  const stepIdleColor = isCancelled ? "#F2B8B5" : "#BDBDBD";
+  const lineActiveStyle = { backgroundColor: isCancelled ? "#F44336" : "#4CAF50" };
 
   const generateInvoiceHTML = () => {
     if (!order || !order.items) {
@@ -146,17 +181,75 @@ export default function CustomerOrderDetails() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Order Details</Text>
-      <View style={styles.statusRow}>
-        <View
-          style={[
-            styles.statusDot,
-            { backgroundColor: STATUS_COLORS[status] || "#999" },
-          ]}
-        />
-        <Text style={styles.statusText}>
-          {STATUS_LABELS[status] || "Pending"}
-        </Text>
+
+      <View style={styles.timelineContainer}>
+        <View style={styles.timeline}>
+          {timelineStatuses.map((stepStatus, index) => {
+            const isActive = currentIndex >= index;
+            const isCurrent = currentIndex === index;
+            const stepActiveColor = STEP_ACTIVE_COLORS[stepStatus] || "#4CAF50";
+            const stepActiveBackground =
+              STEP_ACTIVE_BACKGROUNDS[stepStatus] || "#e8f5e9";
+
+            return (
+              <View key={stepStatus} style={styles.timelineStepWrapper}>
+                {index > 0 && (
+                  <View
+                    style={[
+                      styles.lineLeft,
+                      isActive && styles.lineActive,
+                      isActive && lineActiveStyle,
+                    ]}
+                  />
+                )}
+
+                <View style={styles.stepContainer}>
+                  <View
+                    style={[
+                      styles.stepCircle,
+                      isActive && styles.stepCircleActive,
+                      isCurrent && styles.stepCircleCurrent,
+                      isActive && { borderColor: stepActiveColor },
+                      isActive && { backgroundColor: stepActiveBackground },
+                    ]}
+                  >
+                    <AppIcon
+                      name={STATUS_STEP_ICONS[stepStatus]}
+                      variant="community"
+                      size={18}
+                      color={isActive ? stepActiveColor : stepIdleColor}
+                    />
+                  </View>
+
+                  <Text
+                    style={[
+                      styles.stepLabel,
+                      isActive && styles.stepLabelActive,
+                      isCurrent && styles.stepLabelCurrent,
+                      isCurrent && {
+                        color: isCancelled ? "#F44336" : stepActiveColor,
+                      },
+                    ]}
+                  >
+                    {STATUS_LABELS[stepStatus]}
+                  </Text>
+                </View>
+
+                {index < timelineStatuses.length - 1 && (
+                  <View
+                    style={[
+                      styles.lineRight,
+                      isActive && styles.lineActive,
+                      isActive && lineActiveStyle,
+                    ]}
+                  />
+                )}
+              </View>
+            );
+          })}
+        </View>
       </View>
+
       {status === "cancelled" && (
         <View style={styles.cancelledBox}>
           <AppIcon
@@ -174,13 +267,13 @@ export default function CustomerOrderDetails() {
       {status === "accepted" && (
         <View style={styles.acceptedBox}>
           <AppIcon
-            name="party-popper"
+            name="store-clock"
             variant="community"
-            size={28}
-            color="#02810d"
+            size={24}
+            color="#0b5ed7"
           />
           <Text style={styles.acceptedText}>
-            Woohoo! Your order has been shipped and will be with you shortly!
+            Your order has been processed and will be shipped soon!
           </Text>
         </View>
       )}
@@ -244,18 +337,75 @@ const styles = StyleSheet.create({
     backgroundColor: "#F2F2F7",
   },
   title: { fontSize: 22, fontWeight: "700", marginBottom: 6 },
-  statusRow: {
+  timelineContainer: {
+    marginBottom: 14,
+    paddingVertical: 16,
+    backgroundColor: "#f9f9f9",
+    borderRadius: 12,
+    paddingHorizontal: 12,
+  },
+  timeline: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
-    marginBottom: 14,
+    justifyContent: "space-between",
+    paddingHorizontal: 8,
   },
-  statusDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 7,
+  timelineStepWrapper: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
   },
-  statusText: { fontSize: 16, color: "#666", fontWeight: "600" },
+  lineLeft: {
+    flex: 1,
+    height: 3,
+    backgroundColor: "#ddd",
+  },
+  lineRight: {
+    flex: 1,
+    height: 3,
+    backgroundColor: "#ddd",
+  },
+  lineActive: {
+    backgroundColor: "#4CAF50",
+  },
+  stepContainer: {
+    alignItems: "center",
+    paddingHorizontal: 4,
+  },
+  stepCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#ddd",
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 3,
+    borderColor: "#fff",
+  },
+  stepCircleActive: {
+    backgroundColor: "#e8f5e9",
+    borderColor: "#4CAF50",
+  },
+  stepCircleCurrent: {
+    backgroundColor: "#e8f5e9",
+    borderColor: "#4CAF50",
+    borderWidth: 4,
+  },
+  stepLabel: {
+    marginTop: 8,
+    fontSize: 11,
+    color: "#999",
+    textAlign: "center",
+    fontWeight: "500",
+  },
+  stepLabelActive: {
+    color: "#333",
+    fontWeight: "600",
+  },
+  stepLabelCurrent: {
+    color: "#2196F3",
+    fontWeight: "700",
+  },
   cancelledBox: {
     flexDirection: "row",
     alignItems: "flex-start",
@@ -277,16 +427,17 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "flex-start",
     gap: 8,
-    backgroundColor: "#cfffd1",
+    backgroundColor: "#cce0ff",
     borderWidth: 1,
-    borderColor: "#00942a",
-    padding: 10,
+    borderColor: "#0b5ed7",
+    padding: 8,
     borderRadius: 3,
-    marginBottom: 12,
+    marginBottom: 10,
   },
   acceptedText: {
-    color: "#02810d",
+    color: "#0b5ed7",
     fontWeight: "500",
+    fontSize: 13,
     fontStyle: "",
     flex: 1,
   },

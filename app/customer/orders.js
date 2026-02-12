@@ -16,6 +16,7 @@ import {
 } from "react-native";
 
 import AppIcon from "../../src/components/AppIcon";
+import EmptyFieldState from "../../src/components/EmptyFieldState";
 import { auth, db } from "../../src/firebase/firebaseConfig";
 
 const STATUS_ICONS = {
@@ -117,6 +118,11 @@ export default function CustomerOrders() {
       return merchant.includes(q) || itemNames.includes(q);
     });
   }, [orders, searchQuery, selectedStatus]);
+  const isOnboardingEmpty =
+    orders.length === 0 &&
+    !searchQuery.trim() &&
+    selectedStatus === "all";
+  const hasAnyOrders = orders.length > 0;
 
   const statusFilters = [
     {
@@ -153,56 +159,70 @@ export default function CustomerOrders() {
 
   return (
     <View style={styles.container}>
-      <TextInput
-        placeholder="Search by merchant or product"
-        value={searchQuery}
-        onChangeText={setSearchQuery}
-        style={styles.search}
-        clearButtonMode="while-editing"
-        onFocus={() => setSearchFocused(true)}
-        onBlur={() => setSearchFocused(false)}
-      />
-      <View style={styles.filters}>
-        {statusFilters.map((filter) => {
-          const isSelected = selectedStatus === filter.key;
-          const isInactive = searchFocused;
-          return (
-            <Pressable
-              key={filter.key}
-              style={[
-                styles.filterPill,
-                isInactive && styles.filterInactive,
-                !isInactive &&
-                  !isSelected && {
-                    backgroundColor: filter.light,
-                    borderColor: "transparent",
-                  },
-                !isInactive &&
-                  isSelected && {
-                    backgroundColor: filter.dark,
-                    borderColor: filter.light,
-                  },
-              ]}
-              onPress={() => setSelectedStatus(filter.key)}
-              disabled={isInactive}
-            >
-              <Text
-                style={[
-                  styles.filterText,
-                  isInactive && styles.filterTextInactive,
-                  !isInactive && !isSelected && { color: filter.dark },
-                  !isInactive && isSelected && { color: "#fff" },
-                ]}
-              >
-                {filter.label}
-              </Text>
-            </Pressable>
-          );
-        })}
-      </View>
+      {hasAnyOrders && (
+        <>
+          <TextInput
+            placeholder="Search by merchant or product"
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            style={styles.search}
+            clearButtonMode="while-editing"
+            onFocus={() => setSearchFocused(true)}
+            onBlur={() => setSearchFocused(false)}
+          />
+          <View style={styles.filters}>
+            {statusFilters.map((filter) => {
+              const isSelected = selectedStatus === filter.key;
+              const isInactive = searchFocused;
+              return (
+                <Pressable
+                  key={filter.key}
+                  style={[
+                    styles.filterPill,
+                    isInactive && styles.filterInactive,
+                    !isInactive &&
+                      !isSelected && {
+                        backgroundColor: filter.light,
+                        borderColor: "transparent",
+                      },
+                    !isInactive &&
+                      isSelected && {
+                        backgroundColor: filter.dark,
+                        borderColor: filter.light,
+                      },
+                  ]}
+                  onPress={() => setSelectedStatus(filter.key)}
+                  disabled={isInactive}
+                >
+                  <Text
+                    style={[
+                      styles.filterText,
+                      isInactive && styles.filterTextInactive,
+                      !isInactive && !isSelected && { color: filter.dark },
+                      !isInactive && isSelected && { color: "#fff" },
+                    ]}
+                  >
+                    {filter.label}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        </>
+      )}
       <FlatList
         data={visibleOrders}
         keyExtractor={(item) => item.id}
+        contentContainerStyle={
+          visibleOrders.length === 0 ? styles.listEmptyContainer : undefined
+        }
+        ListEmptyComponent={
+          isOnboardingEmpty ? (
+            <EmptyFieldState message="Empty as a field. Browse some stores to start buying!" />
+          ) : (
+            <Text style={styles.empty}>No orders found</Text>
+          )
+        }
         renderItem={({ item }) => {
           const isExpanded = expandedId === item.id;
           const previewItems = item.items?.slice(0, 3) || [];
@@ -363,5 +383,13 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#777",
     marginTop: 4,
+  },
+  empty: {
+    textAlign: "center",
+    color: "#666",
+    marginTop: 40,
+  },
+  listEmptyContainer: {
+    flexGrow: 1,
   },
 });

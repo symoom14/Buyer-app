@@ -1,12 +1,15 @@
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   KeyboardAvoidingView,
-  Keyboard,
+  Modal,
   Platform,
+  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -16,6 +19,7 @@ import {
   View,
 } from "react-native";
 import { useHeaderHeight } from "@react-navigation/elements";
+import AppIcon from "../../../../src/components/AppIcon";
 import ScreenContainer from "../../../../src/components/ScreenContainer";
 import { db } from "../../../../src/firebase/firebaseConfig";
 
@@ -30,11 +34,18 @@ const CATEGORIES = [
   "Clothing",
   "Food",
 ];
+const DEFAULT_PRODUCT_ICON = "package-variant-closed";
+const ALL_PRODUCT_ICONS = Object.keys(MaterialCommunityIcons.glyphMap || {});
 
 export default function EditProductPage() {
   const { productId } = useLocalSearchParams();
   const router = useRouter();
   const headerHeight = useHeaderHeight();
+  const scrollRef = useRef(null);
+  const fieldYRef = useRef({
+    price: 0,
+    quantity: 0,
+  });
 
   const [loading, setLoading] = useState(true);
   const [name, setName] = useState("");
@@ -42,6 +53,18 @@ export default function EditProductPage() {
   const [category, setCategory] = useState(CATEGORIES[0]);
   const [price, setPrice] = useState("");
   const [quantity, setQuantity] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [iconQuery, setIconQuery] = useState("");
+  const [iconName, setIconName] = useState(DEFAULT_PRODUCT_ICON);
+  const [iconModalVisible, setIconModalVisible] = useState(false);
+
+  const normalizedQuery = iconQuery.trim().toLowerCase();
+  const visibleIcons = normalizedQuery
+    ? ALL_PRODUCT_ICONS.filter((icon) => icon.includes(normalizedQuery)).slice(
+        0,
+        48,
+      )
+    : [];
 
   useEffect(() => {
     fetchProduct();
@@ -57,23 +80,54 @@ export default function EditProductPage() {
       setCategory(data.category || CATEGORIES[0]);
       setPrice(data.price?.toString?.() || "");
       setQuantity(data.quantity?.toString?.() || "");
+      setIconName(data.iconName || DEFAULT_PRODUCT_ICON);
     } finally {
       setLoading(false);
     }
   };
 
   const handleSave = async () => {
-    if (!name || !description || !price || !quantity) return;
+    if (saving) return;
 
-    await updateDoc(doc(db, "products", productId), {
-      name,
-      description,
-      category,
-      price: Number(price),
-      quantity: Number(quantity),
-    });
+    const nextName = name.trim();
+    const nextDescription = description.trim();
+    const nextPrice = Number(price);
+    const nextQuantity = Number(quantity);
 
-    router.back();
+    if (!nextName || !nextDescription || !price || !quantity) {
+      Alert.alert("Missing fields", "Please fill out all product fields.");
+      return;
+    }
+
+    if (Number.isNaN(nextPrice) || Number.isNaN(nextQuantity)) {
+      Alert.alert("Invalid values", "Price and quantity must be valid numbers.");
+      return;
+    }
+
+    try {
+      setSaving(true);
+      await updateDoc(doc(db, "products", productId), {
+        name: nextName,
+        description: nextDescription,
+        category,
+        price: nextPrice,
+        quantity: nextQuantity,
+        iconName,
+      });
+      router.back();
+    } catch (err) {
+      Alert.alert("Save failed", "Couldn't save product changes. Try again.");
+      console.error("Failed to save product:", err);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const scrollToField = (fieldKey) => {
+    const y = Math.max(0, (fieldYRef.current[fieldKey] ?? 0) - 24);
+    setTimeout(() => {
+      scrollRef.current?.scrollTo({ y, animated: true });
+    }, 120);
   };
 
   if (loading) {
@@ -91,68 +145,163 @@ export default function EditProductPage() {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         keyboardVerticalOffset={headerHeight + 12}
       >
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-          <ScrollView
-            keyboardShouldPersistTaps="handled"
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.scrollContent}
-          >
-            <View>
+        <ScrollView
+          ref={scrollRef}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
+          automaticallyAdjustKeyboardInsets
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
+        >
+          <View>
             <Text style={styles.title}>Edit Product</Text>
 
-            <TextInput
-              style={styles.input}
-              placeholder="Product name"
-              value={name}
-              onChangeText={setName}
-            />
+              <View style={styles.selectedIconRow}>
+                <TouchableOpacity
+                  style={styles.selectedIconBubble}
+                  onPress={() => setIconModalVisible(true)}
+                >
+                  <AppIcon
+                    name={iconName}
+                    variant="community"
+                    size={28}
+                    color="#222"
+                  />
+                </TouchableOpacity>
+              </View>
 
-            <TextInput
-              style={[styles.input, styles.textArea]}
-              placeholder="Product description"
-              value={description}
-              onChangeText={setDescription}
-              multiline
-            />
+              <TextInput
+                style={styles.input}
+                placeholder="Product name"
+                value={name}
+                onChangeText={setName}
+              />
 
-            <View style={styles.pickerWrapper}>
-              <Picker selectedValue={category} onValueChange={setCategory}>
-                {CATEGORIES.map((cat) => (
-                  <Picker.Item key={cat} label={cat} value={cat} />
-                ))}
-              </Picker>
-            </View>
+              <TextInput
+                style={[styles.input, styles.textArea]}
+                placeholder="Product description"
+                value={description}
+                onChangeText={setDescription}
+                multiline
+              />
 
-            <TextInput
-              style={styles.input}
-              placeholder="Price"
-              keyboardType="numeric"
-              value={price}
-              onChangeText={setPrice}
-            />
+              <View style={styles.pickerWrapper}>
+                <Picker selectedValue={category} onValueChange={setCategory}>
+                  {CATEGORIES.map((cat) => (
+                    <Picker.Item key={cat} label={cat} value={cat} />
+                  ))}
+                </Picker>
+              </View>
 
-            <TextInput
-              style={styles.input}
-              placeholder="Quantity"
-              keyboardType="numeric"
-              value={quantity}
-              onChangeText={setQuantity}
-            />
+              <View
+                onLayout={(event) => {
+                  fieldYRef.current.price = event.nativeEvent.layout.y;
+                }}
+              >
+                <TextInput
+                  style={styles.input}
+                  placeholder="Price"
+                  keyboardType="numeric"
+                  value={price}
+                  onChangeText={setPrice}
+                  onFocus={() => scrollToField("price")}
+                />
+              </View>
 
-            <TouchableOpacity style={styles.button} onPress={handleSave}>
-              <Text style={styles.buttonText}>Save Changes</Text>
+              <View
+                onLayout={(event) => {
+                  fieldYRef.current.quantity = event.nativeEvent.layout.y;
+                }}
+              >
+                <TextInput
+                  style={styles.input}
+                  placeholder="Quantity"
+                  keyboardType="numeric"
+                  value={quantity}
+                  onChangeText={setQuantity}
+                  onFocus={() => scrollToField("quantity")}
+                />
+              </View>
+
+            <TouchableOpacity
+              style={[styles.button, saving && styles.buttonDisabled]}
+              onPress={handleSave}
+              disabled={saving}
+            >
+              <Text style={styles.buttonText}>
+                {saving ? "Saving..." : "Save Changes"}
+              </Text>
             </TouchableOpacity>
-            </View>
-          </ScrollView>
-        </TouchableWithoutFeedback>
+          </View>
+        </ScrollView>
       </KeyboardAvoidingView>
+
+      <Modal
+        visible={iconModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setIconModalVisible(false)}
+      >
+        <Pressable
+          style={styles.modalBackdrop}
+          onPress={() => setIconModalVisible(false)}
+        >
+          <TouchableWithoutFeedback>
+            <View style={styles.modalCard}>
+              <TextInput
+                style={styles.input}
+                placeholder="Search icon (e.g. shoe, laptop, food)"
+                value={iconQuery}
+                onChangeText={setIconQuery}
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
+
+              {normalizedQuery.length === 0 ? (
+                <Text style={styles.modalHint}>
+                  Icons will appear here once you start searching
+                </Text>
+              ) : visibleIcons.length === 0 ? (
+                <Text style={styles.modalHint}>
+                  Hmm..looks like there were no matches. Try searching with
+                  another keyword
+                </Text>
+              ) : (
+                <View style={styles.iconGrid}>
+                  {visibleIcons.map((icon) => {
+                    const isSelected = icon === iconName;
+                    return (
+                      <TouchableOpacity
+                        key={icon}
+                        style={[
+                          styles.iconChip,
+                          isSelected && styles.iconChipSelected,
+                        ]}
+                        onPress={() => setIconName(icon)}
+                      >
+                        <AppIcon
+                          name={icon}
+                          variant="community"
+                          size={22}
+                          color={isSelected ? "#fff" : "#333"}
+                        />
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+              )}
+            </View>
+          </TouchableWithoutFeedback>
+        </Pressable>
+      </Modal>
     </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
   scrollContent: {
-    paddingBottom: 24,
+    flexGrow: 1,
+    paddingBottom: 40,
   },
   title: {
     fontSize: 24,
@@ -177,12 +326,72 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     overflow: "hidden",
   },
+  selectedIconRow: {
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 10,
+  },
+  selectedIconBubble: {
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    borderWidth: 1,
+    borderColor: "#ddd",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#f5f5f5",
+  },
+  iconGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center",
+    gap: 8,
+    marginBottom: 10,
+  },
+  iconChip: {
+    width: 44,
+    height: 44,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#ddd",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#fff",
+  },
+  iconChipSelected: {
+    backgroundColor: "#111",
+    borderColor: "#111",
+  },
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.28)",
+    justifyContent: "center",
+    paddingHorizontal: 20,
+  },
+  modalCard: {
+    backgroundColor: "#fff",
+    borderRadius: 5,
+    padding: 14,
+    minHeight: "20%",
+    maxHeight: "70%",
+  },
+  modalHint: {
+    textAlign: "center",
+    color: "#777",
+    fontSize: 14,
+    lineHeight: 20,
+    marginTop: 20,
+    marginBottom: 8,
+  },
   button: {
     backgroundColor: "#000",
     padding: 14,
     borderRadius: 6,
     alignItems: "center",
     marginTop: 12,
+  },
+  buttonDisabled: {
+    opacity: 0.6,
   },
   buttonText: {
     color: "#fff",

@@ -13,6 +13,7 @@ import {
 } from "react-native";
 
 import AppIcon from "../../src/components/AppIcon";
+import EmptyFieldState from "../../src/components/EmptyFieldState";
 import { auth, db } from "../../src/firebase/firebaseConfig";
 
 const STATUS_COLORS = {
@@ -56,11 +57,16 @@ export default function MerchantOrdersScreen() {
             (sum, item) => sum + (item.quantity || 0),
             0,
           );
+          const merchantTotal = merchantItems.reduce(
+            (sum, item) =>
+              sum + Number(item.price || 0) * Number(item.quantity || 0),
+            0,
+          );
 
           return {
             id: docSnap.id,
             createdAt: data.createdAt,
-            total: data.total,
+            total: merchantTotal,
             customerId: data.customerId,
             totalItems,
             status: data.status || "pending",
@@ -127,6 +133,9 @@ export default function MerchantOrdersScreen() {
     });
   }, [orders, userCache, searchQuery]);
 
+  const isOnboardingEmpty =
+    !error && !searchQuery.trim() && orders.length === 0;
+
   const renderItem = ({ item }) => {
     const date = item.createdAt?.toDate?.();
 
@@ -176,8 +185,15 @@ export default function MerchantOrdersScreen() {
         data={visibleOrders}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
+        contentContainerStyle={
+          visibleOrders.length === 0 ? styles.listEmptyContainer : undefined
+        }
         ListEmptyComponent={
-          <Text style={styles.empty}>{error || "No orders found"}</Text>
+          isOnboardingEmpty ? (
+            <EmptyFieldState message="Empty as a field. Create a new store to start selling!" />
+          ) : (
+            <Text style={styles.empty}>{error || "No orders found"}</Text>
+          )
         }
       />
     </View>
@@ -231,5 +247,8 @@ const styles = StyleSheet.create({
     textAlign: "center",
     color: "#666",
     marginTop: 40,
+  },
+  listEmptyContainer: {
+    flexGrow: 1,
   },
 });

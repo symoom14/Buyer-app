@@ -78,6 +78,7 @@ export default function MerchantOrderDetailsScreen() {
     const ordersSnap = await getDocs(collection(db, "orders"));
     const orderedByProduct = {};
     ordersSnap.docs.forEach((docSnap) => {
+      if (docSnap.id === orderId) return;
       const data = docSnap.data();
       const items = (data.items || []).filter(
         (item) => item.merchantId === merchantId,
@@ -179,21 +180,7 @@ export default function MerchantOrderDetailsScreen() {
 
   const handleStatusPress = (targetStatus) => {
     if (!canUpdateToStatus(targetStatus)) return;
-
-    const currentStatus = order?.status || "pending";
-
-    Alert.alert(
-      "Update Order Status",
-      `Change status from "${STATUS_LABELS[currentStatus]}" to "${STATUS_LABELS[targetStatus]}"?`,
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Update",
-          style: "default",
-          onPress: () => updateStatus(targetStatus),
-        },
-      ],
-    );
+    updateStatus(targetStatus);
   };
 
   const handleCancelOrder = () => {

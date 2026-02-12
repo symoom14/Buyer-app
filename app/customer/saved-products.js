@@ -1,14 +1,6 @@
-import { useLocalSearchParams, useRouter } from "expo-router";
-import {
-  collection,
-  doc,
-  getDoc,
-  getDocs,
-  orderBy,
-  query,
-  where,
-} from "firebase/firestore";
-import { useEffect, useState } from "react";
+import { useFocusEffect, useRouter } from "expo-router";
+import { collection, getDocs, orderBy, query } from "firebase/firestore";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -17,67 +9,71 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import AppIcon from "../../../src/components/AppIcon";
-import { db } from "../../../src/firebase/firebaseConfig";
+
+import AppIcon from "../../src/components/AppIcon";
+import { useFavorites } from "../../src/context/FavoritesContext";
+import { db } from "../../src/firebase/firebaseConfig";
 
 const DEFAULT_PRODUCT_ICON = "package-variant-closed";
 const ICON_COLOR_POOL = [
-  "#E53935", // red
-  "#2E7D32", // green
-  "#1E88E5", // blue
-  "#FFA700", // chrome yellow
-  "#F57C00", // orange
-  "#111111", // black
+  "#E53935",
+  "#2E7D32",
+  "#1E88E5",
+  "#FFA700",
+  "#F57C00",
+  "#111111",
 ];
 
-export default function CustomerStorePage() {
-  const router = useRouter();
-  const { storeId } = useLocalSearchParams();
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
+function getRandomIconColor() {
+  const idx = Math.floor(Math.random() * ICON_COLOR_POOL.length);
+  return ICON_COLOR_POOL[idx];
+}
 
-  const getRandomIconColor = () => {
-    const idx = Math.floor(Math.random() * ICON_COLOR_POOL.length);
-    return ICON_COLOR_POOL[idx];
-  };
+export default function CustomerSavedProducts() {
+  const router = useRouter();
+  const { favoriteIds } = useFavorites();
+
+  const [allProducts, setAllProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const fetchProducts = async () => {
     try {
       const productsQuery = query(
         collection(db, "products"),
-        where("storeId", "==", storeId),
         orderBy("createdAt", "desc"),
       );
+      const productSnapshot = await getDocs(productsQuery);
 
-      const [productSnapshot, storeSnapshot] = await Promise.all([
-        getDocs(productsQuery),
-        getDoc(doc(db, "stores", String(storeId))),
-      ]);
-
-      const rawProducts = productSnapshot.docs.map((docSnap) => ({
-        id: docSnap.id,
-        ...docSnap.data(),
+      const rawProducts = productSnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
       }));
 
-      const storeData = storeSnapshot.exists() ? storeSnapshot.data() : {};
-      const storeName = storeData?.name || "Unknown Store";
+      const storeSnapshot = await getDocs(collection(db, "stores"));
+      const storeMap = {};
+      storeSnapshot.docs.forEach((doc) => {
+        storeMap[doc.id] = doc.data().name;
+      });
 
-      let sellerName = "Unknown Seller";
-      if (storeData?.merchantId) {
-        const sellerSnapshot = await getDoc(doc(db, "users", storeData.merchantId));
-        if (sellerSnapshot.exists()) {
-          sellerName = sellerSnapshot.data()?.username || "Unknown Seller";
+      const userSnapshot = await getDocs(collection(db, "users"));
+      const merchantMap = {};
+      userSnapshot.docs.forEach((doc) => {
+        const data = doc.data();
+        if (data.role === "merchant") {
+          merchantMap[doc.id] = data.username;
         }
-      }
+      });
 
       const enrichedProducts = rawProducts.map((product) => ({
         ...product,
-        storeName,
-        sellerName,
+        storeName: storeMap[product.storeId] || "Unknown Store",
+        sellerName: merchantMap[product.merchantId] || "Unknown Seller",
         iconColor: getRandomIconColor(),
       }));
 
-      setProducts(enrichedProducts);
+      setAllProducts(enrichedProducts);
+    } catch (error) {
+      console.error("Error loading saved products:", error);
     } finally {
       setLoading(false);
     }
@@ -86,6 +82,17 @@ export default function CustomerStorePage() {
   useEffect(() => {
     fetchProducts();
   }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchProducts();
+    }, []),
+  );
+
+  const products = useMemo(() => {
+    const favoritesSet = new Set(favoriteIds);
+    return allProducts.filter((product) => favoritesSet.has(product.id));
+  }, [allProducts, favoriteIds]);
 
   if (loading) {
     return (
@@ -97,14 +104,14 @@ export default function CustomerStorePage() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.pageTitle}>Products</Text>
+      <Text style={styles.pageTitle}>Saved products</Text>
 
       <FlatList
         data={products}
         keyExtractor={(item) => item.id}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
-          <Text style={styles.empty}>No products in this store</Text>
+          <Text style={styles.empty}>No saved products yet</Text>
         }
         renderItem={({ item }) => (
           <TouchableOpacity
@@ -119,6 +126,7 @@ export default function CustomerStorePage() {
                 color={item.iconColor || "#333"}
               />
             </View>
+
             <View style={styles.contentWrap}>
               <Text style={styles.productName}>{item.name}</Text>
 
@@ -145,11 +153,6 @@ const styles = StyleSheet.create({
     padding: 16,
     backgroundColor: "#F2F2F7",
   },
-  pageTitle: {
-    fontSize: 26,
-    fontWeight: "700",
-    marginBottom: 16,
-  },
   card: {
     flexDirection: "row",
     alignItems: "center",
@@ -171,6 +174,11 @@ const styles = StyleSheet.create({
   },
   contentWrap: {
     flex: 1,
+  },
+  pageTitle: {
+    fontSize: 26,
+    fontWeight: "700",
+    marginBottom: 16,
   },
   productName: {
     fontSize: 16,

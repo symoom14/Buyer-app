@@ -26,12 +26,6 @@ export default function MerchantLayout() {
 
       {/* Stores management */}
       <Stack.Screen
-        name="stores"
-        options={{
-          title: "My Stores",
-        }}
-      />
-      <Stack.Screen
         name="stores/manage"
         options={{
           title: "Manage Stores",

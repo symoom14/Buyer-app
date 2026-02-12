@@ -10,6 +10,7 @@ import { Text, TextInput } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "react-native-reanimated";
 import { CartProvider } from "../src/context/CartContext";
+import { FavoritesProvider } from "../src/context/FavoritesContext";
 
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { AuthProvider } from "../src/context/AuthContext";
@@ -53,14 +54,16 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <CartProvider>
-        <AuthProvider>
-          <ThemeProvider
-            value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
-          >
-            <Stack screenOptions={{ headerShown: false }} />
-            <StatusBar style="auto" />
-          </ThemeProvider>
-        </AuthProvider>
+        <FavoritesProvider>
+          <AuthProvider>
+            <ThemeProvider
+              value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+            >
+              <Stack screenOptions={{ headerShown: false }} />
+              <StatusBar style="auto" />
+            </ThemeProvider>
+          </AuthProvider>
+        </FavoritesProvider>
       </CartProvider>
     </GestureHandlerRootView>
   );

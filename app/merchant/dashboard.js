@@ -35,18 +35,42 @@ export default function MerchantDashboard() {
         contentContainerStyle={styles.content}
       >
         <DashboardSection
-          title="Manage"
+          title="My stores"
           layout="grid"
           tiles={[
             {
-              title: "My stores",
-              onPress: () => router.push("/merchant/stores"),
+              title: "View and manage existing stores",
+              onPress: () => router.push("/merchant/stores/manage"),
               icon: "store",
               iconVariant: "community",
               backgroundColor: "#DFF2FF",
               iconColor: "#0b6be0",
               textColor: "#0A4AA3",
             },
+            {
+              title: "Add new store",
+              onPress: () => router.push("/merchant/stores/add"),
+              icon: "store-plus",
+              iconVariant: "community",
+              backgroundColor: "#FFF1CC",
+              iconColor: "#9C6B00",
+              textColor: "#6B4A00",
+            },
+            {
+              title: "View all products",
+              onPress: () => router.push("/merchant/stores/products"),
+              icon: "format-list-bulleted",
+              iconVariant: "community",
+              backgroundColor: "#E8F7EC",
+              iconColor: "#1E8E3E",
+              textColor: "#146C2E",
+            },
+          ]}
+        />
+
+        <DashboardSection
+          title="Orders"
+          tiles={[
             {
               title: "Orders",
               onPress: () => router.push("/merchant/orders"),
@@ -56,10 +80,23 @@ export default function MerchantDashboard() {
               iconColor: "#9C6B00",
               textColor: "#6B4A00",
             },
+          ]}
+        />
+
+        <DashboardSection
+          title="Analytics"
+          tiles={[
             {
-              title: "Restock",
-              onPress: () => router.push("/merchant/restock"),
-              icon: "package-variant-plus",
+              title: "Store analytics",
+              icon: "chart-line",
+              iconVariant: "community",
+              backgroundColor: "#F2E8FF",
+              iconColor: "#6B2DE0",
+              textColor: "#4A1EA3",
+            },
+            {
+              title: "Earnings analytics",
+              icon: "finance",
               iconVariant: "community",
               backgroundColor: "#E8F7EC",
               iconColor: "#1E8E3E",

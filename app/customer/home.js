@@ -38,19 +38,20 @@ export default function CustomerHome() {
         contentContainerStyle={styles.content}
       >
         <DashboardSection
-          title="Browse products"
+          title="Browse"
           tiles={[
             {
               title: "Latest products",
               onPress: () => router.push("/customer/product"),
-              icon: "shimmer",
+              icon: "package-variant",
               iconVariant: "community",
-              backgroundColor: "#FFE9C6",
-              iconColor: "#8A5B00",
-              textColor: "#5C3B00",
+              backgroundColor: "#FFD8B0",
+              iconColor: "#A34300",
+              textColor: "#6C2C00",
             },
             {
               title: "Browse stores",
+              onPress: () => router.push("/customer/store"),
               icon: "store",
               iconVariant: "community",
               backgroundColor: "#DFF2FF",
@@ -105,10 +106,10 @@ export default function CustomerHome() {
 
         <DashboardSection
           title="Favourites"
-          onShowMore={() => {}}
           tiles={[
             {
               title: "Saved products",
+              onPress: () => router.push("/customer/saved-products"),
               icon: "heart",
               iconVariant: "community",
               backgroundColor: "#FFE0E6",
@@ -124,7 +125,6 @@ export default function CustomerHome() {
               textColor: "#0D47A1",
             },
           ]}
-          disabled
         />
       </ScrollView>
     </ScreenContainer>

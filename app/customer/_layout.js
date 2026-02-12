@@ -45,6 +45,11 @@ export default function CustomerLayout() {
           name="product/[productId]"
           options={{ title: "Product Details" }}
         />
+        <Stack.Screen name="store" options={{ title: "Browse Stores" }} />
+        <Stack.Screen
+          name="store/[storeId]"
+          options={{ title: "Store Products" }}
+        />
         <Stack.Screen
           name="in-progress"
           options={{ title: "In progress" }}
@@ -62,6 +67,10 @@ export default function CustomerLayout() {
           options={{ title: "Order Details" }}
         />
         <Stack.Screen name="orders" options={{ title: "All orders" }} />
+        <Stack.Screen
+          name="saved-products"
+          options={{ title: "Saved products" }}
+        />
         <Stack.Screen name="cart" options={{ title: "Cart" }} />
         <Stack.Screen name="checkout" options={{ title: "Checkout" }} />
         <Stack.Screen name="invoice/[orderId]" options={{ title: "Invoice" }} />
