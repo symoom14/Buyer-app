@@ -3,7 +3,13 @@ import { useLocalSearchParams } from "expo-router";
 import * as Sharing from "expo-sharing";
 import { doc, getDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, Text, TouchableOpacity } from "react-native";
+import {
+  ActivityIndicator,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+} from "react-native";
+import PdfViewer from "../../../src/components/PdfViewer";
 import ScreenContainer from "../../../src/components/ScreenContainer";
 import { db } from "../../../src/firebase/firebaseConfig";
 
@@ -11,6 +17,9 @@ export default function InvoicePage() {
   const { orderId } = useLocalSearchParams();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [invoiceUri, setInvoiceUri] = useState("");
+  const [viewerVisible, setViewerVisible] = useState(false);
+  const [previewUri, setPreviewUri] = useState("");
 
   useEffect(() => {
     fetchOrder();
@@ -115,10 +124,27 @@ export default function InvoicePage() {
     `;
   };
 
-  const handleDownload = async () => {
+  const getInvoiceUri = async () => {
+    if (invoiceUri) return invoiceUri;
+    const html = generateInvoiceHTML();
+    const { uri } = await Print.printToFileAsync({ html });
+    setInvoiceUri(uri);
+    return uri;
+  };
+
+  const handleViewInvoice = async () => {
     try {
-      const html = generateInvoiceHTML();
-      const { uri } = await Print.printToFileAsync({ html });
+      const uri = await getInvoiceUri();
+      setPreviewUri(uri);
+      setViewerVisible(true);
+    } catch (err) {
+      console.error("Invoice preview failed:", err.message);
+    }
+  };
+
+  const handleShareInvoice = async () => {
+    try {
+      const uri = await getInvoiceUri();
       await Sharing.shareAsync(uri);
     } catch (err) {
       console.error("Invoice generation failed:", err.message);
@@ -143,23 +169,69 @@ export default function InvoicePage() {
 
   return (
     <ScreenContainer>
-      <Text style={{ fontSize: 20, fontWeight: "600", marginBottom: 12 }}>
-        Invoice
+      <PdfViewer
+        visible={viewerVisible}
+        uri={previewUri}
+        onClose={() => setViewerVisible(false)}
+      />
+
+      <Text style={styles.successTitle}>Payment successful!</Text>
+      <Text style={styles.subHeading}>
+        Your order will be processed by the seller soon.
+      </Text>
+      <Text style={styles.helperText}>
+        You can preview your invoice and save/share a PDF copy from here.
       </Text>
 
-      <TouchableOpacity
-        style={{
-          backgroundColor: "#000",
-          padding: 14,
-          borderRadius: 6,
-          alignItems: "center",
-        }}
-        onPress={handleDownload}
-      >
-        <Text style={{ color: "#fff", fontWeight: "600" }}>
-          Download Invoice (PDF)
-        </Text>
+      <TouchableOpacity style={styles.previewBtn} onPress={handleViewInvoice}>
+        <Text style={styles.previewBtnText}>View Invoice</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.shareBtn} onPress={handleShareInvoice}>
+        <Text style={styles.shareText}>Save Invoice (PDF)</Text>
       </TouchableOpacity>
     </ScreenContainer>
   );
 }
+
+const styles = StyleSheet.create({
+  successTitle: {
+    fontSize: 26,
+    fontWeight: "700",
+    color: "#1E8E3E",
+    marginBottom: 20,
+  },
+  subHeading: {
+    fontSize: 16,
+    color: "#333",
+    marginBottom: 50,
+  },
+  helperText: {
+    fontSize: 14,
+    color: "#666",
+    marginBottom: 18,
+  },
+  previewBtn: {
+    backgroundColor: "#111",
+    padding: 14,
+    borderRadius: 6,
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  previewBtnText: {
+    color: "#fff",
+    fontWeight: "600",
+  },
+  shareBtn: {
+    backgroundColor: "#fff",
+    borderWidth: 1,
+    borderColor: "#111",
+    padding: 14,
+    borderRadius: 6,
+    alignItems: "center",
+  },
+  shareText: {
+    color: "#111",
+    fontWeight: "600",
+  },
+});

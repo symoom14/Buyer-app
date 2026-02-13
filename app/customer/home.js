@@ -11,10 +11,12 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import DashboardSection from "../../src/components/DashboardSection";
 import ScreenContainer from "../../src/components/ScreenContainer";
+import { useCart } from "../../src/context/CartContext";
 
 export default function CustomerHome() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { cart } = useCart();
 
   return (
     <ScreenContainer>
@@ -23,12 +25,23 @@ export default function CustomerHome() {
         <View style={styles.heroRow}>
           <Text style={styles.heroTitle}>Buyer</Text>
 
-          <TouchableOpacity
-            style={styles.profileBtn}
-            onPress={() => router.push("/customer/profile")}
-          >
-            <Ionicons name="person-circle-outline" size={30} color="#000" />
-          </TouchableOpacity>
+          <View style={styles.headerActions}>
+            {cart.length > 0 ? (
+              <TouchableOpacity
+                style={styles.actionBtn}
+                onPress={() => router.push("/customer/cart")}
+              >
+                <Ionicons name="basket" size={30} color="#000" />
+              </TouchableOpacity>
+            ) : null}
+
+            <TouchableOpacity
+              style={styles.actionBtn}
+              onPress={() => router.push("/customer/profile")}
+            >
+              <Ionicons name="person-circle-outline" size={30} color="#000" />
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
 
@@ -152,7 +165,12 @@ const styles = StyleSheet.create({
     fontWeight: "800",
     color: "#000",
   },
-  profileBtn: {
+  headerActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  actionBtn: {
     width: 32,
     height: 32,
     borderRadius: 16,

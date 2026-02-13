@@ -8,6 +8,8 @@ export default function CustomerLayout() {
   const pathname = usePathname();
 
   const hideCartButton =
+    pathname.includes("/customer/home") ||
+    pathname === "/customer" ||
     pathname.includes("/customer/cart") ||
     pathname.includes("/customer/checkout") ||
     pathname.includes("/customer/invoice") ||

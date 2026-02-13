@@ -1,6 +1,7 @@
 import { useRouter } from "expo-router";
-import { StyleSheet, Text, TouchableOpacity } from "react-native";
+import { StyleSheet, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import AppIcon from "./AppIcon";
 import { useCart } from "../context/CartContext";
 
 export default function FloatingCartButton() {
@@ -19,7 +20,7 @@ export default function FloatingCartButton() {
         style={styles.button}
         onPress={() => router.push("/customer/cart")}
       >
-        <Text style={styles.text}>Cart ({cart.length})</Text>
+        <AppIcon name="basket" variant="community" size={24} color="#fff" />
       </TouchableOpacity>
     </SafeAreaView>
   );
@@ -36,18 +37,15 @@ const styles = StyleSheet.create({
     marginRight: 16,
     marginBottom: 24,
     backgroundColor: "#000",
-    paddingHorizontal: 18,
-    paddingVertical: 12,
-    borderRadius: 24,
+    width: 54,
+    height: 54,
+    borderRadius: 27,
+    alignItems: "center",
+    justifyContent: "center",
     elevation: 5,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
-  },
-  text: {
-    color: "#fff",
-    fontWeight: "600",
-    fontSize: 14,
   },
 });
