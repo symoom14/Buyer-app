@@ -14,6 +14,7 @@ import ScreenContainer from "../../../src/components/ScreenContainer";
 import { useCart } from "../../../src/context/CartContext";
 import { useFavorites } from "../../../src/context/FavoritesContext";
 import { db } from "../../../src/firebase/firebaseConfig";
+import { getUserDisplayName } from "../../../src/utils/userDisplayName";
 
 const DEFAULT_PRODUCT_ICON = "package-variant-closed";
 const FAVORITE_ICON_SIZE = 25;
@@ -90,7 +91,7 @@ export default function ProductDetails() {
       storeId: product.storeId,
       storeName: store?.name || "Unknown store",
       merchantId: store?.merchantId || "unknown",
-      merchantName: merchant?.username || "Unknown merchant",
+      merchantName: getUserDisplayName(merchant, "Unknown merchant"),
     });
   };
 
@@ -216,7 +217,7 @@ export default function ProductDetails() {
           <Text style={styles.meta}>
             Seller:{" "}
             <Text style={styles.metaValue}>
-              {merchant?.username || "Unknown"}
+              {getUserDisplayName(merchant, "Unknown")}
             </Text>
           </Text>
           <TouchableOpacity style={styles.pill} onPress={() => {}}>

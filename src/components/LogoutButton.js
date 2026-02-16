@@ -23,10 +23,11 @@ const styles = StyleSheet.create({
     position: "absolute",
     left: 16,
     bottom: 24,
+    width: 110,
     backgroundColor: "#e53935",
-    paddingHorizontal: 16,
     paddingVertical: 12,
     borderRadius: 24,
+    alignItems: "center",
     elevation: 5,
   },
   text: {

@@ -13,6 +13,7 @@ import {
 import AppIcon from "../../src/components/AppIcon";
 import { useFavorites } from "../../src/context/FavoritesContext";
 import { db } from "../../src/firebase/firebaseConfig";
+import { getUserDisplayName } from "../../src/utils/userDisplayName";
 
 const DEFAULT_PRODUCT_ICON = "package-variant-closed";
 const ICON_COLOR_POOL = [
@@ -60,7 +61,7 @@ export default function CustomerSavedProducts() {
       userSnapshot.docs.forEach((doc) => {
         const data = doc.data();
         if (data.role === "merchant") {
-          merchantMap[doc.id] = data.username;
+          merchantMap[doc.id] = getUserDisplayName(data, "Unknown Seller");
         }
       });
 

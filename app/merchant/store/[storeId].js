@@ -3,6 +3,7 @@ import {
   collection,
   deleteDoc,
   doc,
+  getDoc,
   getDocs,
   query,
   updateDoc,
@@ -32,6 +33,10 @@ export default function StorePage() {
   const router = useRouter();
   const [products, setProducts] = useState([]);
   const [soldCounts, setSoldCounts] = useState({});
+  const [storeName, setStoreName] = useState("Store");
+  const [nameModalVisible, setNameModalVisible] = useState(false);
+  const [storeNameInput, setStoreNameInput] = useState("");
+  const [savingStoreName, setSavingStoreName] = useState(false);
   const [restockTarget, setRestockTarget] = useState(null);
   const [restockQtyInput, setRestockQtyInput] = useState("");
   const [fabVisible, setFabVisible] = useState(true);
@@ -39,6 +44,13 @@ export default function StorePage() {
   const fabAnim = useRef(new Animated.Value(1)).current;
 
   const fetchProducts = async () => {
+    const storeSnap = await getDoc(doc(db, "stores", String(storeId)));
+    if (storeSnap.exists()) {
+      const currentStoreName = storeSnap.data()?.name || "Store";
+      setStoreName(currentStoreName);
+      setStoreNameInput(currentStoreName);
+    }
+
     const q = query(
       collection(db, "products"),
       where("storeId", "==", storeId),
@@ -153,6 +165,24 @@ export default function StorePage() {
     </View>
   );
 
+  const handleSaveStoreName = async () => {
+    const nextName = storeNameInput.trim();
+    if (!nextName) {
+      Alert.alert("Invalid name", "Store name cannot be empty.");
+      return;
+    }
+    if (savingStoreName) return;
+
+    try {
+      setSavingStoreName(true);
+      await updateDoc(doc(db, "stores", String(storeId)), { name: nextName });
+      setStoreName(nextName);
+      setNameModalVisible(false);
+    } finally {
+      setSavingStoreName(false);
+    }
+  };
+
   const setFabVisibility = (visible) => {
     if (visible === fabVisible) return;
     setFabVisible(visible);
@@ -180,7 +210,23 @@ export default function StorePage() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Store Products</Text>
+      <Text style={styles.title}>{storeName}</Text>
+      <TouchableOpacity
+        style={styles.renameCard}
+        onPress={() => setNameModalVisible(true)}
+      >
+        <View style={styles.renameCardLeft}>
+          <AppIcon name="store-edit-outline" variant="community" size={20} />
+          <Text style={styles.renameCardText}>Change store name</Text>
+        </View>
+        <AppIcon
+          name="chevron-right"
+          variant="community"
+          size={18}
+          color="#8A8A8E"
+        />
+      </TouchableOpacity>
+      <Text style={styles.subtitle}>Store Products</Text>
 
       <FlatList
         data={products}
@@ -243,6 +289,49 @@ export default function StorePage() {
           );
         }}
       />
+
+      <Modal
+        visible={nameModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setNameModalVisible(false)}
+      >
+        <Pressable
+          style={styles.modalBackdrop}
+          onPress={() => setNameModalVisible(false)}
+        >
+          <Pressable style={styles.modalCard} onPress={() => {}}>
+            <Text style={styles.modalTitle}>Change store name</Text>
+            <TextInput
+              style={styles.modalInput}
+              value={storeNameInput}
+              onChangeText={setStoreNameInput}
+              placeholder="Enter store name"
+              autoFocus
+              maxLength={80}
+            />
+
+            <View style={styles.renameModalActions}>
+              <TouchableOpacity
+                style={styles.cancelButton}
+                onPress={() => setNameModalVisible(false)}
+                disabled={savingStoreName}
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.renameDoneButton}
+                onPress={handleSaveStoreName}
+                disabled={savingStoreName}
+              >
+                <Text style={styles.renameDoneButtonText}>
+                  {savingStoreName ? "Saving..." : "Save"}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
 
       <Modal
         visible={!!restockTarget}
@@ -329,7 +418,31 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: "600",
-    marginBottom: 16,
+    marginBottom: 8,
+  },
+  subtitle: {
+    fontSize: 16,
+    color: "#555",
+    marginBottom: 12,
+  },
+  renameCard: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    height: 46,
+    marginBottom: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  renameCardLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  renameCardText: {
+    fontSize: 15,
+    fontWeight: "600",
   },
   productCard: {
     flexDirection: "row",
@@ -435,6 +548,36 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 10,
+  },
+  renameModalActions: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    gap: 10,
+    marginTop: 12,
+  },
+  cancelButton: {
+    height: 34,
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    backgroundColor: "#E5E5EA",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  cancelButtonText: {
+    color: "#333",
+    fontWeight: "600",
+  },
+  renameDoneButton: {
+    height: 34,
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    backgroundColor: "#111",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  renameDoneButtonText: {
+    color: "#fff",
+    fontWeight: "600",
   },
   doneButton: {
     marginTop: 12,

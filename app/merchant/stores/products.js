@@ -33,6 +33,8 @@ export default function MerchantStoresProducts() {
   const [soldCounts, setSoldCounts] = useState({});
   const [restockTarget, setRestockTarget] = useState(null);
   const [restockQtyInput, setRestockQtyInput] = useState("");
+  const [storeSwitchTarget, setStoreSwitchTarget] = useState(null);
+  const [selectedStoreId, setSelectedStoreId] = useState("");
   const [storeMap, setStoreMap] = useState({});
   const [merchantStores, setMerchantStores] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -170,6 +172,27 @@ export default function MerchantStoresProducts() {
     setRestockQtyInput("");
   };
 
+  const handleOpenStoreSwitch = (item) => {
+    setStoreSwitchTarget(item);
+    setSelectedStoreId(item.storeId || "");
+  };
+
+  const handleDoneStoreSwitch = async () => {
+    if (!storeSwitchTarget || !selectedStoreId) return;
+
+    await updateDoc(doc(db, "products", storeSwitchTarget.id), {
+      storeId: selectedStoreId,
+    });
+
+    setProducts((prev) =>
+      prev.map((p) =>
+        p.id === storeSwitchTarget.id ? { ...p, storeId: selectedStoreId } : p,
+      ),
+    );
+    setStoreSwitchTarget(null);
+    setSelectedStoreId("");
+  };
+
   const handleDoneRestock = async () => {
     if (!restockTarget) return;
     const restockAmount = Number(restockQtyInput);
@@ -190,9 +213,13 @@ export default function MerchantStoresProducts() {
       return;
     }
 
-    await updateDoc(doc(db, "products", restockTarget.id), { quantity: nextQty });
+    await updateDoc(doc(db, "products", restockTarget.id), {
+      quantity: nextQty,
+    });
     setProducts((prev) =>
-      prev.map((p) => (p.id === restockTarget.id ? { ...p, quantity: nextQty } : p)),
+      prev.map((p) =>
+        p.id === restockTarget.id ? { ...p, quantity: nextQty } : p,
+      ),
     );
     setRestockTarget(null);
   };
@@ -208,6 +235,17 @@ export default function MerchantStoresProducts() {
           variant="community"
           size={24}
           color="#2E7D32"
+        />
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.switchStoreActionButton}
+        onPress={() => handleOpenStoreSwitch(item)}
+      >
+        <AppIcon
+          name="store-cog-outline"
+          variant="community"
+          size={23}
+          color="#1565C0"
         />
       </TouchableOpacity>
     </View>
@@ -238,7 +276,12 @@ export default function MerchantStoresProducts() {
               renderLeftActions={() => renderLeftActions(item)}
               renderRightActions={() => renderRightActions(item.id)}
             >
-              <View style={styles.productCard}>
+              <Pressable
+                style={styles.productCard}
+                onPress={() =>
+                  router.push(`/merchant/store/edit-product/${item.id}`)
+                }
+              >
                 <View style={styles.iconWrap}>
                   <AppIcon
                     name={item.iconName || DEFAULT_PRODUCT_ICON}
@@ -275,7 +318,7 @@ export default function MerchantStoresProducts() {
                       : `${remainingStock} left in stock`}
                   </Text>
                 </View>
-              </View>
+              </Pressable>
             </Swipeable>
           );
         }}
@@ -316,8 +359,66 @@ export default function MerchantStoresProducts() {
               placeholder="Enter restock amount"
             />
 
-            <TouchableOpacity style={styles.doneButton} onPress={handleDoneRestock}>
-              <AppIcon name="check" variant="community" size={18} color="#fff" />
+            <TouchableOpacity
+              style={styles.doneButton}
+              onPress={handleDoneRestock}
+            >
+              <AppIcon
+                name="check"
+                variant="community"
+                size={18}
+                color="#fff"
+              />
+              <Text style={styles.doneButtonText}>Done</Text>
+            </TouchableOpacity>
+          </Pressable>
+        </Pressable>
+      </Modal>
+
+      <Modal
+        visible={!!storeSwitchTarget}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setStoreSwitchTarget(null)}
+      >
+        <Pressable
+          style={styles.modalBackdrop}
+          onPress={() => setStoreSwitchTarget(null)}
+        >
+          <Pressable style={styles.modalCard} onPress={() => {}}>
+            <Text style={styles.modalTitle}>Switch store</Text>
+            <Text style={styles.modalMeta}>
+              Product: {storeSwitchTarget?.name || "Unnamed product"}
+            </Text>
+
+            <View style={styles.radioList}>
+              {merchantStores.map((store) => {
+                const selected = selectedStoreId === store.id;
+                return (
+                  <TouchableOpacity
+                    key={store.id}
+                    style={styles.radioRow}
+                    onPress={() => setSelectedStoreId(store.id)}
+                  >
+                    <View style={styles.radioOuter}>
+                      {selected ? <View style={styles.radioInner} /> : null}
+                    </View>
+                    <Text style={styles.radioLabel}>{store.name}</Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+
+            <TouchableOpacity
+              style={styles.doneButton}
+              onPress={handleDoneStoreSwitch}
+            >
+              <AppIcon
+                name="check"
+                variant="community"
+                size={18}
+                color="#fff"
+              />
               <Text style={styles.doneButtonText}>Done</Text>
             </TouchableOpacity>
           </Pressable>
@@ -418,11 +519,21 @@ const styles = StyleSheet.create({
   restockActionWrap: {
     justifyContent: "center",
     alignItems: "center",
-    width: 84,
+    flexDirection: "row",
+    width: 150,
     marginBottom: 12,
+    gap: 10,
   },
   restockActionButton: {
     backgroundColor: "#ccf5d7",
+    justifyContent: "center",
+    alignItems: "center",
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+  },
+  switchStoreActionButton: {
+    backgroundColor: "#c5e4f7",
     justifyContent: "center",
     alignItems: "center",
     width: 52,
@@ -471,6 +582,35 @@ const styles = StyleSheet.create({
   doneButtonText: {
     color: "#fff",
     fontWeight: "600",
+  },
+  radioList: {
+    marginTop: 8,
+    marginBottom: 2,
+    gap: 8,
+  },
+  radioRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  radioOuter: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: "#999",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 10,
+  },
+  radioInner: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: "#000",
+  },
+  radioLabel: {
+    fontSize: 15,
+    color: "#222",
   },
   fab: {
     position: "absolute",

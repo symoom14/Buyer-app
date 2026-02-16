@@ -15,6 +15,7 @@ import {
 import AppIcon from "../../src/components/AppIcon";
 import EmptyFieldState from "../../src/components/EmptyFieldState";
 import { auth, db } from "../../src/firebase/firebaseConfig";
+import { getUserDisplayName } from "../../src/utils/userDisplayName";
 
 const STATUS_COLORS = {
   pending: "#FFB300",
@@ -93,7 +94,7 @@ export default function MerchantOrdersScreen() {
 
           const userSnap = await getDoc(doc(db, "users", id));
           if (userSnap.exists()) {
-            newCache[id] = userSnap.data().username || "Unknown user";
+            newCache[id] = getUserDisplayName(userSnap.data(), "Unknown user");
           } else {
             newCache[id] = "Unknown user";
           }
@@ -128,8 +129,8 @@ export default function MerchantOrdersScreen() {
     const q = searchQuery.toLowerCase();
 
     return orders.filter((order) => {
-      const username = userCache[order.customerId] || "";
-      return username.toLowerCase().includes(q);
+      const customerName = userCache[order.customerId] || "";
+      return customerName.toLowerCase().includes(q);
     });
   }, [orders, userCache, searchQuery]);
 

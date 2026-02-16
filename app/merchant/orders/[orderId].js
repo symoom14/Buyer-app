@@ -13,6 +13,7 @@ import {
 import AppIcon from "../../../src/components/AppIcon";
 import ScreenContainer from "../../../src/components/ScreenContainer";
 import { auth, db } from "../../../src/firebase/firebaseConfig";
+import { getUserDisplayName } from "../../../src/utils/userDisplayName";
 
 const STATUS_COLORS = {
   pending: "#FFB300",
@@ -54,7 +55,7 @@ export default function MerchantOrderDetailsScreen() {
       if (data.customerId) {
         const userSnap = await getDoc(doc(db, "users", data.customerId));
         if (userSnap.exists()) {
-          setCustomerName(userSnap.data().username);
+          setCustomerName(getUserDisplayName(userSnap.data(), "Unknown user"));
         }
       }
 

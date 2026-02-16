@@ -18,6 +18,7 @@ import {
 import AppIcon from "../../src/components/AppIcon";
 import EmptyFieldState from "../../src/components/EmptyFieldState";
 import { auth, db } from "../../src/firebase/firebaseConfig";
+import { getUserDisplayName } from "../../src/utils/userDisplayName";
 
 const STATUS_ICONS = {
   pending: "receipt-clock",
@@ -49,7 +50,17 @@ export default function CustomerOrders() {
   }
 
   const fetchOrders = async (customerId) => {
-    const snapshot = await getDocs(collection(db, "orders"));
+    const [snapshot, usersSnapshot] = await Promise.all([
+      getDocs(collection(db, "orders")),
+      getDocs(collection(db, "users")),
+    ]);
+    const merchantNameById = {};
+    usersSnapshot.docs.forEach((docSnap) => {
+      const data = docSnap.data();
+      if (data.role === "merchant") {
+        merchantNameById[docSnap.id] = getUserDisplayName(data, "Store");
+      }
+    });
 
     const grouped = snapshot.docs.flatMap((docSnap) => {
       const data = docSnap.data();
@@ -73,7 +84,8 @@ export default function CustomerOrders() {
           id: `${docSnap.id}:${merchantId}`,
           orderId: docSnap.id,
           merchantId,
-          merchantName: items[0]?.merchantName || "Store",
+          merchantName:
+            merchantNameById[merchantId] || items[0]?.merchantName || "Store",
           createdAt: data.createdAt,
           total: items.reduce((s, i) => s + i.quantity * i.price, 0),
           status: data.merchantStatuses?.[merchantId]?.status || "pending",

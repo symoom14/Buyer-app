@@ -6,14 +6,18 @@ import {
   doc,
   getDocs,
   query,
+  updateDoc,
   where,
 } from "firebase/firestore";
 import { useCallback, useState } from "react";
 import {
   Alert,
   FlatList,
+  Modal,
+  Pressable,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -24,6 +28,9 @@ import { auth, db } from "../../../src/firebase/firebaseConfig";
 
 export default function MerchantStoresManage() {
   const [stores, setStores] = useState([]);
+  const [renameTarget, setRenameTarget] = useState(null);
+  const [renameInput, setRenameInput] = useState("");
+  const [savingRename, setSavingRename] = useState(false);
   const router = useRouter();
 
   const fetchStores = async (merchantId) => {
@@ -101,6 +108,34 @@ export default function MerchantStoresManage() {
     </View>
   );
 
+  const openRenameModal = (store) => {
+    setRenameTarget(store);
+    setRenameInput(store?.name || "");
+  };
+
+  const handleRenameStore = async () => {
+    if (!renameTarget || savingRename) return;
+    const nextName = renameInput.trim();
+    if (!nextName) {
+      Alert.alert("Invalid name", "Store name cannot be empty.");
+      return;
+    }
+
+    try {
+      setSavingRename(true);
+      await updateDoc(doc(db, "stores", renameTarget.id), { name: nextName });
+      setStores((prev) =>
+        prev.map((store) =>
+          store.id === renameTarget.id ? { ...store, name: nextName } : store,
+        ),
+      );
+      setRenameTarget(null);
+      setRenameInput("");
+    } finally {
+      setSavingRename(false);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Your stores</Text>
@@ -115,11 +150,27 @@ export default function MerchantStoresManage() {
         }
         renderItem={({ item }) => (
           <Swipeable renderRightActions={() => renderRightActions(item.id)}>
-            <TouchableOpacity
+            <Pressable
               style={styles.card}
               onPress={() => router.push(`/merchant/store/${item.id}`)}
             >
-              <Text style={styles.name}>{item.name}</Text>
+              <View style={styles.nameRow}>
+                <Text style={styles.name}>{item.name}</Text>
+                <TouchableOpacity
+                  style={styles.renameButton}
+                  onPress={(e) => {
+                    e.stopPropagation();
+                    openRenameModal(item);
+                  }}
+                >
+                  <AppIcon
+                    name="pencil-outline"
+                    variant="community"
+                    size={18}
+                    color="#333"
+                  />
+                </TouchableOpacity>
+              </View>
               <Text style={styles.meta}>
                 Products: {item.productCount || 0}
               </Text>
@@ -127,10 +178,52 @@ export default function MerchantStoresManage() {
                 Date opened:{" "}
                 {item.createdAt?.toDate?.().toLocaleDateString?.() || "—"}
               </Text>
-            </TouchableOpacity>
+            </Pressable>
           </Swipeable>
         )}
       />
+
+      <Modal
+        visible={!!renameTarget}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setRenameTarget(null)}
+      >
+        <Pressable
+          style={styles.modalBackdrop}
+          onPress={() => setRenameTarget(null)}
+        >
+          <Pressable style={styles.modalCard} onPress={() => {}}>
+            <Text style={styles.modalTitle}>Change store name</Text>
+            <TextInput
+              value={renameInput}
+              onChangeText={setRenameInput}
+              placeholder="Enter store name"
+              style={styles.modalInput}
+              autoFocus
+              maxLength={80}
+            />
+            <View style={styles.modalActions}>
+              <TouchableOpacity
+                style={styles.cancelButton}
+                onPress={() => setRenameTarget(null)}
+                disabled={savingRename}
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.doneButton}
+                onPress={handleRenameStore}
+                disabled={savingRename}
+              >
+                <Text style={styles.doneButtonText}>
+                  {savingRename ? "Saving..." : "Save"}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </View>
   );
 }
@@ -152,6 +245,11 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     marginBottom: 12,
   },
+  nameRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
   deleteActionWrap: {
     justifyContent: "center",
     alignItems: "center",
@@ -171,10 +269,72 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     marginBottom: 6,
   },
+  renameButton: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: "#F2F2F7",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 6,
+  },
   meta: {
     fontSize: 13,
     color: "#666",
     marginBottom: 2,
+  },
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.28)",
+    justifyContent: "center",
+    paddingHorizontal: 22,
+  },
+  modalCard: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    padding: 14,
+    gap: 10,
+  },
+  modalTitle: {
+    fontSize: 17,
+    fontWeight: "700",
+  },
+  modalInput: {
+    backgroundColor: "#F2F2F7",
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 16,
+  },
+  modalActions: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    gap: 10,
+    marginTop: 2,
+  },
+  cancelButton: {
+    height: 34,
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    backgroundColor: "#E5E5EA",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  cancelButtonText: {
+    color: "#333",
+    fontWeight: "600",
+  },
+  doneButton: {
+    height: 34,
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    backgroundColor: "#111",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  doneButtonText: {
+    color: "#fff",
+    fontWeight: "600",
   },
   listEmptyContainer: {
     flexGrow: 1,

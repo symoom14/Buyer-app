@@ -65,6 +65,7 @@ export default function SignUp() {
 
       await setDoc(doc(db, "users", uid), {
         username: usernameRef.current,
+        name: usernameRef.current,
         role,
         createdAt: serverTimestamp(),
       });

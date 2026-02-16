@@ -1,0 +1,1581 @@
+{
+  "generatedAt": "2026-02-13T16:34:44.172Z",
+  "notes": [
+    "Edit only 'proposedStoreCategory' for each store.",
+    "Injector script can copy proposedStoreCategory to store.category and product.category for all products in the store."
+  ],
+  "totals": {
+    "merchants": 8,
+    "stores": 28,
+    "products": 124
+  },
+  "stores": [
+    {
+      "storeId": "0RVbX6oXKzHP5G0PLnWg",
+      "name": "Fair Beauty Essentials",
+      "merchantId": "p3dkAJxQTtZd42qu6lzWdS0zGji2",
+      "merchantDisplayName": "fairbeautyproducts",
+      "existingStoreCategory": null,
+      "proposedStoreCategory": "Beauty",
+      "createdAt": "2026-02-13T06:14:01.784Z",
+      "productCount": 11,
+      "products": [
+        {
+          "productId": "3ogoNFS1WuGkLWwTkv4N",
+          "name": "FairGlow Face Cream",
+          "category": "Beauty",
+          "iconName": "spray",
+          "merchantId": "p3dkAJxQTtZd42qu6lzWdS0zGji2",
+          "price": 43.88,
+          "quantity": 70,
+          "createdAt": "2026-02-13T07:14:14.731Z"
+        },
+        {
+          "productId": "Cf2q4eTGs8YahOlvBlON",
+          "name": "FairGlow Night Gel",
+          "category": "Beauty",
+          "iconName": "lipstick",
+          "merchantId": "p3dkAJxQTtZd42qu6lzWdS0zGji2",
+          "price": 77.63,
+          "quantity": 79,
+          "createdAt": "2026-02-13T07:14:16.684Z"
+        },
+        {
+          "productId": "G8MvkL7taOB4TmMfiz9Y",
+          "name": "Lip Balm Set",
+          "category": "Beauty",
+          "iconName": "lipstick",
+          "merchantId": "p3dkAJxQTtZd42qu6lzWdS0zGji2",
+          "price": 20,
+          "quantity": 66,
+          "createdAt": "2026-02-13T06:14:08.313Z"
+        },
+        {
+          "productId": "IRwXYqJgkIVDizA3DvPz",
+          "name": "FairGlow Makeup Brush Kit",
+          "category": "Beauty",
+          "iconName": "spray",
+          "merchantId": "p3dkAJxQTtZd42qu6lzWdS0zGji2",
+          "price": 85.98,
+          "quantity": 13,
+          "createdAt": "2026-02-13T07:14:15.221Z"
+        },
+        {
+          "productId": "JuMlNvuqfPlELCMnvvaD",
+          "name": "Hair Repair Mask",
+          "category": "Beauty",
+          "iconName": "hair-dryer",
+          "merchantId": "p3dkAJxQTtZd42qu6lzWdS0zGji2",
+          "price": 35,
+          "quantity": 12,
+          "createdAt": "2026-02-13T06:14:08.361Z"
+        },
+        {
+          "productId": "Lw7MRh2sEeDOT199Ksc1",
+          "name": "Vitamin C Serum",
+          "category": "Beauty",
+          "iconName": "bottle-tonic-plus",
+          "merchantId": "p3dkAJxQTtZd42qu6lzWdS0zGji2",
+          "price": 45,
+          "quantity": 39,
+          "createdAt": "2026-02-13T06:14:08.170Z"
+        },
+        {
+          "productId": "MeOFtTZvucWvhytKUskU",
+          "name": "Hydrating Face Cream",
+          "category": "Beauty",
+          "iconName": "face-man-shimmer",
+          "merchantId": "p3dkAJxQTtZd42qu6lzWdS0zGji2",
+          "price": 40,
+          "quantity": 76,
+          "createdAt": "2026-02-13T06:14:08.124Z"
+        },
+        {
+          "productId": "YjUWVddkYCwXlOq51eK9",
+          "name": "Makeup Brush Kit",
+          "category": "Beauty",
+          "iconName": "brush",
+          "merchantId": "p3dkAJxQTtZd42qu6lzWdS0zGji2",
+          "price": 50,
+          "quantity": 86,
+          "createdAt": "2026-02-13T06:14:08.470Z"
+        },
+        {
+          "productId": "pQSZawmafxtNLIBNvlVU",
+          "name": "FairGlow SPF Shield",
+          "category": "Beauty",
+          "iconName": "lotion",
+          "merchantId": "p3dkAJxQTtZd42qu6lzWdS0zGji2",
+          "price": 80.24,
+          "quantity": 38,
+          "createdAt": "2026-02-13T07:14:14.986Z"
+        },
+        {
+          "productId": "uVHDZ6RO8d2qLCVv11i0",
+          "name": "Sunscreen SPF 50",
+          "category": "Beauty",
+          "iconName": "weather-sunny-alert",
+          "merchantId": "p3dkAJxQTtZd42qu6lzWdS0zGji2",
+          "price": 35,
+          "quantity": 65,
+          "createdAt": "2026-02-13T06:14:08.267Z"
+        },
+        {
+          "productId": "utvqQdV6unYP8yIWdG7I",
+          "name": "Body Lotion",
+          "category": "Beauty",
+          "iconName": "lotion",
+          "merchantId": "p3dkAJxQTtZd42qu6lzWdS0zGji2",
+          "price": 30,
+          "quantity": 25,
+          "createdAt": "2026-02-13T06:14:08.222Z"
+        }
+      ]
+    },
+    {
+      "storeId": "0zA2d6wAmrm0FWqR0H9y",
+      "name": "Everyday Home Finds",
+      "merchantId": "5X2xrHa3k5h3qxZuWLvWmywaEsf2",
+      "merchantDisplayName": "homelyliving",
+      "existingStoreCategory": null,
+      "proposedStoreCategory": "Home",
+      "createdAt": "2026-02-13T06:14:00.606Z",
+      "productCount": 11,
+      "products": [
+        {
+          "productId": "1SaQ5DHop9p7jxuc9GdS",
+          "name": "Storage Basket",
+          "category": "Home",
+          "iconName": "basket",
+          "merchantId": "5X2xrHa3k5h3qxZuWLvWmywaEsf2",
+          "price": 30,
+          "quantity": 61,
+          "createdAt": "2026-02-13T06:14:04.472Z"
+        },
+        {
+          "productId": "2OC3H0Y9kE38oqGcrmsT",
+          "name": "Velvet Accent Pillow",
+          "category": "Home",
+          "iconName": "vase",
+          "merchantId": "5X2xrHa3k5h3qxZuWLvWmywaEsf2",
+          "price": 114.54,
+          "quantity": 61,
+          "createdAt": "2026-02-13T07:14:16.816Z"
+        },
+        {
+          "productId": "D2e5xkHAhvEwjbDFMw4U",
+          "name": "Table Lamp",
+          "category": "Home",
+          "iconName": "lamp",
+          "merchantId": "5X2xrHa3k5h3qxZuWLvWmywaEsf2",
+          "price": 55,
+          "quantity": 89,
+          "createdAt": "2026-02-13T06:14:04.426Z"
+        },
+        {
+          "productId": "GKf1p4i0oBifib9W4bXD",
+          "name": "Scented Candle",
+          "category": "Home",
+          "iconName": "candle",
+          "merchantId": "5X2xrHa3k5h3qxZuWLvWmywaEsf2",
+          "price": 20,
+          "quantity": 23,
+          "createdAt": "2026-02-13T06:14:04.380Z"
+        },
+        {
+          "productId": "YhGVYvLzA8lw5cRbS0jy",
+          "name": "Accent Cushion",
+          "category": "Home",
+          "iconName": "sofa",
+          "merchantId": "5X2xrHa3k5h3qxZuWLvWmywaEsf2",
+          "price": 25,
+          "quantity": 76,
+          "createdAt": "2026-02-13T06:14:04.276Z"
+        },
+        {
+          "productId": "h8sCCrsqIBNEG1WOlkVn",
+          "name": "Dining Runner",
+          "category": "Home",
+          "iconName": "table-furniture",
+          "merchantId": "5X2xrHa3k5h3qxZuWLvWmywaEsf2",
+          "price": 25,
+          "quantity": 97,
+          "createdAt": "2026-02-13T06:14:04.517Z"
+        },
+        {
+          "productId": "qoIY3V9QvdsUblNIateF",
+          "name": "Wall Frame Set",
+          "category": "Home",
+          "iconName": "image-frame",
+          "merchantId": "5X2xrHa3k5h3qxZuWLvWmywaEsf2",
+          "price": 35,
+          "quantity": 88,
+          "createdAt": "2026-02-13T06:14:04.332Z"
+        },
+        {
+          "productId": "sKj6YJkkqfs1pIcLJaVS",
+          "name": "Ceramic Vase",
+          "category": "Home",
+          "iconName": "vase",
+          "merchantId": "5X2xrHa3k5h3qxZuWLvWmywaEsf2",
+          "price": 45,
+          "quantity": 47,
+          "createdAt": "2026-02-13T06:14:04.176Z"
+        },
+        {
+          "productId": "vwZdDSl9QAQC02FbR7MA",
+          "name": "LinenHarmony Runner",
+          "category": "Home",
+          "iconName": "vase",
+          "merchantId": "5X2xrHa3k5h3qxZuWLvWmywaEsf2",
+          "price": 139.7,
+          "quantity": 28,
+          "createdAt": "2026-02-13T07:14:15.740Z"
+        },
+        {
+          "productId": "y1pXZzxUpPf8AibEFWbF",
+          "name": "MinimalWall Frame Trio",
+          "category": "Home",
+          "iconName": "sofa",
+          "merchantId": "5X2xrHa3k5h3qxZuWLvWmywaEsf2",
+          "price": 97.7,
+          "quantity": 56,
+          "createdAt": "2026-02-13T07:14:16.460Z"
+        },
+        {
+          "productId": "zS8UeHsECgmZ5iBq70sY",
+          "name": "CozyNest Cushion Pair",
+          "category": "Home",
+          "iconName": "basket",
+          "merchantId": "5X2xrHa3k5h3qxZuWLvWmywaEsf2",
+          "price": 18.6,
+          "quantity": 42,
+          "createdAt": "2026-02-13T07:14:14.191Z"
+        }
+      ]
+    },
+    {
+      "storeId": "DSp9zGflOBztKC1nr7Uj",
+      "name": "Merchant Two General",
+      "merchantId": "pRvgCX2Uv6UIzK3UDc52nDbifSS2",
+      "merchantDisplayName": "merchant2",
+      "existingStoreCategory": null,
+      "proposedStoreCategory": "Other",
+      "createdAt": "2026-02-13T06:14:01.875Z",
+      "productCount": 0,
+      "products": []
+    },
+    {
+      "storeId": "DrlfNXTeVy0o8wgaWmr6",
+      "name": "Cozy Nest Home",
+      "merchantId": "5X2xrHa3k5h3qxZuWLvWmywaEsf2",
+      "merchantDisplayName": "homelyliving",
+      "existingStoreCategory": null,
+      "proposedStoreCategory": "Home",
+      "createdAt": "2026-02-13T06:14:00.492Z",
+      "productCount": 3,
+      "products": [
+        {
+          "productId": "0kC8QzmfDlYSyik7gc0k",
+          "name": "Nordic Planter Pot",
+          "category": "Home",
+          "iconName": "basket",
+          "merchantId": "5X2xrHa3k5h3qxZuWLvWmywaEsf2",
+          "price": 83.44,
+          "quantity": 38,
+          "createdAt": "2026-02-13T07:14:16.594Z"
+        },
+        {
+          "productId": "IOYz11imvPEUQX19IQr6",
+          "name": "SoftCloud Throw Blanket",
+          "category": "Home",
+          "iconName": "sofa",
+          "merchantId": "5X2xrHa3k5h3qxZuWLvWmywaEsf2",
+          "price": 54.02,
+          "quantity": 87,
+          "createdAt": "2026-02-13T07:14:16.130Z"
+        },
+        {
+          "productId": "LJDjJldtCsdkjRAnwiiM",
+          "name": "WarmGlow Table Lamp",
+          "category": "Home",
+          "iconName": "basket",
+          "merchantId": "5X2xrHa3k5h3qxZuWLvWmywaEsf2",
+          "price": 19.27,
+          "quantity": 30,
+          "createdAt": "2026-02-13T07:14:15.078Z"
+        }
+      ]
+    },
+    {
+      "storeId": "I8DaIbOQ8IvVIxqCYiac",
+      "name": "Merchant One General",
+      "merchantId": "S05wJhaNWoVm96gFpyyxqk90kK53",
+      "merchantDisplayName": "merchant1",
+      "existingStoreCategory": null,
+      "proposedStoreCategory": "Other",
+      "createdAt": "2026-02-13T06:14:01.230Z",
+      "productCount": 0,
+      "products": []
+    },
+    {
+      "storeId": "L31ab5mzBRPF2V4SwScg",
+      "name": "Tool & Fix Depot",
+      "merchantId": "4VTmwsr8EFZXxfunqfu6MIjQ1AE3",
+      "merchantDisplayName": "hardwaremarks",
+      "existingStoreCategory": null,
+      "proposedStoreCategory": "Electronics",
+      "createdAt": "2026-02-13T06:14:00.251Z",
+      "productCount": 4,
+      "products": [
+        {
+          "productId": "2N3kdo7SqTjvwLI2I2uV",
+          "name": "Workshop Safety Gloves",
+          "category": "Hardware",
+          "iconName": "wrench",
+          "merchantId": "4VTmwsr8EFZXxfunqfu6MIjQ1AE3",
+          "price": 26.43,
+          "quantity": 95,
+          "createdAt": "2026-02-13T07:14:16.992Z"
+        },
+        {
+          "productId": "B6uC5kYwxIG40yn1rPbQ",
+          "name": "Precision Screwdriver Bundle",
+          "category": "Hardware",
+          "iconName": "tape-measure",
+          "merchantId": "4VTmwsr8EFZXxfunqfu6MIjQ1AE3",
+          "price": 149.22,
+          "quantity": 90,
+          "createdAt": "2026-02-13T07:14:15.516Z"
+        },
+        {
+          "productId": "DgCvDqz1NvANEY5ioIvC",
+          "name": "QuickFix Fastener Box",
+          "category": "Hardware",
+          "iconName": "toolbox",
+          "merchantId": "4VTmwsr8EFZXxfunqfu6MIjQ1AE3",
+          "price": 79.02,
+          "quantity": 18,
+          "createdAt": "2026-02-13T07:14:16.084Z"
+        },
+        {
+          "productId": "n2NbeDXbGnwSoai1gGE2",
+          "name": "ForgeLine Drill Kit",
+          "category": "Hardware",
+          "iconName": "tape-measure",
+          "merchantId": "4VTmwsr8EFZXxfunqfu6MIjQ1AE3",
+          "price": 111.41,
+          "quantity": 93,
+          "createdAt": "2026-02-13T07:14:14.330Z"
+        }
+      ]
+    },
+    {
+      "storeId": "MwETwFaBtNXg9eFOLiyn",
+      "name": "Homely Living Decor",
+      "merchantId": "5X2xrHa3k5h3qxZuWLvWmywaEsf2",
+      "merchantDisplayName": "homelyliving",
+      "existingStoreCategory": null,
+      "proposedStoreCategory": "Home",
+      "createdAt": "2026-02-13T06:14:00.440Z",
+      "productCount": 3,
+      "products": [
+        {
+          "productId": "QqV4ldkOLz9nI7UqQjJx",
+          "name": "CalmStone Ceramic Vase",
+          "category": "Home",
+          "iconName": "basket",
+          "merchantId": "5X2xrHa3k5h3qxZuWLvWmywaEsf2",
+          "price": 35.95,
+          "quantity": 49,
+          "createdAt": "2026-02-13T07:14:15.267Z"
+        },
+        {
+          "productId": "uzx0oeuHKNBGzbNk5J3q",
+          "name": "OakTone Storage Basket",
+          "category": "Home",
+          "iconName": "table-furniture",
+          "merchantId": "5X2xrHa3k5h3qxZuWLvWmywaEsf2",
+          "price": 136.42,
+          "quantity": 54,
+          "createdAt": "2026-02-13T07:14:16.282Z"
+        },
+        {
+          "productId": "wrqe797b2TkAYaWjTIBh",
+          "name": "AromaCandle Gift Set",
+          "category": "Home",
+          "iconName": "sofa",
+          "merchantId": "5X2xrHa3k5h3qxZuWLvWmywaEsf2",
+          "price": 139.41,
+          "quantity": 32,
+          "createdAt": "2026-02-13T07:14:16.727Z"
+        }
+      ]
+    },
+    {
+      "storeId": "Nvwg5gXuF188hGrInWK8",
+      "name": "Merch Test Outlet",
+      "merchantId": "9c4BQwM0XbNJY6uF0ofQFKgiRBi2",
+      "merchantDisplayName": "merchtest",
+      "existingStoreCategory": null,
+      "proposedStoreCategory": "Other",
+      "createdAt": "2026-02-13T06:14:01.130Z",
+      "productCount": 0,
+      "products": []
+    },
+    {
+      "storeId": "NzRMnbV7V4mVxUHUV6mS",
+      "name": "Merchant One’s Pets",
+      "merchantId": "S05wJhaNWoVm96gFpyyxqk90kK53",
+      "merchantDisplayName": "merchant1",
+      "existingStoreCategory": null,
+      "proposedStoreCategory": "Other",
+      "createdAt": "2026-02-10T15:36:38.140Z",
+      "productCount": 14,
+      "products": [
+        {
+          "productId": "46HtfSSLlWTs92zSn1IE",
+          "name": "Puzzle Box",
+          "category": "Toys",
+          "iconName": "puzzle",
+          "merchantId": "S05wJhaNWoVm96gFpyyxqk90kK53",
+          "price": 20,
+          "quantity": 11,
+          "createdAt": "2026-02-13T05:20:57.498Z"
+        },
+        {
+          "productId": "Bbkxe8SAwETDOIJHlLIt",
+          "name": "Cat treats",
+          "category": "Pets",
+          "iconName": "cat",
+          "merchantId": "S05wJhaNWoVm96gFpyyxqk90kK53",
+          "price": 10,
+          "quantity": 100,
+          "createdAt": "2026-02-11T00:17:04.886Z"
+        },
+        {
+          "productId": "DWIcEppbRardWF6gQuSF",
+          "name": "Ceramic Mug Set",
+          "category": "Home",
+          "iconName": "cup",
+          "merchantId": "S05wJhaNWoVm96gFpyyxqk90kK53",
+          "price": 20,
+          "quantity": 30,
+          "createdAt": "2026-02-13T05:20:57.582Z"
+        },
+        {
+          "productId": "EOBDn5EXZlWK029E02oj",
+          "name": "Wholegrain Pasta",
+          "category": "Grocery",
+          "iconName": "noodles",
+          "merchantId": "S05wJhaNWoVm96gFpyyxqk90kK53",
+          "price": 10,
+          "quantity": 86,
+          "createdAt": "2026-02-13T05:20:58.288Z"
+        },
+        {
+          "productId": "IQB6FJtdmTiJFiliLRSt",
+          "name": "Pet Carrier Bag",
+          "category": "Pet Supplies",
+          "iconName": "bag-suitcase",
+          "merchantId": "S05wJhaNWoVm96gFpyyxqk90kK53",
+          "price": 80,
+          "quantity": 11,
+          "createdAt": "2026-02-13T05:20:56.984Z"
+        },
+        {
+          "productId": "LGwz47ekNWiCsXkDQgNT",
+          "name": "Pet Food Bowl",
+          "category": "Pet Supplies",
+          "iconName": "bowl",
+          "merchantId": "S05wJhaNWoVm96gFpyyxqk90kK53",
+          "price": 30,
+          "quantity": 84,
+          "createdAt": "2026-02-13T05:20:56.356Z"
+        },
+        {
+          "productId": "LQgrq7Ml7gsytIe01h7a",
+          "name": "Windshield Sun Shade",
+          "category": "Automotive",
+          "iconName": "weather-sunny",
+          "merchantId": "S05wJhaNWoVm96gFpyyxqk90kK53",
+          "price": 10,
+          "quantity": 51,
+          "createdAt": "2026-02-13T05:20:57.809Z"
+        },
+        {
+          "productId": "O8PWIWD0YxRG8qcUSj8Q",
+          "name": "Wall Clock",
+          "category": "Home",
+          "iconName": "clock-outline",
+          "merchantId": "S05wJhaNWoVm96gFpyyxqk90kK53",
+          "price": 35,
+          "quantity": 37,
+          "createdAt": "2026-02-13T05:20:56.312Z"
+        },
+        {
+          "productId": "Q8Swwem7kmdfxxOHgOL3",
+          "name": "Notebook Bundle",
+          "category": "Office",
+          "iconName": "notebook",
+          "merchantId": "S05wJhaNWoVm96gFpyyxqk90kK53",
+          "price": 15,
+          "quantity": 50,
+          "createdAt": "2026-02-13T05:20:57.983Z"
+        },
+        {
+          "productId": "QJQ9JhmhFmTpBzDMX8Ao",
+          "name": "Wireless Mouse",
+          "category": "Electronics",
+          "iconName": "mouse",
+          "merchantId": "S05wJhaNWoVm96gFpyyxqk90kK53",
+          "price": 45,
+          "quantity": 19,
+          "createdAt": "2026-02-13T05:20:58.671Z"
+        },
+        {
+          "productId": "QTRZg7AbX7LgJny7B9Sc",
+          "name": "Building Block Set",
+          "category": "Toys",
+          "iconName": "toy-brick",
+          "merchantId": "S05wJhaNWoVm96gFpyyxqk90kK53",
+          "price": 65,
+          "quantity": 66,
+          "createdAt": "2026-02-13T05:20:58.028Z"
+        },
+        {
+          "productId": "pjmRUfthJoFpspRw9IDo",
+          "name": "Cat harness",
+          "category": "Pets",
+          "iconName": "cat",
+          "merchantId": "S05wJhaNWoVm96gFpyyxqk90kK53",
+          "price": 75,
+          "quantity": 20,
+          "createdAt": "2026-02-10T15:40:06.961Z"
+        },
+        {
+          "productId": "w74WWR9iZmCXVujdOcTD",
+          "name": "Resistance Bands",
+          "category": "Sports",
+          "iconName": "dumbbell",
+          "merchantId": "S05wJhaNWoVm96gFpyyxqk90kK53",
+          "price": 20,
+          "quantity": 41,
+          "createdAt": "2026-02-13T05:20:58.374Z"
+        },
+        {
+          "productId": "xm7uUVOxbxKkEb2szKcu",
+          "name": "Lip Balm Duo",
+          "category": "Beauty",
+          "iconName": "lipstick",
+          "merchantId": "S05wJhaNWoVm96gFpyyxqk90kK53",
+          "price": 10,
+          "quantity": 57,
+          "createdAt": "2026-02-13T05:20:57.026Z"
+        }
+      ]
+    },
+    {
+      "storeId": "Ou8F9U2IWOtI8zMtFUvE",
+      "name": "Marks Hardware Hub",
+      "merchantId": "4VTmwsr8EFZXxfunqfu6MIjQ1AE3",
+      "merchantDisplayName": "hardwaremarks",
+      "existingStoreCategory": null,
+      "proposedStoreCategory": "Electronics",
+      "createdAt": "2026-02-13T06:14:00.168Z",
+      "productCount": 3,
+      "products": [
+        {
+          "productId": "0Yw0KZpwkyr21149yBly",
+          "name": "IronGrip Hammer Set",
+          "category": "Hardware",
+          "iconName": "wrench",
+          "merchantId": "4VTmwsr8EFZXxfunqfu6MIjQ1AE3",
+          "price": 136.71,
+          "quantity": 16,
+          "createdAt": "2026-02-13T07:14:14.442Z"
+        },
+        {
+          "productId": "cihI8y4jkfpBiTrILcsf",
+          "name": "ProMeasure Tape Set",
+          "category": "Hardware",
+          "iconName": "tape-measure",
+          "merchantId": "4VTmwsr8EFZXxfunqfu6MIjQ1AE3",
+          "price": 92.5,
+          "quantity": 18,
+          "createdAt": "2026-02-13T07:14:15.607Z"
+        },
+        {
+          "productId": "hIE4V4jJWRunQs6KqSt7",
+          "name": "HeavyDuty Clamp Pair",
+          "category": "Hardware",
+          "iconName": "wrench",
+          "merchantId": "4VTmwsr8EFZXxfunqfu6MIjQ1AE3",
+          "price": 34.2,
+          "quantity": 66,
+          "createdAt": "2026-02-13T07:14:16.228Z"
+        }
+      ]
+    },
+    {
+      "storeId": "Oxu633h7hMDITf433NMX",
+      "name": "Merchant One Select",
+      "merchantId": "S05wJhaNWoVm96gFpyyxqk90kK53",
+      "merchantDisplayName": "merchant1",
+      "existingStoreCategory": null,
+      "proposedStoreCategory": "Electronics",
+      "createdAt": "2026-02-13T06:14:01.328Z",
+      "productCount": 0,
+      "products": []
+    },
+    {
+      "storeId": "P72dMZ6oTqfuklaMLA9I",
+      "name": "Merchant Two Select",
+      "merchantId": "pRvgCX2Uv6UIzK3UDc52nDbifSS2",
+      "merchantDisplayName": "merchant2",
+      "existingStoreCategory": null,
+      "proposedStoreCategory": "Electronics",
+      "createdAt": "2026-02-13T06:14:01.969Z",
+      "productCount": 0,
+      "products": []
+    },
+    {
+      "storeId": "TtDqxtgSJwU0fxuejNR5",
+      "name": "Merchant One’s Tech Store",
+      "merchantId": "S05wJhaNWoVm96gFpyyxqk90kK53",
+      "merchantDisplayName": "merchant1",
+      "existingStoreCategory": null,
+      "proposedStoreCategory": "Groceries",
+      "createdAt": "2026-02-10T15:35:24.423Z",
+      "productCount": 7,
+      "products": [
+        {
+          "productId": "2PzwvIge1v4wvJ622Fq2",
+          "name": "Art Supply Kit",
+          "category": "Toys",
+          "iconName": "palette",
+          "merchantId": "S05wJhaNWoVm96gFpyyxqk90kK53",
+          "price": 35,
+          "quantity": 100,
+          "createdAt": "2026-02-13T05:20:56.937Z"
+        },
+        {
+          "productId": "4UO5sQ2KRKSFQOXSmSO7",
+          "name": "Ergonomic Chair Cushion",
+          "category": "Office",
+          "iconName": "chair-rolling",
+          "merchantId": "S05wJhaNWoVm96gFpyyxqk90kK53",
+          "price": 55,
+          "quantity": 65,
+          "createdAt": "2026-02-13T05:20:56.258Z"
+        },
+        {
+          "productId": "TTdWtwmXfnGIcbWkZzDq",
+          "name": "Dark Chocolate Bar",
+          "category": "Grocery",
+          "iconName": "candy",
+          "merchantId": "S05wJhaNWoVm96gFpyyxqk90kK53",
+          "price": 5,
+          "quantity": 62,
+          "createdAt": "2026-02-13T05:20:56.579Z"
+        },
+        {
+          "productId": "TmWaHJo5EZEZZCx8dVi9",
+          "name": "Shampoo Bar",
+          "category": "Beauty",
+          "iconName": "shower",
+          "merchantId": "S05wJhaNWoVm96gFpyyxqk90kK53",
+          "price": 20,
+          "quantity": 28,
+          "createdAt": "2026-02-13T05:20:56.062Z"
+        },
+        {
+          "productId": "aYCEaz44an81XejJmQfy",
+          "name": "POS machine",
+          "category": "Tech",
+          "iconName": "contactless-payment-circle",
+          "merchantId": "S05wJhaNWoVm96gFpyyxqk90kK53",
+          "price": 250,
+          "quantity": 10,
+          "createdAt": "2026-02-10T15:38:31.588Z"
+        },
+        {
+          "productId": "epsaVSgfX1ji1uUpWNbB",
+          "name": "Throw Pillow",
+          "category": "Home",
+          "iconName": "sofa",
+          "merchantId": "S05wJhaNWoVm96gFpyyxqk90kK53",
+          "price": 20,
+          "quantity": 87,
+          "createdAt": "2026-02-13T05:20:58.852Z"
+        },
+        {
+          "productId": "xVNQb4iiHy941a2U4JWG",
+          "name": "Trail Mix Pack",
+          "category": "Grocery",
+          "iconName": "food-apple",
+          "merchantId": "S05wJhaNWoVm96gFpyyxqk90kK53",
+          "price": 15,
+          "quantity": 36,
+          "createdAt": "2026-02-13T05:20:56.758Z"
+        }
+      ]
+    },
+    {
+      "storeId": "UYCkn3fi3GWXkYB3uCne",
+      "name": "A simple store",
+      "merchantId": "9c4BQwM0XbNJY6uF0ofQFKgiRBi2",
+      "merchantDisplayName": "merchtest",
+      "existingStoreCategory": null,
+      "proposedStoreCategory": "Home",
+      "createdAt": "2026-02-06T07:01:07.213Z",
+      "productCount": 15,
+      "products": [
+        {
+          "productId": "HMIQ4JXy70prGnK99jFW",
+          "name": "Plush Toy",
+          "category": "Toys",
+          "iconName": "teddy-bear",
+          "merchantId": "9c4BQwM0XbNJY6uF0ofQFKgiRBi2",
+          "price": 15,
+          "quantity": 31,
+          "createdAt": "2026-02-13T05:20:58.504Z"
+        },
+        {
+          "productId": "IyuDvJprQYkjowQLea8z",
+          "name": "Skipping Rope",
+          "category": "Sports",
+          "iconName": "jump-rope",
+          "merchantId": "9c4BQwM0XbNJY6uF0ofQFKgiRBi2",
+          "price": 15,
+          "quantity": 33,
+          "createdAt": "2026-02-13T05:20:58.244Z"
+        },
+        {
+          "productId": "L3RRBfRGaqWknJ3ZNhBb",
+          "name": "Phone",
+          "category": null,
+          "iconName": null,
+          "merchantId": "9c4BQwM0XbNJY6uF0ofQFKgiRBi2",
+          "price": 300,
+          "quantity": 20,
+          "createdAt": "2026-02-05T02:58:23.449Z"
+        },
+        {
+          "productId": "NTk42K4rDT8jEhkzrQ8E",
+          "name": "Keyboard",
+          "category": "Tech",
+          "iconName": "keyboard",
+          "merchantId": "9c4BQwM0XbNJY6uF0ofQFKgiRBi2",
+          "price": 85,
+          "quantity": 19,
+          "createdAt": "2026-02-06T07:01:17.954Z"
+        },
+        {
+          "productId": "O6aC7Z6R0Xf0aLv7RBpl",
+          "name": "Monitor",
+          "category": "Tech",
+          "iconName": "monitor",
+          "merchantId": "9c4BQwM0XbNJY6uF0ofQFKgiRBi2",
+          "price": 350,
+          "quantity": 50,
+          "createdAt": "2026-02-07T06:51:39.074Z"
+        },
+        {
+          "productId": "P6cFgYlYasmQFnVXHlQ5",
+          "name": "Floor Lamp",
+          "category": "Home",
+          "iconName": "floor-lamp",
+          "merchantId": "9c4BQwM0XbNJY6uF0ofQFKgiRBi2",
+          "price": 145,
+          "quantity": 91,
+          "createdAt": "2026-02-13T05:20:57.940Z"
+        },
+        {
+          "productId": "QneIfFj3FEfU3Cq18s7Q",
+          "name": "Microwave Oven",
+          "category": "Home",
+          "iconName": "toaster-oven",
+          "merchantId": "9c4BQwM0XbNJY6uF0ofQFKgiRBi2",
+          "price": 110,
+          "quantity": 25,
+          "createdAt": "2026-02-11T14:57:51.027Z"
+        },
+        {
+          "productId": "WKQsqM2lzvUGdY4eadYK",
+          "name": "Portable Tire Inflator",
+          "category": "Automotive",
+          "iconName": "car-tire-alert",
+          "merchantId": "9c4BQwM0XbNJY6uF0ofQFKgiRBi2",
+          "price": 95,
+          "quantity": 31,
+          "createdAt": "2026-02-13T05:20:58.332Z"
+        },
+        {
+          "productId": "ftW9utbNX9f2TrcVjBGk",
+          "name": "Pet Grooming Brush",
+          "category": "Pet Supplies",
+          "iconName": "brush",
+          "merchantId": "9c4BQwM0XbNJY6uF0ofQFKgiRBi2",
+          "price": 10,
+          "quantity": 10,
+          "createdAt": "2026-02-13T05:20:58.116Z"
+        },
+        {
+          "productId": "lvJoDeOnQcEyuHRcVaSe",
+          "name": "Car Vacuum Cleaner",
+          "category": "Automotive",
+          "iconName": "car-wash",
+          "merchantId": "9c4BQwM0XbNJY6uF0ofQFKgiRBi2",
+          "price": 55,
+          "quantity": 52,
+          "createdAt": "2026-02-13T05:20:56.891Z"
+        },
+        {
+          "productId": "n2Ftydrr92rUNpuzA0aB",
+          "name": "Cotton T-Shirt",
+          "category": "Fashion",
+          "iconName": "tshirt-crew",
+          "merchantId": "9c4BQwM0XbNJY6uF0ofQFKgiRBi2",
+          "price": 30,
+          "quantity": 87,
+          "createdAt": "2026-02-13T05:20:57.897Z"
+        },
+        {
+          "productId": "n9H13lFf0UpHD571gbPw",
+          "name": "Pet water fountain",
+          "category": "Pets",
+          "iconName": "watering-can-outline",
+          "merchantId": "9c4BQwM0XbNJY6uF0ofQFKgiRBi2",
+          "price": 50,
+          "quantity": 20,
+          "createdAt": "2026-02-06T07:27:20.951Z"
+        },
+        {
+          "productId": "okF5sTdTAhoHS13PusYd",
+          "name": "Cat toy",
+          "category": "Pets",
+          "iconName": "cat",
+          "merchantId": "9c4BQwM0XbNJY6uF0ofQFKgiRBi2",
+          "price": 30,
+          "quantity": 110,
+          "createdAt": "2026-02-06T07:21:06.217Z"
+        },
+        {
+          "productId": "rNzBtD6FO99cRlF3R8lA",
+          "name": "Premium Olive Oil",
+          "category": "Grocery",
+          "iconName": "bottle-tonic",
+          "merchantId": "9c4BQwM0XbNJY6uF0ofQFKgiRBi2",
+          "price": 25,
+          "quantity": 23,
+          "createdAt": "2026-02-13T05:20:58.627Z"
+        },
+        {
+          "productId": "xrhBozmGmsJkkKlZ3SCS",
+          "name": "OLED TV",
+          "category": "Home",
+          "iconName": "television-classic",
+          "merchantId": "9c4BQwM0XbNJY6uF0ofQFKgiRBi2",
+          "price": 500,
+          "quantity": 72,
+          "createdAt": "2026-02-07T07:00:28.077Z"
+        }
+      ]
+    },
+    {
+      "storeId": "WpIU9Gqmuml9k9OF3CzE",
+      "name": "OneStop Everyday",
+      "merchantId": "S05wJhaNWoVm96gFpyyxqk90kK53",
+      "merchantDisplayName": "merchant1",
+      "existingStoreCategory": null,
+      "proposedStoreCategory": "Other",
+      "createdAt": "2026-02-13T06:14:01.276Z",
+      "productCount": 0,
+      "products": []
+    },
+    {
+      "storeId": "YORSwQUacTQ4hdXkEwvI",
+      "name": "BuildRight Supplies",
+      "merchantId": "4VTmwsr8EFZXxfunqfu6MIjQ1AE3",
+      "merchantDisplayName": "hardwaremarks",
+      "existingStoreCategory": null,
+      "proposedStoreCategory": "Electronics",
+      "createdAt": "2026-02-13T06:14:00.314Z",
+      "productCount": 10,
+      "products": [
+        {
+          "productId": "3WIf8STA1T0ZCcPEDO43",
+          "name": "BoltMaster Wrench Pack",
+          "category": "Hardware",
+          "iconName": "tape-measure",
+          "merchantId": "4VTmwsr8EFZXxfunqfu6MIjQ1AE3",
+          "price": 142.73,
+          "quantity": 26,
+          "createdAt": "2026-02-13T07:14:15.467Z"
+        },
+        {
+          "productId": "AKmWF28i0Bulg8sVDTIn",
+          "name": "Adjustable Wrench",
+          "category": "Hardware",
+          "iconName": "wrench",
+          "merchantId": "4VTmwsr8EFZXxfunqfu6MIjQ1AE3",
+          "price": 25,
+          "quantity": 42,
+          "createdAt": "2026-02-13T06:14:03.027Z"
+        },
+        {
+          "productId": "BqvRIOYsEwy5vVArtlx4",
+          "name": "Screwdriver Set",
+          "category": "Hardware",
+          "iconName": "screwdriver",
+          "merchantId": "4VTmwsr8EFZXxfunqfu6MIjQ1AE3",
+          "price": 40,
+          "quantity": 56,
+          "createdAt": "2026-02-13T06:14:03.120Z"
+        },
+        {
+          "productId": "L88Zm7YGz7keXA0z1fVE",
+          "name": "Cordless Drill",
+          "category": "Hardware",
+          "iconName": "needle",
+          "merchantId": "4VTmwsr8EFZXxfunqfu6MIjQ1AE3",
+          "price": 95,
+          "quantity": 98,
+          "createdAt": "2026-02-13T06:14:02.932Z"
+        },
+        {
+          "productId": "Q9sbIBgaHbkuobl5Pbvj",
+          "name": "Claw Hammer",
+          "category": "Hardware",
+          "iconName": "hammer",
+          "merchantId": "4VTmwsr8EFZXxfunqfu6MIjQ1AE3",
+          "price": 30,
+          "quantity": 53,
+          "createdAt": "2026-02-13T06:14:02.979Z"
+        },
+        {
+          "productId": "RLCG7YBNUxAviGiOWY4A",
+          "name": "Titan Utility Knife",
+          "category": "Hardware",
+          "iconName": "tape-measure",
+          "merchantId": "4VTmwsr8EFZXxfunqfu6MIjQ1AE3",
+          "price": 127.54,
+          "quantity": 15,
+          "createdAt": "2026-02-13T07:14:15.992Z"
+        },
+        {
+          "productId": "hc6zlvzYXMczmlR6Ov3z",
+          "name": "Carbide Bit Assortment",
+          "category": "Hardware",
+          "iconName": "tape-measure",
+          "merchantId": "4VTmwsr8EFZXxfunqfu6MIjQ1AE3",
+          "price": 155.47,
+          "quantity": 21,
+          "createdAt": "2026-02-13T07:14:16.550Z"
+        },
+        {
+          "productId": "oygXKqEIr2igF4CearLi",
+          "name": "Safety Gloves",
+          "category": "Hardware",
+          "iconName": "gloves",
+          "merchantId": "4VTmwsr8EFZXxfunqfu6MIjQ1AE3",
+          "price": 15,
+          "quantity": 57,
+          "createdAt": "2026-02-13T06:14:03.227Z"
+        },
+        {
+          "productId": "tIbUWESHy5cr8bXkb7YV",
+          "name": "Tape Measure 8m",
+          "category": "Hardware",
+          "iconName": "tape-measure",
+          "merchantId": "4VTmwsr8EFZXxfunqfu6MIjQ1AE3",
+          "price": 20,
+          "quantity": 92,
+          "createdAt": "2026-02-13T06:14:03.073Z"
+        },
+        {
+          "productId": "zt0wzz17LYq8EFmbtp5R",
+          "name": "Toolbox Organizer",
+          "category": "Hardware",
+          "iconName": "toolbox",
+          "merchantId": "4VTmwsr8EFZXxfunqfu6MIjQ1AE3",
+          "price": 60,
+          "quantity": 64,
+          "createdAt": "2026-02-13T06:14:03.274Z"
+        }
+      ]
+    },
+    {
+      "storeId": "YoBJxl20t2DjlzXg0Gk2",
+      "name": "BlazeTech Devices",
+      "merchantId": "lY8XujNInWgReBN2SHacRImNp2o1",
+      "merchantDisplayName": "BlazeTech",
+      "existingStoreCategory": null,
+      "proposedStoreCategory": "Electronics",
+      "createdAt": "2026-02-13T06:14:01.417Z",
+      "productCount": 4,
+      "products": [
+        {
+          "productId": "3UqrJTvk5yw3YVPy3kqC",
+          "name": "BlazeCore USB-C Hub",
+          "category": "Tech",
+          "iconName": "mouse",
+          "merchantId": "lY8XujNInWgReBN2SHacRImNp2o1",
+          "price": 108.82,
+          "quantity": 59,
+          "createdAt": "2026-02-13T07:14:15.124Z"
+        },
+        {
+          "productId": "5hJl9oE8bOw3WhbKYCWS",
+          "name": "BlazeCore Display Dock",
+          "category": "Electronics",
+          "iconName": "headphones",
+          "merchantId": "lY8XujNInWgReBN2SHacRImNp2o1",
+          "price": 97.92,
+          "quantity": 72,
+          "createdAt": "2026-02-13T07:14:16.947Z"
+        },
+        {
+          "productId": "TT1UCPVyBFqNtUwyvymx",
+          "name": "BlazeCore Wireless Earbuds",
+          "category": "Electronics",
+          "iconName": "mouse",
+          "merchantId": "lY8XujNInWgReBN2SHacRImNp2o1",
+          "price": 110.82,
+          "quantity": 59,
+          "createdAt": "2026-02-13T07:14:14.490Z"
+        },
+        {
+          "productId": "o9dmO1P5ITja0mSIpM5t",
+          "name": "BlazeCore Bluetooth Speaker",
+          "category": "Electronics",
+          "iconName": "keyboard",
+          "merchantId": "lY8XujNInWgReBN2SHacRImNp2o1",
+          "price": 113.96,
+          "quantity": 76,
+          "createdAt": "2026-02-13T07:14:15.898Z"
+        }
+      ]
+    },
+    {
+      "storeId": "gWuadW7ekqeuzGPG0vqv",
+      "name": "BlazeTech Accessories",
+      "merchantId": "lY8XujNInWgReBN2SHacRImNp2o1",
+      "merchantDisplayName": "BlazeTech",
+      "existingStoreCategory": null,
+      "proposedStoreCategory": "Electronics",
+      "createdAt": "2026-02-13T06:14:01.464Z",
+      "productCount": 4,
+      "products": [
+        {
+          "productId": "6rInzT76QvuKBV6PbfR8",
+          "name": "BlazeCore Mechanical Keyboard",
+          "category": "Electronics",
+          "iconName": "headphones",
+          "merchantId": "lY8XujNInWgReBN2SHacRImNp2o1",
+          "price": 192.45,
+          "quantity": 39,
+          "createdAt": "2026-02-13T07:14:14.661Z"
+        },
+        {
+          "productId": "Ag2sKwv7tf9e0KrkPxkl",
+          "name": "BlazeCore Webcam Pro",
+          "category": "Electronics",
+          "iconName": "laptop",
+          "merchantId": "lY8XujNInWgReBN2SHacRImNp2o1",
+          "price": 57.29,
+          "quantity": 30,
+          "createdAt": "2026-02-13T07:14:16.036Z"
+        },
+        {
+          "productId": "BN6CXa5ONK1xumtztvWF",
+          "name": "BlazeCore Portable SSD",
+          "category": "Electronics",
+          "iconName": "mouse",
+          "merchantId": "lY8XujNInWgReBN2SHacRImNp2o1",
+          "price": 115.26,
+          "quantity": 73,
+          "createdAt": "2026-02-13T07:14:15.374Z"
+        },
+        {
+          "productId": "wo2HuZCdMNclNik79RYH",
+          "name": "BlazeCore Gaming Mouse",
+          "category": "Electronics",
+          "iconName": "keyboard",
+          "merchantId": "lY8XujNInWgReBN2SHacRImNp2o1",
+          "price": 182.12,
+          "quantity": 76,
+          "createdAt": "2026-02-13T07:14:14.613Z"
+        }
+      ]
+    },
+    {
+      "storeId": "gjFHEuIMzhnApEI5x4iR",
+      "name": "Tail & Whisker Shop",
+      "merchantId": "4pNvSXJUeKgK594mJP2GisFcwYH3",
+      "merchantDisplayName": "pawspets",
+      "existingStoreCategory": null,
+      "proposedStoreCategory": "Pets",
+      "createdAt": "2026-02-13T06:14:00.757Z",
+      "productCount": 4,
+      "products": [
+        {
+          "productId": "DNfoNgTySKgS9O92Z0uH",
+          "name": "PawCare Feeding Bowl",
+          "category": "Pet Supplies",
+          "iconName": "paw",
+          "merchantId": "4pNvSXJUeKgK594mJP2GisFcwYH3",
+          "price": 36.2,
+          "quantity": 13,
+          "createdAt": "2026-02-13T07:14:14.392Z"
+        },
+        {
+          "productId": "FvnumRzD8GwPe1ypg2UO",
+          "name": "FurFresh Grooming Brush",
+          "category": "Pet Supplies",
+          "iconName": "bone",
+          "merchantId": "4pNvSXJUeKgK594mJP2GisFcwYH3",
+          "price": 83.52,
+          "quantity": 27,
+          "createdAt": "2026-02-13T07:14:16.184Z"
+        },
+        {
+          "productId": "IwgBbkv4Ie4RMkCNQr65",
+          "name": "CozyPaw Blanket",
+          "category": "Pet Supplies",
+          "iconName": "cat",
+          "merchantId": "4pNvSXJUeKgK594mJP2GisFcwYH3",
+          "price": 116.54,
+          "quantity": 32,
+          "createdAt": "2026-02-13T07:14:16.771Z"
+        },
+        {
+          "productId": "SRY1wOHmdQ0JHlAT35HB",
+          "name": "PetShield Travel Carrier",
+          "category": "Pet Supplies",
+          "iconName": "dog-side",
+          "merchantId": "4pNvSXJUeKgK594mJP2GisFcwYH3",
+          "price": 35.25,
+          "quantity": 14,
+          "createdAt": "2026-02-13T07:14:15.650Z"
+        }
+      ]
+    },
+    {
+      "storeId": "iFScbop2dDxk8TGWJNwb",
+      "name": "Merch Test Mart",
+      "merchantId": "9c4BQwM0XbNJY6uF0ofQFKgiRBi2",
+      "merchantDisplayName": "merchtest",
+      "existingStoreCategory": null,
+      "proposedStoreCategory": "Groceries",
+      "createdAt": "2026-02-13T06:14:00.995Z",
+      "productCount": 0,
+      "products": []
+    },
+    {
+      "storeId": "j6hM7jFr3mxYDwj7SvZU",
+      "name": "Glow & Care Beauty",
+      "merchantId": "p3dkAJxQTtZd42qu6lzWdS0zGji2",
+      "merchantDisplayName": "fairbeautyproducts",
+      "existingStoreCategory": null,
+      "proposedStoreCategory": "Beauty",
+      "createdAt": "2026-02-13T06:14:01.737Z",
+      "productCount": 3,
+      "products": [
+        {
+          "productId": "3uhVcWwAYjPFZbztWK6t",
+          "name": "FairGlow Lip Balm Duo",
+          "category": "Beauty",
+          "iconName": "lotion",
+          "merchantId": "p3dkAJxQTtZd42qu6lzWdS0zGji2",
+          "price": 42.29,
+          "quantity": 61,
+          "createdAt": "2026-02-13T07:14:15.033Z"
+        },
+        {
+          "productId": "IRjtJ6s0dnPyCbLRdEMI",
+          "name": "FairGlow Cleanser Foam",
+          "category": "Beauty",
+          "iconName": "bottle-tonic-plus",
+          "merchantId": "p3dkAJxQTtZd42qu6lzWdS0zGji2",
+          "price": 75.89,
+          "quantity": 66,
+          "createdAt": "2026-02-13T07:14:15.562Z"
+        },
+        {
+          "productId": "kA9dZX2ZdPFGAWd0HEQM",
+          "name": "FairGlow Vitamin Serum",
+          "category": "Beauty",
+          "iconName": "bottle-tonic-plus",
+          "merchantId": "p3dkAJxQTtZd42qu6lzWdS0zGji2",
+          "price": 66.89,
+          "quantity": 81,
+          "createdAt": "2026-02-13T07:14:14.896Z"
+        }
+      ]
+    },
+    {
+      "storeId": "jvieLbVOQy3YNrQQJjR9",
+      "name": "Paws Pet Essentials",
+      "merchantId": "4pNvSXJUeKgK594mJP2GisFcwYH3",
+      "merchantDisplayName": "pawspets",
+      "existingStoreCategory": null,
+      "proposedStoreCategory": "Pets",
+      "createdAt": "2026-02-13T06:14:00.703Z",
+      "productCount": 3,
+      "products": [
+        {
+          "productId": "CxhRoda8jK3g5Uom06d0",
+          "name": "CalmPet Shampoo",
+          "category": "Pet Supplies",
+          "iconName": "cat",
+          "merchantId": "4pNvSXJUeKgK594mJP2GisFcwYH3",
+          "price": 61.38,
+          "quantity": 48,
+          "createdAt": "2026-02-13T07:14:16.507Z"
+        },
+        {
+          "productId": "KYVnIqJ2zlMOKOwn5PbO",
+          "name": "TailTrail Dog Leash",
+          "category": "Pet Supplies",
+          "iconName": "paw",
+          "merchantId": "4pNvSXJUeKgK594mJP2GisFcwYH3",
+          "price": 48.93,
+          "quantity": 55,
+          "createdAt": "2026-02-13T07:14:14.563Z"
+        },
+        {
+          "productId": "bh8R6HW2nB3zm3cgEhib",
+          "name": "HappyPaws Chew Toy",
+          "category": "Pet Supplies",
+          "iconName": "bowl",
+          "merchantId": "4pNvSXJUeKgK594mJP2GisFcwYH3",
+          "price": 85.49,
+          "quantity": 45,
+          "createdAt": "2026-02-13T07:14:15.696Z"
+        }
+      ]
+    },
+    {
+      "storeId": "knQMB8htVdZtNNrFULbq",
+      "name": "TwoTown Market",
+      "merchantId": "pRvgCX2Uv6UIzK3UDc52nDbifSS2",
+      "merchantDisplayName": "merchant2",
+      "existingStoreCategory": null,
+      "proposedStoreCategory": "Other",
+      "createdAt": "2026-02-13T06:14:01.922Z",
+      "productCount": 0,
+      "products": []
+    },
+    {
+      "storeId": "kpONrFN2lIv0TxCIrGB3",
+      "name": "Fair Beauty Studio",
+      "merchantId": "p3dkAJxQTtZd42qu6lzWdS0zGji2",
+      "merchantDisplayName": "fairbeautyproducts",
+      "existingStoreCategory": null,
+      "proposedStoreCategory": "Beauty",
+      "createdAt": "2026-02-13T06:14:01.690Z",
+      "productCount": 3,
+      "products": [
+        {
+          "productId": "6VKJKyCLTuQmtkOD1mXL",
+          "name": "FairGlow Toner Mist",
+          "category": "Beauty",
+          "iconName": "bottle-tonic-plus",
+          "merchantId": "p3dkAJxQTtZd42qu6lzWdS0zGji2",
+          "price": 93.54,
+          "quantity": 34,
+          "createdAt": "2026-02-13T07:14:15.947Z"
+        },
+        {
+          "productId": "APo96ZRztECFzZf7aCrf",
+          "name": "FairGlow Body Lotion",
+          "category": "Beauty",
+          "iconName": "bottle-tonic-plus",
+          "merchantId": "p3dkAJxQTtZd42qu6lzWdS0zGji2",
+          "price": 47.27,
+          "quantity": 82,
+          "createdAt": "2026-02-13T07:14:14.940Z"
+        },
+        {
+          "productId": "gMLkvYL16YA0QfEAce3o",
+          "name": "FairGlow Hair Repair Mask",
+          "category": "Beauty",
+          "iconName": "bottle-tonic-plus",
+          "merchantId": "p3dkAJxQTtZd42qu6lzWdS0zGji2",
+          "price": 71.74,
+          "quantity": 21,
+          "createdAt": "2026-02-13T07:14:15.175Z"
+        }
+      ]
+    },
+    {
+      "storeId": "qeiySmR5F4TdSq6JncPz",
+      "name": "Merch Test Central",
+      "merchantId": "9c4BQwM0XbNJY6uF0ofQFKgiRBi2",
+      "merchantDisplayName": "merchtest",
+      "existingStoreCategory": null,
+      "proposedStoreCategory": "Other",
+      "createdAt": "2026-02-13T06:14:00.946Z",
+      "productCount": 0,
+      "products": []
+    },
+    {
+      "storeId": "tR8esaO7NhaFUtFDpbgm",
+      "name": "New store",
+      "merchantId": "9c4BQwM0XbNJY6uF0ofQFKgiRBi2",
+      "merchantDisplayName": "merchtest",
+      "existingStoreCategory": null,
+      "proposedStoreCategory": "Fashion",
+      "createdAt": "2026-02-10T01:21:03.462Z",
+      "productCount": 3,
+      "products": [
+        {
+          "productId": "W2Xykt6p7sSq7xMeHvD8",
+          "name": "Desk Organizer",
+          "category": "Office",
+          "iconName": "desk",
+          "merchantId": "9c4BQwM0XbNJY6uF0ofQFKgiRBi2",
+          "price": 15,
+          "quantity": 98,
+          "createdAt": "2026-02-13T05:20:57.282Z"
+        },
+        {
+          "productId": "bMvhC7bUY4MgLR6wmSr9",
+          "name": "Travel Backpack",
+          "category": "Fashion",
+          "iconName": "bag-personal",
+          "merchantId": "9c4BQwM0XbNJY6uF0ofQFKgiRBi2",
+          "price": 45,
+          "quantity": 76,
+          "createdAt": "2026-02-13T05:20:58.809Z"
+        },
+        {
+          "productId": "tjR00fmDPXDY30j0m7QL",
+          "name": "Classic Hoodie",
+          "category": "Fashion",
+          "iconName": "hanger",
+          "merchantId": "9c4BQwM0XbNJY6uF0ofQFKgiRBi2",
+          "price": 75,
+          "quantity": 10,
+          "createdAt": "2026-02-13T05:20:57.070Z"
+        }
+      ]
+    },
+    {
+      "storeId": "wrZSXzTop2wDKPNQ5g5b",
+      "name": "BlazeTech Smart Gear",
+      "merchantId": "lY8XujNInWgReBN2SHacRImNp2o1",
+      "merchantDisplayName": "BlazeTech",
+      "existingStoreCategory": null,
+      "proposedStoreCategory": "Electronics",
+      "createdAt": "2026-02-13T06:14:01.512Z",
+      "productCount": 9,
+      "products": [
+        {
+          "productId": "AWt7vlQcGmaIlFdWK0fO",
+          "name": "Smartwatch",
+          "category": "Electronics",
+          "iconName": "watch-variant",
+          "merchantId": "lY8XujNInWgReBN2SHacRImNp2o1",
+          "price": 120,
+          "quantity": 80,
+          "createdAt": "2026-02-13T06:14:07.038Z"
+        },
+        {
+          "productId": "DVhJpsOKcixr0BSLvcIL",
+          "name": "Mechanical Keyboard",
+          "category": "Electronics",
+          "iconName": "keyboard",
+          "merchantId": "lY8XujNInWgReBN2SHacRImNp2o1",
+          "price": 90,
+          "quantity": 59,
+          "createdAt": "2026-02-13T06:14:06.897Z"
+        },
+        {
+          "productId": "E2hnDgxHVpkjSH0DYH0s",
+          "name": "Wireless Earbuds",
+          "category": "Electronics",
+          "iconName": "earbuds",
+          "merchantId": "lY8XujNInWgReBN2SHacRImNp2o1",
+          "price": 85,
+          "quantity": 46,
+          "createdAt": "2026-02-13T06:14:06.740Z"
+        },
+        {
+          "productId": "IKl7cUsxrgR6yIwV0CZT",
+          "name": "Gaming Mouse",
+          "category": "Electronics",
+          "iconName": "mouse",
+          "merchantId": "lY8XujNInWgReBN2SHacRImNp2o1",
+          "price": 45,
+          "quantity": 53,
+          "createdAt": "2026-02-13T06:14:06.787Z"
+        },
+        {
+          "productId": "RPGvIU7tgcSNeYgEy7L1",
+          "name": "Bluetooth Speaker",
+          "category": "Electronics",
+          "iconName": "speaker-wireless",
+          "merchantId": "lY8XujNInWgReBN2SHacRImNp2o1",
+          "price": 80,
+          "quantity": 15,
+          "createdAt": "2026-02-13T06:14:06.991Z"
+        },
+        {
+          "productId": "a5si7uwLah6JiZHgbPTe",
+          "name": "BlazeCore Power Adapter",
+          "category": "Electronics",
+          "iconName": "keyboard",
+          "merchantId": "lY8XujNInWgReBN2SHacRImNp2o1",
+          "price": 169.7,
+          "quantity": 33,
+          "createdAt": "2026-02-13T07:14:16.329Z"
+        },
+        {
+          "productId": "kRJICNAEEGzG43LgyiwS",
+          "name": "USB-C Hub",
+          "category": "Electronics",
+          "iconName": "hubspot",
+          "merchantId": "lY8XujNInWgReBN2SHacRImNp2o1",
+          "price": 55,
+          "quantity": 43,
+          "createdAt": "2026-02-13T06:14:06.943Z"
+        },
+        {
+          "productId": "ojtn1jf0GmIVNwnEIoMK",
+          "name": "Portable SSD",
+          "category": "Electronics",
+          "iconName": "harddisk",
+          "merchantId": "lY8XujNInWgReBN2SHacRImNp2o1",
+          "price": 130,
+          "quantity": 87,
+          "createdAt": "2026-02-13T06:14:07.093Z"
+        },
+        {
+          "productId": "wYOREx8Ou2GVPF3RF1vx",
+          "name": "BlazeCore Smartwatch",
+          "category": "Electronics",
+          "iconName": "headphones",
+          "merchantId": "lY8XujNInWgReBN2SHacRImNp2o1",
+          "price": 211.07,
+          "quantity": 51,
+          "createdAt": "2026-02-13T07:14:15.418Z"
+        }
+      ]
+    },
+    {
+      "storeId": "zEOe36JQbPERTXWxxGH5",
+      "name": "Happy Paws Care",
+      "merchantId": "4pNvSXJUeKgK594mJP2GisFcwYH3",
+      "merchantDisplayName": "pawspets",
+      "existingStoreCategory": null,
+      "proposedStoreCategory": "Pets",
+      "createdAt": "2026-02-13T06:14:00.805Z",
+      "productCount": 10,
+      "products": [
+        {
+          "productId": "2KaxYHdaeTzbJ1HWPEXV",
+          "name": "Chew Toy",
+          "category": "Pet Supplies",
+          "iconName": "toy-brick",
+          "merchantId": "4pNvSXJUeKgK594mJP2GisFcwYH3",
+          "price": 15,
+          "quantity": 98,
+          "createdAt": "2026-02-13T06:14:05.745Z"
+        },
+        {
+          "productId": "2nPkgOVtmzuw9TeCYZ0k",
+          "name": "Dog Leash",
+          "category": "Pet Supplies",
+          "iconName": "dog-side",
+          "merchantId": "4pNvSXJUeKgK594mJP2GisFcwYH3",
+          "price": 20,
+          "quantity": 37,
+          "createdAt": "2026-02-13T06:14:05.555Z"
+        },
+        {
+          "productId": "6whQMygF7z6v6X6LsVxC",
+          "name": "Pet Carrier",
+          "category": "Pet Supplies",
+          "iconName": "bag-suitcase",
+          "merchantId": "4pNvSXJUeKgK594mJP2GisFcwYH3",
+          "price": 70,
+          "quantity": 72,
+          "createdAt": "2026-02-13T06:14:05.848Z"
+        },
+        {
+          "productId": "CzHjKIdvYa71iQWZqIeU",
+          "name": "SoftNap Pet Bed",
+          "category": "Pet Supplies",
+          "iconName": "bowl",
+          "merchantId": "4pNvSXJUeKgK594mJP2GisFcwYH3",
+          "price": 34.41,
+          "quantity": 67,
+          "createdAt": "2026-02-13T07:14:15.790Z"
+        },
+        {
+          "productId": "E2ylRrX7t0CQySCiigk8",
+          "name": "Pet Shampoo",
+          "category": "Pet Supplies",
+          "iconName": "shower",
+          "merchantId": "4pNvSXJUeKgK594mJP2GisFcwYH3",
+          "price": 20,
+          "quantity": 85,
+          "createdAt": "2026-02-13T06:14:05.650Z"
+        },
+        {
+          "productId": "EcWCAEtNfXPyAMFR9nlK",
+          "name": "Whisker Scratcher Pad",
+          "category": "Pet Supplies",
+          "iconName": "bone",
+          "merchantId": "4pNvSXJUeKgK594mJP2GisFcwYH3",
+          "price": 76.11,
+          "quantity": 92,
+          "createdAt": "2026-02-13T07:14:14.850Z"
+        },
+        {
+          "productId": "TjBXheI1djp8inq8go2V",
+          "name": "BarkSafe Harness",
+          "category": "Pet Supplies",
+          "iconName": "bowl",
+          "merchantId": "4pNvSXJUeKgK594mJP2GisFcwYH3",
+          "price": 91.45,
+          "quantity": 90,
+          "createdAt": "2026-02-13T07:14:16.639Z"
+        },
+        {
+          "productId": "UkJcqFNWh9UzoonD5Uiz",
+          "name": "Pet Bed",
+          "category": "Pet Supplies",
+          "iconName": "bed",
+          "merchantId": "4pNvSXJUeKgK594mJP2GisFcwYH3",
+          "price": 60,
+          "quantity": 28,
+          "createdAt": "2026-02-13T06:14:05.697Z"
+        },
+        {
+          "productId": "kzmqPTRmXBRVdLuhd004",
+          "name": "Cat Scratcher",
+          "category": "Pet Supplies",
+          "iconName": "cat",
+          "merchantId": "4pNvSXJUeKgK594mJP2GisFcwYH3",
+          "price": 35,
+          "quantity": 86,
+          "createdAt": "2026-02-13T06:14:05.602Z"
+        },
+        {
+          "productId": "uNxdbfLvR8nUwfbHobwQ",
+          "name": "Pet Bowl Set",
+          "category": "Pet Supplies",
+          "iconName": "bowl",
+          "merchantId": "4pNvSXJUeKgK594mJP2GisFcwYH3",
+          "price": 25,
+          "quantity": 26,
+          "createdAt": "2026-02-13T06:14:05.509Z"
+        }
+      ]
+    }
+  ]
+}

@@ -13,7 +13,18 @@
     "dev:seed-dummy-products": "node ./scripts/seed-dummy-products.cjs",
     "dev:normalize-product-prices": "node ./scripts/normalize-product-prices.cjs",
     "dev:strip-product-name-numbers": "node ./scripts/remove-numbers-from-product-names.cjs",
-    "dev:seed-stores-products-by-merchant": "node ./scripts/seed-stores-and-products-by-merchant.cjs"
+    "dev:seed-stores-products-by-merchant": "node ./scripts/seed-stores-and-products-by-merchant.cjs",
+    "dev:dedupe-products-by-name": "node ./scripts/delete-duplicate-products-by-name.cjs",
+    "dev:dedupe-products-by-name:apply": "node ./scripts/delete-duplicate-products-by-name.cjs --apply",
+    "dev:seed-50-unique-products-target-merchants": "node ./scripts/seed-50-unique-products-target-merchants.cjs",
+    "dev:export-store-product-category-template": "node ./scripts/export-store-product-category-template.cjs",
+    "dev:export-all-products-json": "node ./scripts/export-all-products-to-json.cjs",
+    "dev:sync-store-product-categories": "node ./scripts/apply-store-product-categories-from-template.cjs",
+    "dev:sync-store-product-categories:apply": "node ./scripts/apply-store-product-categories-from-template.cjs --apply",
+    "dev:round-product-prices-whole": "node ./scripts/round-product-prices-to-whole.cjs",
+    "dev:round-product-prices-whole:apply": "node ./scripts/round-product-prices-to-whole.cjs --apply",
+    "dev:import-product-categories": "node ./scripts/import-product-categories-from-json.cjs",
+    "dev:import-product-categories:apply": "node ./scripts/import-product-categories-from-json.cjs --apply"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",

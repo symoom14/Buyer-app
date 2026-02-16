@@ -19,6 +19,7 @@ import {
 } from "react-native";
 import AppIcon from "../../../src/components/AppIcon";
 import { db } from "../../../src/firebase/firebaseConfig";
+import { getUserDisplayName } from "../../../src/utils/userDisplayName";
 
 const DEFAULT_PRODUCT_ICON = "package-variant-closed";
 const ICON_COLOR_POOL = [
@@ -66,7 +67,10 @@ export default function CustomerStorePage() {
       if (storeData?.merchantId) {
         const sellerSnapshot = await getDoc(doc(db, "users", storeData.merchantId));
         if (sellerSnapshot.exists()) {
-          sellerName = sellerSnapshot.data()?.username || "Unknown Seller";
+          sellerName = getUserDisplayName(
+            sellerSnapshot.data(),
+            "Unknown Seller",
+          );
         }
       }
 

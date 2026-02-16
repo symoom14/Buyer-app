@@ -57,9 +57,9 @@ export default function MerchantDashboard() {
               textColor: "#6B4A00",
             },
             {
-              title: "View all products",
+              title: "Product management",
               onPress: () => router.push("/merchant/stores/products"),
-              icon: "format-list-bulleted",
+              icon: "archive-cog",
               iconVariant: "community",
               backgroundColor: "#E8F7EC",
               iconColor: "#1E8E3E",
@@ -72,7 +72,7 @@ export default function MerchantDashboard() {
           title="Orders"
           tiles={[
             {
-              title: "Orders",
+              title: "View orders",
               onPress: () => router.push("/merchant/orders"),
               icon: "receipt-text",
               iconVariant: "community",
