@@ -2,10 +2,12 @@ import { Ionicons } from "@expo/vector-icons";
 import { Stack, usePathname, useRouter } from "expo-router";
 import { Pressable, View } from "react-native";
 import FloatingCartButton from "../../src/components/FloatingCartButton";
+import { useAppTheme } from "../../src/theme/useAppTheme";
 
 export default function CustomerLayout() {
   const router = useRouter();
   const pathname = usePathname();
+  const { colors } = useAppTheme();
 
   const hideCartButton =
     pathname.includes("/customer/home") ||
@@ -20,9 +22,9 @@ export default function CustomerLayout() {
       <Stack
         screenOptions={{
           headerStyle: {
-            backgroundColor: "#ffae00",
+            backgroundColor: colors.customerHeaderBg,
           },
-          headerTintColor: "#000",
+          headerTintColor: colors.customerHeaderText,
           headerTitleStyle: {
             fontWeight: "600",
           },
@@ -35,13 +37,21 @@ export default function CustomerLayout() {
             title: "Home",
             headerRight: () => (
               <Pressable onPress={() => router.push("/customer/profile")}>
-                <Ionicons name="person-outline" size={22} color="#000" />
+                <Ionicons
+                  name="person-outline"
+                  size={22}
+                  color={colors.customerHeaderText}
+                />
               </Pressable>
             ),
           }}
         />
 
         <Stack.Screen name="profile" options={{ title: "Profile" }} />
+        <Stack.Screen
+          name="notifications"
+          options={{ title: "Notifications" }}
+        />
         <Stack.Screen name="product" options={{ title: "Latest Products" }} />
         <Stack.Screen
           name="product/[productId]"
@@ -51,6 +61,10 @@ export default function CustomerLayout() {
         <Stack.Screen
           name="store/[storeId]"
           options={{ title: "Store Products" }}
+        />
+        <Stack.Screen
+          name="seller/[sellerId]"
+          options={{ title: "Seller Stores" }}
         />
         <Stack.Screen
           name="in-progress"

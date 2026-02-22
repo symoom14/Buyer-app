@@ -1,5 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import { onAuthStateChanged } from "firebase/auth";
+import { collection, onSnapshot, query, where } from "firebase/firestore";
+import { useEffect, useState } from "react";
 import {
   ScrollView,
   StyleSheet,
@@ -9,14 +12,55 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import AppIcon from "../../src/components/AppIcon";
 import DashboardSection from "../../src/components/DashboardSection";
 import ScreenContainer from "../../src/components/ScreenContainer";
 import { useCart } from "../../src/context/CartContext";
+import { auth, db } from "../../src/firebase/firebaseConfig";
+import { useAppTheme } from "../../src/theme/useAppTheme";
 
 export default function CustomerHome() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { cart } = useCart();
+  const { colors } = useAppTheme();
+  const [hasUnreadNotifications, setHasUnreadNotifications] = useState(false);
+  const styles = createStyles(colors);
+
+  useEffect(() => {
+    let unsubscribeNotifications = () => {};
+
+    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+      unsubscribeNotifications();
+
+      if (!user?.uid) {
+        setHasUnreadNotifications(false);
+        return;
+      }
+
+      const unreadQuery = query(
+        collection(db, "notifications"),
+        where("recipientId", "==", user.uid),
+        where("read", "==", false),
+      );
+
+      unsubscribeNotifications = onSnapshot(
+        unreadQuery,
+        (snap) => {
+          const hasUnread = snap.docs.some(
+            (docSnap) => docSnap.data()?.recipientRole === "customer",
+          );
+          setHasUnreadNotifications(hasUnread);
+        },
+        () => setHasUnreadNotifications(false),
+      );
+    });
+
+    return () => {
+      unsubscribeNotifications();
+      unsubscribeAuth();
+    };
+  }, []);
 
   return (
     <ScreenContainer>
@@ -31,15 +75,31 @@ export default function CustomerHome() {
                 style={styles.actionBtn}
                 onPress={() => router.push("/customer/cart")}
               >
-                <Ionicons name="basket" size={30} color="#000" />
+                <Ionicons name="basket" size={30} color={colors.customerHeaderText} />
               </TouchableOpacity>
             ) : null}
 
             <TouchableOpacity
               style={styles.actionBtn}
+              onPress={() => router.push("/customer/notifications")}
+            >
+              <AppIcon
+                name={hasUnreadNotifications ? "bell-badge" : "bell"}
+                variant="community"
+                size={26}
+                color={colors.customerHeaderText}
+              />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.actionBtn}
               onPress={() => router.push("/customer/profile")}
             >
-              <Ionicons name="person-circle-outline" size={30} color="#000" />
+              <Ionicons
+                name="person-circle-outline"
+                size={30}
+                color={colors.customerHeaderText}
+              />
             </TouchableOpacity>
           </View>
         </View>
@@ -144,9 +204,10 @@ export default function CustomerHome() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors) =>
+  StyleSheet.create({
   hero: {
-    backgroundColor: "#ffae00",
+    backgroundColor: colors.customerHeaderBg,
     marginHorizontal: -16,
     marginTop: -16,
     paddingHorizontal: 16,
@@ -163,7 +224,7 @@ const styles = StyleSheet.create({
   heroTitle: {
     fontSize: 42,
     fontWeight: "800",
-    color: "#000",
+    color: colors.customerHeaderText,
   },
   headerActions: {
     flexDirection: "row",

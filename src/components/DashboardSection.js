@@ -6,6 +6,7 @@ import {
     View,
 } from "react-native";
 import AppIcon from "./AppIcon";
+import { useAppTheme } from "../theme/useAppTheme";
 
 export default function DashboardSection({
   title,
@@ -14,6 +15,9 @@ export default function DashboardSection({
   layout = "scroll",
   disabled = false,
 }) {
+  const { colors } = useAppTheme();
+  const styles = createStyles(colors);
+
   return (
     <View style={styles.section}>
       <View style={styles.header}>
@@ -36,7 +40,7 @@ export default function DashboardSection({
               tile.backgroundColor && { backgroundColor: tile.backgroundColor },
               tile.borderColor && { borderColor: tile.borderColor },
             ];
-            const iconColor = tile.iconColor || "#555";
+            const iconColor = tile.iconColor || colors.textMuted;
             const textStyle = [
               styles.tileText,
               tile.textColor && { color: tile.textColor },
@@ -48,6 +52,7 @@ export default function DashboardSection({
                 onPress={tile.onPress}
                 disabled={!tile.onPress}
               >
+                {tile.showDot ? <View style={styles.notificationDot} /> : null}
                 <AppIcon
                   name={tile.icon || "apps"}
                   variant={tile.iconVariant || "material"}
@@ -68,7 +73,7 @@ export default function DashboardSection({
             tile.backgroundColor && { backgroundColor: tile.backgroundColor },
             tile.borderColor && { borderColor: tile.borderColor },
           ];
-          const iconColor = tile.iconColor || "#555";
+          const iconColor = tile.iconColor || colors.textMuted;
           const textStyle = [
             styles.tileText,
             tile.textColor && { color: tile.textColor },
@@ -80,6 +85,7 @@ export default function DashboardSection({
               onPress={tile.onPress}
               disabled={!tile.onPress}
             >
+              {tile.showDot ? <View style={styles.notificationDot} /> : null}
               <AppIcon
                 name={tile.icon || "apps"}
                 variant={tile.iconVariant || "material"}
@@ -96,7 +102,8 @@ export default function DashboardSection({
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors) =>
+  StyleSheet.create({
   section: {
     marginBottom: 24,
   },
@@ -109,15 +116,16 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     fontWeight: "600",
+    color: colors.text,
   },
   showMore: {
     fontSize: 14,
-    color: "#007AFF",
+    color: colors.tint,
   },
   tile: {
     width: 160,
     height: 100,
-    backgroundColor: "#F2F2F7",
+    backgroundColor: colors.surface,
     borderRadius: 12,
     padding: 12,
     marginRight: 12,
@@ -136,5 +144,15 @@ const styles = StyleSheet.create({
     marginTop: 8,
     fontSize: 14,
     fontWeight: "500",
+    color: colors.text,
+  },
+  notificationDot: {
+    position: "absolute",
+    top: 10,
+    right: 10,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: colors.danger,
   },
 });

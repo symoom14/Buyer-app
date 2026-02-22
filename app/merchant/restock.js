@@ -11,14 +11,17 @@ import {
 } from "react-native";
 import AppIcon from "../../src/components/AppIcon";
 import { auth, db } from "../../src/firebase/firebaseConfig";
+import { useAppTheme } from "../../src/theme/useAppTheme";
 
 export default function MerchantRestock() {
+  const { colors } = useAppTheme();
   const [products, setProducts] = useState([]);
   const [storeMap, setStoreMap] = useState({});
   const [orderedCounts, setOrderedCounts] = useState({});
   const [searchQuery, setSearchQuery] = useState("");
   const [restockId, setRestockId] = useState(null);
   const [restockQty, setRestockQty] = useState({});
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   const fetchProducts = async (merchantId) => {
     const q = query(
@@ -103,6 +106,7 @@ export default function MerchantRestock() {
     <View style={styles.container}>
       <TextInput
         placeholder="Search by product or store"
+        placeholderTextColor={colors.textSubtle}
         value={searchQuery}
         onChangeText={setSearchQuery}
         style={styles.search}
@@ -158,7 +162,7 @@ export default function MerchantRestock() {
                         name="minus"
                         variant="community"
                         size={18}
-                        color="#BDBDBD"
+                        color={colors.textSubtle}
                       />
                     </View>
                     <View
@@ -169,7 +173,7 @@ export default function MerchantRestock() {
                         name="plus"
                         variant="community"
                         size={18}
-                        color="#2E7D32"
+                        color={colors.success}
                       />
                     </View>
                   </View>
@@ -181,7 +185,7 @@ export default function MerchantRestock() {
                       name="check-circle"
                       variant="community"
                       size={26}
-                      color="#2E7D32"
+                      color={colors.success}
                     />
                   </View>
                 </View>
@@ -194,7 +198,7 @@ export default function MerchantRestock() {
                     name="package-variant-plus"
                     variant="community"
                     size={26}
-                    color="#2E7D32"
+                    color={colors.success}
                   />
                 </View>
               )}
@@ -206,24 +210,26 @@ export default function MerchantRestock() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors) =>
+  StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: "#F2F2F7",
+    backgroundColor: colors.screen,
   },
   search: {
-    backgroundColor: "#E5E5EA",
+    backgroundColor: colors.input,
     borderRadius: 10,
     paddingHorizontal: 12,
     paddingVertical: 8,
     fontSize: 16,
     marginBottom: 12,
+    color: colors.text,
   },
   card: {
     flexDirection: "row",
     justifyContent: "space-between",
-    backgroundColor: "#fff",
+    backgroundColor: colors.surface,
     padding: 14,
     borderRadius: 14,
     marginBottom: 12,
@@ -239,24 +245,25 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 16,
     fontWeight: "600",
+    color: colors.text,
   },
   meta: {
     marginTop: 4,
-    color: "#666",
+    color: colors.textSubtle,
   },
   status: {
     fontSize: 13,
-    color: "#555",
+    color: colors.textMuted,
     fontWeight: "600",
   },
   statusCritical: {
-    color: "#C62828",
+    color: colors.danger,
   },
   statusLow: {
-    color: "#EF6C00",
+    color: colors.warning,
   },
   statusGood: {
-    color: "#2E7D32",
+    color: colors.success,
   },
   restockIcon: {
     marginTop: 6,
@@ -272,12 +279,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: "#E0E0E0",
+    borderColor: colors.border,
     alignItems: "center",
+    backgroundColor: colors.surface,
   },
   qtyText: {
     fontWeight: "600",
     fontSize: 14,
+    color: colors.text,
   },
   qtyActions: {
     flexDirection: "row",
@@ -287,18 +296,18 @@ const styles = StyleSheet.create({
   qtyIconDisabled: {
     padding: 8,
     borderRadius: 10,
-    backgroundColor: "#F2F2F7",
+    backgroundColor: colors.surfaceMuted,
   },
   qtyIcon: {
     padding: 8,
     borderRadius: 10,
-    backgroundColor: "#E8F7EC",
+    backgroundColor: colors.successSoft,
   },
   confirmIcon: {
     marginTop: 2,
   },
   empty: {
-    color: "#666",
+    color: colors.textSubtle,
     marginTop: 20,
   },
 });

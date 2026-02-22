@@ -1,6 +1,6 @@
 import { useRouter } from "expo-router";
 import { collection, getDocs, orderBy, query } from "firebase/firestore";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -14,7 +14,9 @@ import {
 
 import AppIcon from "../../src/components/AppIcon";
 import { useCart } from "../../src/context/CartContext";
+import { useFavorites } from "../../src/context/FavoritesContext";
 import { db } from "../../src/firebase/firebaseConfig";
+import { useAppTheme } from "../../src/theme/useAppTheme";
 import {
   PRODUCT_SORT_MODES,
   sortProducts,
@@ -34,6 +36,8 @@ const ICON_COLOR_POOL = [
 export default function CustomerProducts() {
   const router = useRouter();
   const { addToCart } = useCart();
+  const { hasFavoriteStore, toggleFavoriteStore } = useFavorites();
+  const { colors, isDark } = useAppTheme();
 
   const [products, setProducts] = useState([]);
   const [stores, setStores] = useState([]);
@@ -42,12 +46,12 @@ export default function CustomerProducts() {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [loading, setLoading] = useState(true);
 
-  const getRandomIconColor = () => {
+  const getRandomIconColor = useCallback(() => {
     const idx = Math.floor(Math.random() * ICON_COLOR_POOL.length);
     return ICON_COLOR_POOL[idx];
-  };
+  }, []);
 
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     try {
       const productsQuery = query(
         collection(db, "products"),
@@ -105,11 +109,11 @@ export default function CustomerProducts() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [getRandomIconColor]);
 
   useEffect(() => {
     fetchProducts();
-  }, []);
+  }, [fetchProducts]);
 
   const trimmedQuery = searchQuery.trim().toLowerCase();
   const isSearching = trimmedQuery.length > 0;
@@ -155,6 +159,7 @@ export default function CustomerProducts() {
       (seller.name || "").toLowerCase().includes(trimmedQuery),
     );
   }, [isSearching, sellers, trimmedQuery]);
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   const handleQuickAddToCart = (product) => {
     addToCart({
@@ -180,7 +185,7 @@ export default function CustomerProducts() {
             name={product.iconName || DEFAULT_PRODUCT_ICON}
             variant="community"
             size={27}
-            color={product.iconColor || "#333"}
+            color={product.iconColor || (isDark ? colors.textMuted : "#333")}
           />
         </View>
 
@@ -195,7 +200,7 @@ export default function CustomerProducts() {
                   name="chevron-right"
                   variant="community"
                   size={14}
-                  color="#5C5C5C"
+                  color={colors.textMuted}
                 />
               </View>
               <Text style={styles.sellerStoreText}>{product.storeName}</Text>
@@ -234,6 +239,7 @@ export default function CustomerProducts() {
       <TextInput
         style={styles.search}
         placeholder="Search products, stores, sellers"
+        placeholderTextColor={colors.textSubtle}
         value={searchQuery}
         onChangeText={setSearchQuery}
         clearButtonMode="while-editing"
@@ -298,44 +304,68 @@ export default function CustomerProducts() {
               ) : null}
 
               {section.key === "stores"
-                ? section.items.map((store) => (
-                    <TouchableOpacity
-                      key={store.id}
-                      style={styles.card}
-                      onPress={() => router.push(`/customer/store/${store.id}`)}
-                    >
-                      <View style={styles.iconWrap}>
-                        <AppIcon
-                          name="store"
-                          variant="community"
-                          size={24}
-                          color="#333"
-                        />
+                ? section.items.map((store) => {
+                    const isFavoriteStore = hasFavoriteStore(store.id);
+                    return (
+                      <View key={store.id} style={[styles.card, styles.storeCard]}>
+                        <TouchableOpacity
+                          style={styles.storeCardMain}
+                          onPress={() => router.push(`/customer/store/${store.id}`)}
+                        >
+                          <View style={styles.iconWrap}>
+                            <AppIcon
+                              name="store"
+                              variant="community"
+                              size={24}
+                              color={colors.text}
+                            />
+                          </View>
+                          <View style={styles.contentWrap}>
+                            <Text style={styles.productName}>{store.name}</Text>
+                            <Text style={styles.meta}>Store result</Text>
+                          </View>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          style={[
+                            styles.favoriteStoreButton,
+                            isFavoriteStore
+                              ? styles.favoriteStoreButtonRemove
+                              : styles.favoriteStoreButtonAdd,
+                          ]}
+                          onPress={() => toggleFavoriteStore(store.id)}
+                        >
+                          <AppIcon
+                            name={isFavoriteStore ? "store-remove" : "store-check"}
+                            variant="community"
+                            size={18}
+                            color={isFavoriteStore ? colors.danger : colors.success}
+                          />
+                        </TouchableOpacity>
                       </View>
-                      <View style={styles.contentWrap}>
-                        <Text style={styles.productName}>{store.name}</Text>
-                        <Text style={styles.meta}>Store result</Text>
-                      </View>
-                    </TouchableOpacity>
-                  ))
+                    );
+                  })
                 : null}
 
               {section.key === "sellers"
                 ? section.items.map((seller) => (
-                    <View key={seller.id} style={styles.card}>
+                    <TouchableOpacity
+                      key={seller.id}
+                      style={styles.card}
+                      onPress={() => router.push(`/customer/seller/${seller.id}`)}
+                    >
                       <View style={styles.iconWrap}>
                         <AppIcon
                           name="account-tie"
                           variant="community"
                           size={24}
-                          color="#333"
+                          color={colors.text}
                         />
                       </View>
                       <View style={styles.contentWrap}>
                         <Text style={styles.productName}>{seller.name}</Text>
                         <Text style={styles.meta}>Seller result</Text>
                       </View>
-                    </View>
+                    </TouchableOpacity>
                   ))
                 : null}
 
@@ -365,27 +395,28 @@ export default function CustomerProducts() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors) =>
+  StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: "#F2F2F7",
+    backgroundColor: colors.screen,
   },
   card: {
     flexDirection: "row",
     alignItems: "center",
     padding: 16,
     borderWidth: 1,
-    borderColor: "#eee",
+    borderColor: colors.borderSoft,
     borderRadius: 8,
     marginBottom: 12,
-    backgroundColor: "#fff",
+    backgroundColor: colors.surface,
   },
   iconWrap: {
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: "#f2f2f2",
+    backgroundColor: colors.surfaceMuted,
     alignItems: "center",
     justifyContent: "center",
     marginRight: 15,
@@ -396,7 +427,17 @@ const styles = StyleSheet.create({
   productCard: {
     padding: 0,
   },
+  storeCard: {
+    padding: 0,
+  },
   productCardMain: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 16,
+    paddingRight: 10,
+  },
+  storeCardMain: {
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
@@ -408,22 +449,38 @@ const styles = StyleSheet.create({
     height: 38,
     borderRadius: 19,
     marginRight: 12,
-    backgroundColor: "#E8F7EC",
+    backgroundColor: colors.successSoft,
     alignItems: "center",
     justifyContent: "center",
+  },
+  favoriteStoreButton: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    marginRight: 12,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  favoriteStoreButtonAdd: {
+    backgroundColor: colors.successSoft,
+  },
+  favoriteStoreButtonRemove: {
+    backgroundColor: "#FDECEC",
   },
   pageTitle: {
     fontSize: 26,
     fontWeight: "700",
     marginBottom: 12,
+    color: colors.text,
   },
   search: {
-    backgroundColor: "#E5E5EA",
+    backgroundColor: colors.input,
     borderRadius: 10,
     paddingHorizontal: 12,
     paddingVertical: 10,
     fontSize: 16,
     marginBottom: 14,
+    color: colors.text,
   },
   filters: {
     flexDirection: "row",
@@ -432,9 +489,9 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   categoryPill: {
-    backgroundColor: "#EAF1FF",
+    backgroundColor: colors.pill,
     borderWidth: 1,
-    borderColor: "#C9D9FF",
+    borderColor: colors.pillBorder,
     borderRadius: 999,
     paddingHorizontal: 14,
     height: 34,
@@ -442,30 +499,30 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   categoryPillSelected: {
-    backgroundColor: "#D8E7FF",
-    borderColor: "#95B7FF",
+    backgroundColor: colors.pillSelected,
+    borderColor: colors.pillSelectedBorder,
   },
   categoryPillText: {
-    color: "#2357B8",
+    color: colors.pillText,
     fontWeight: "600",
     fontSize: 13,
   },
   categoryPillTextSelected: {
-    color: "#18479E",
+    color: colors.pillTextSelected,
   },
   categoryAllPill: {
-    backgroundColor: "#F2F2F7",
-    borderColor: "#DADAE0",
+    backgroundColor: colors.pillNeutral,
+    borderColor: colors.pillNeutralBorder,
   },
   categoryAllPillSelected: {
-    backgroundColor: "#DDDEE6",
-    borderColor: "#BCBEC9",
+    backgroundColor: colors.pillNeutralSelected,
+    borderColor: colors.pillNeutralSelectedBorder,
   },
   categoryAllPillText: {
-    color: "#4B4E5A",
+    color: colors.pillNeutralText,
   },
   categoryAllPillTextSelected: {
-    color: "#333642",
+    color: colors.pillNeutralTextSelected,
   },
   listContent: {
     paddingTop: 0,
@@ -478,6 +535,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "700",
     marginBottom: 4,
+    color: colors.text,
   },
   metaWrap: {
     marginTop: 4,
@@ -490,14 +548,14 @@ const styles = StyleSheet.create({
   },
   sellerStoreText: {
     fontSize: 12,
-    color: "#666",
+    color: colors.textSubtle,
     fontWeight: "500",
   },
   arrowChip: {
     width: 20,
     height: 20,
     borderRadius: 10,
-    backgroundColor: "#F2F2F7",
+    backgroundColor: colors.screen,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -505,9 +563,10 @@ const styles = StyleSheet.create({
     marginTop: 16,
     fontSize: 17,
     fontWeight: "600",
+    color: colors.text,
   },
   empty: {
-    color: "#666",
+    color: colors.textSubtle,
     marginTop: 20,
   },
   sectionWrap: {
@@ -517,9 +576,14 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "700",
     marginBottom: 8,
+    color: colors.text,
   },
   sectionEmpty: {
-    color: "#666",
+    color: colors.textSubtle,
     marginBottom: 10,
+  },
+  meta: {
+    fontSize: 14,
+    color: colors.textMuted,
   },
 });

@@ -9,7 +9,7 @@ import {
   updateDoc,
   where,
 } from "firebase/firestore";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   Alert,
   FlatList,
@@ -25,13 +25,16 @@ import { Swipeable } from "react-native-gesture-handler";
 import AppIcon from "../../../src/components/AppIcon";
 import EmptyFieldState from "../../../src/components/EmptyFieldState";
 import { auth, db } from "../../../src/firebase/firebaseConfig";
+import { useAppTheme } from "../../../src/theme/useAppTheme";
 
 export default function MerchantStoresManage() {
+  const { colors, isDark } = useAppTheme();
   const [stores, setStores] = useState([]);
   const [renameTarget, setRenameTarget] = useState(null);
   const [renameInput, setRenameInput] = useState("");
   const [savingRename, setSavingRename] = useState(false);
   const router = useRouter();
+  const styles = useMemo(() => createStyles(colors, isDark), [colors, isDark]);
 
   const fetchStores = async (merchantId) => {
     const storesQuery = query(
@@ -102,7 +105,7 @@ export default function MerchantStoresManage() {
           name="store-remove"
           variant="community"
           size={24}
-          color="#C62828"
+          color={colors.danger}
         />
       </TouchableOpacity>
     </View>
@@ -167,7 +170,7 @@ export default function MerchantStoresManage() {
                     name="pencil-outline"
                     variant="community"
                     size={18}
-                    color="#333"
+                    color={colors.text}
                   />
                 </TouchableOpacity>
               </View>
@@ -199,6 +202,7 @@ export default function MerchantStoresManage() {
               value={renameInput}
               onChangeText={setRenameInput}
               placeholder="Enter store name"
+              placeholderTextColor={colors.textSubtle}
               style={styles.modalInput}
               autoFocus
               maxLength={80}
@@ -228,19 +232,21 @@ export default function MerchantStoresManage() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors, isDark) =>
+  StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: "#F2F2F7",
+    backgroundColor: colors.screen,
   },
   title: {
     fontSize: 20,
     fontWeight: "600",
     marginBottom: 12,
+    color: colors.text,
   },
   card: {
-    backgroundColor: "#fff",
+    backgroundColor: colors.surface,
     padding: 14,
     borderRadius: 14,
     marginBottom: 12,
@@ -260,7 +266,7 @@ const styles = StyleSheet.create({
     width: 52,
     height: 52,
     borderRadius: 26,
-    backgroundColor: "#FFE0E6",
+    backgroundColor: colors.surfaceMuted,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -268,29 +274,30 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     marginBottom: 6,
+    color: colors.text,
   },
   renameButton: {
     width: 30,
     height: 30,
     borderRadius: 15,
-    backgroundColor: "#F2F2F7",
+    backgroundColor: colors.surfaceMuted,
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 6,
   },
   meta: {
     fontSize: 13,
-    color: "#666",
+    color: colors.textSubtle,
     marginBottom: 2,
   },
   modalBackdrop: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.28)",
+    backgroundColor: isDark ? "rgba(0,0,0,0.6)" : "rgba(0,0,0,0.28)",
     justifyContent: "center",
     paddingHorizontal: 22,
   },
   modalCard: {
-    backgroundColor: "#fff",
+    backgroundColor: colors.surface,
     borderRadius: 12,
     padding: 14,
     gap: 10,
@@ -298,13 +305,15 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 17,
     fontWeight: "700",
+    color: colors.text,
   },
   modalInput: {
-    backgroundColor: "#F2F2F7",
+    backgroundColor: colors.input,
     borderRadius: 10,
     paddingHorizontal: 12,
     paddingVertical: 10,
     fontSize: 16,
+    color: colors.text,
   },
   modalActions: {
     flexDirection: "row",
@@ -316,24 +325,24 @@ const styles = StyleSheet.create({
     height: 34,
     borderRadius: 10,
     paddingHorizontal: 14,
-    backgroundColor: "#E5E5EA",
+    backgroundColor: colors.input,
     alignItems: "center",
     justifyContent: "center",
   },
   cancelButtonText: {
-    color: "#333",
+    color: colors.textMuted,
     fontWeight: "600",
   },
   doneButton: {
     height: 34,
     borderRadius: 10,
     paddingHorizontal: 14,
-    backgroundColor: "#111",
+    backgroundColor: colors.text,
     alignItems: "center",
     justifyContent: "center",
   },
   doneButtonText: {
-    color: "#fff",
+    color: colors.background,
     fontWeight: "600",
   },
   listEmptyContainer: {

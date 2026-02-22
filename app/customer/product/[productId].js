@@ -1,6 +1,6 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { doc, getDoc } from "firebase/firestore";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Animated,
@@ -14,6 +14,7 @@ import ScreenContainer from "../../../src/components/ScreenContainer";
 import { useCart } from "../../../src/context/CartContext";
 import { useFavorites } from "../../../src/context/FavoritesContext";
 import { db } from "../../../src/firebase/firebaseConfig";
+import { useAppTheme } from "../../../src/theme/useAppTheme";
 import { getUserDisplayName } from "../../../src/utils/userDisplayName";
 
 const DEFAULT_PRODUCT_ICON = "package-variant-closed";
@@ -31,6 +32,7 @@ const ICON_COLOR_POOL = [
 export default function ProductDetails() {
   const params = useLocalSearchParams();
   const router = useRouter();
+  const { colors } = useAppTheme();
   const productId = Array.isArray(params.productId)
     ? params.productId[0]
     : params.productId;
@@ -42,15 +44,12 @@ export default function ProductDetails() {
   const [store, setStore] = useState(null);
   const [merchant, setMerchant] = useState(null);
   const [loading, setLoading] = useState(true);
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const favoriteAnim = useRef(new Animated.Value(0)).current;
   const isFavorite = hasFavorite(productId);
   const iconColor = useMemo(() => {
     const idx = Math.floor(Math.random() * ICON_COLOR_POOL.length);
     return ICON_COLOR_POOL[idx];
-  }, []);
-
-  useEffect(() => {
-    fetchData();
   }, []);
 
   useEffect(() => {
@@ -61,7 +60,7 @@ export default function ProductDetails() {
     }).start();
   }, [favoriteAnim, isFavorite]);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     const productSnap = await getDoc(doc(db, "products", productId));
     if (!productSnap.exists()) return;
 
@@ -80,7 +79,11 @@ export default function ProductDetails() {
     }
 
     setLoading(false);
-  };
+  }, [productId]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const handleAddToCart = () => {
     addToCart({
@@ -132,7 +135,7 @@ export default function ProductDetails() {
             name="basket-plus"
             variant="community"
             size={19}
-            color="#fff"
+            color={colors.background}
           />
           <Text style={styles.buttonText}>Add to Cart</Text>
         </TouchableOpacity>
@@ -166,7 +169,7 @@ export default function ProductDetails() {
                 name="heart-outline"
                 variant="community"
                 size={FAVORITE_ICON_SIZE}
-                color="#111"
+                color={colors.text}
               />
             </Animated.View>
 
@@ -229,19 +232,21 @@ export default function ProductDetails() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors) =>
+  StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: "600",
     marginBottom: 12,
+    color: colors.text,
   },
   meta: {
-    color: "#555",
+    color: colors.textMuted,
     fontSize: 14,
   },
   metaValue: {
     fontWeight: "600",
-    color: "#222",
+    color: colors.text,
   },
   iconWrap: {
     marginTop: 8,
@@ -254,6 +259,7 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     textAlign: "left",
     marginBottom: 12,
+    color: colors.text,
   },
   actionsRow: {
     flexDirection: "row",
@@ -261,7 +267,7 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   button: {
-    backgroundColor: "#000",
+    backgroundColor: colors.text,
     height: 48,
     flex: 1,
     borderRadius: 6,
@@ -271,7 +277,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   buttonText: {
-    color: "#fff",
+    color: colors.background,
     fontWeight: "600",
   },
   favoriteButton: {
@@ -279,8 +285,8 @@ const styles = StyleSheet.create({
     height: 48,
     borderRadius: 6,
     borderWidth: 1,
-    borderColor: "#d1d1d6",
-    backgroundColor: "#fff",
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -298,7 +304,7 @@ const styles = StyleSheet.create({
   description: {
     marginTop: 14,
     marginBottom: 20,
-    color: "#333",
+    color: colors.textMuted,
     fontSize: 15,
     lineHeight: 21,
   },
@@ -307,9 +313,9 @@ const styles = StyleSheet.create({
   },
   infoBox: {
     borderWidth: 1,
-    borderColor: "#e5e5ea",
+    borderColor: colors.border,
     borderRadius: 10,
-    backgroundColor: "#fff",
+    backgroundColor: colors.surface,
     paddingHorizontal: 12,
     paddingVertical: 10,
     gap: 10,
@@ -320,9 +326,9 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   pill: {
-    backgroundColor: "#f2f2f7",
+    backgroundColor: colors.surfaceMuted,
     borderWidth: 1,
-    borderColor: "#d1d1d6",
+    borderColor: colors.border,
     borderRadius: 999,
     paddingHorizontal: 12,
     paddingVertical: 6,
@@ -330,6 +336,6 @@ const styles = StyleSheet.create({
   pillText: {
     fontSize: 12,
     fontWeight: "600",
-    color: "#333",
+    color: colors.textMuted,
   },
 });

@@ -1,13 +1,16 @@
 import { Stack } from "expo-router";
+import { useAppTheme } from "../../src/theme/useAppTheme";
 
 export default function MerchantLayout() {
+  const { colors } = useAppTheme();
+
   return (
     <Stack
       screenOptions={{
         headerStyle: {
-          backgroundColor: "#0b6be0",
+          backgroundColor: colors.merchantHeaderBg,
         },
-        headerTintColor: "#fff",
+        headerTintColor: colors.merchantHeaderText,
         headerTitleStyle: {
           fontWeight: "700",
         },
@@ -23,6 +26,7 @@ export default function MerchantLayout() {
         }}
       />
       <Stack.Screen name="profile" options={{ title: "Profile" }} />
+      <Stack.Screen name="notifications" options={{ title: "Notifications" }} />
 
       {/* Stores management */}
       <Stack.Screen

@@ -1,4 +1,5 @@
 import { useRouter } from "expo-router";
+import { useMemo } from "react";
 import {
   FlatList,
   StyleSheet,
@@ -10,10 +11,13 @@ import { Swipeable } from "react-native-gesture-handler";
 import AppIcon from "../../src/components/AppIcon";
 import ScreenContainer from "../../src/components/ScreenContainer";
 import { useCart } from "../../src/context/CartContext";
+import { useAppTheme } from "../../src/theme/useAppTheme";
 
 export default function CartPage() {
   const { cart, increment, decrement, removeFromCart } = useCart();
   const router = useRouter();
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
@@ -35,7 +39,7 @@ export default function CartPage() {
           name="arrow-right-thick"
           variant="community"
           size={20}
-          color="#fff"
+          color={colors.background}
         />
         <Text style={styles.checkoutText}>Checkout</Text>
       </TouchableOpacity>
@@ -52,7 +56,7 @@ export default function CartPage() {
           name="basket-remove-outline"
           variant="community"
           size={24}
-          color="#C62828"
+          color={colors.danger}
         />
       </TouchableOpacity>
     </View>
@@ -95,7 +99,7 @@ export default function CartPage() {
                       name="chevron-right"
                       variant="community"
                       size={14}
-                      color="#5C5C5C"
+                      color={colors.textMuted}
                     />
                   </View>
                   <Text style={styles.sellerStoreText}>
@@ -109,7 +113,7 @@ export default function CartPage() {
                   style={styles.controlBtn}
                   onPress={() => decrement(item.productId)}
                 >
-                  <Text>−</Text>
+                  <Text style={styles.controlText}>−</Text>
                 </TouchableOpacity>
 
                 <Text style={styles.qty}>{item.quantity}</Text>
@@ -118,7 +122,7 @@ export default function CartPage() {
                   style={styles.controlBtn}
                   onPress={() => increment(item.productId)}
                 >
-                  <Text>+</Text>
+                  <Text style={styles.controlText}>+</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -129,24 +133,26 @@ export default function CartPage() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors) =>
+  StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: "600",
     marginBottom: 16,
+    color: colors.text,
   },
   empty: {
-    color: "#666",
+    color: colors.textSubtle,
     marginTop: 20,
   },
   item: {
     flexDirection: "row",
     padding: 14,
     borderWidth: 1,
-    borderColor: "#eee",
+    borderColor: colors.borderSoft,
     borderRadius: 8,
     marginBottom: 12,
-    backgroundColor: "#fff",
+    backgroundColor: colors.surface,
   },
   itemLeft: {
     flex: 1,
@@ -162,13 +168,13 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 15,
     fontWeight: "600",
-    color: "#1F1F1F",
+    color: colors.text,
   },
   priceBadge: {
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
-    backgroundColor: "#E7F1FF",
+    backgroundColor: colors.pill,
     borderRadius: 999,
     paddingHorizontal: 8,
     height: 24,
@@ -177,7 +183,7 @@ const styles = StyleSheet.create({
   priceBadgeText: {
     fontSize: 12,
     fontWeight: "700",
-    color: "#1F5FBF",
+    color: colors.pillText,
   },
   sellerStoreRow: {
     marginTop: 10,
@@ -187,14 +193,14 @@ const styles = StyleSheet.create({
   },
   sellerStoreText: {
     fontSize: 12,
-    color: "#666",
+    color: colors.textSubtle,
     fontWeight: "500",
   },
   arrowChip: {
     width: 20,
     height: 20,
     borderRadius: 10,
-    backgroundColor: "#F2F2F7",
+    backgroundColor: colors.screen,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -205,14 +211,18 @@ const styles = StyleSheet.create({
   },
   controlBtn: {
     borderWidth: 1,
-    borderColor: "#ddd",
+    borderColor: colors.border,
     borderRadius: 6,
     paddingHorizontal: 10,
     paddingVertical: 4,
   },
+  controlText: {
+    color: colors.text,
+  },
   qty: {
     minWidth: 20,
     textAlign: "center",
+    color: colors.text,
   },
   deleteActionWrap: {
     justifyContent: "center",
@@ -221,7 +231,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   deleteActionButton: {
-    backgroundColor: "#FFE0E6",
+    backgroundColor: colors.surfaceMuted,
     justifyContent: "center",
     alignItems: "center",
     width: 52,
@@ -240,14 +250,15 @@ const styles = StyleSheet.create({
   itemCount: {
     fontSize: 16,
     fontWeight: "500",
-    color: "#555",
+    color: colors.textMuted,
   },
   total: {
     fontSize: 18,
     fontWeight: "600",
+    color: colors.text,
   },
   checkoutBtn: {
-    backgroundColor: "#000",
+    backgroundColor: colors.text,
     padding: 14,
     borderRadius: 6,
     alignItems: "center",
@@ -259,10 +270,10 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   checkoutText: {
-    color: "#fff",
+    color: colors.background,
     fontWeight: "600",
   },
   disabled: {
-    backgroundColor: "#999",
+    backgroundColor: colors.textSubtle,
   },
 });

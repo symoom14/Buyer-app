@@ -13,6 +13,7 @@ import {
 import AppIcon from "../../src/components/AppIcon";
 import { useFavorites } from "../../src/context/FavoritesContext";
 import { db } from "../../src/firebase/firebaseConfig";
+import { useAppTheme } from "../../src/theme/useAppTheme";
 import { getUserDisplayName } from "../../src/utils/userDisplayName";
 
 const DEFAULT_PRODUCT_ICON = "package-variant-closed";
@@ -33,9 +34,11 @@ function getRandomIconColor() {
 export default function CustomerSavedProducts() {
   const router = useRouter();
   const { favoriteIds } = useFavorites();
+  const { colors } = useAppTheme();
 
   const [allProducts, setAllProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   const fetchProducts = async () => {
     try {
@@ -124,7 +127,7 @@ export default function CustomerSavedProducts() {
                 name={item.iconName || DEFAULT_PRODUCT_ICON}
                 variant="community"
                 size={24}
-                color={item.iconColor || "#333"}
+                color={item.iconColor || colors.text}
               />
             </View>
 
@@ -148,27 +151,28 @@ export default function CustomerSavedProducts() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors) =>
+  StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: "#F2F2F7",
+    backgroundColor: colors.screen,
   },
   card: {
     flexDirection: "row",
     alignItems: "center",
     padding: 16,
     borderWidth: 1,
-    borderColor: "#eee",
+    borderColor: colors.borderSoft,
     borderRadius: 8,
     marginBottom: 12,
-    backgroundColor: "#fff",
+    backgroundColor: colors.surface,
   },
   iconWrap: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: "#f2f2f2",
+    backgroundColor: colors.surfaceMuted,
     alignItems: "center",
     justifyContent: "center",
     marginRight: 15,
@@ -180,15 +184,17 @@ const styles = StyleSheet.create({
     fontSize: 26,
     fontWeight: "700",
     marginBottom: 16,
+    color: colors.text,
   },
   productName: {
     fontSize: 16,
     fontWeight: "600",
     marginBottom: 6,
+    color: colors.text,
   },
   meta: {
     fontSize: 14,
-    color: "#555",
+    color: colors.textMuted,
   },
   bold: {
     fontWeight: "500",
@@ -197,9 +203,10 @@ const styles = StyleSheet.create({
     marginTop: 8,
     fontSize: 17,
     fontWeight: "600",
+    color: colors.text,
   },
   empty: {
-    color: "#666",
+    color: colors.textSubtle,
     marginTop: 20,
   },
 });

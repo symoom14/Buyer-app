@@ -24,11 +24,13 @@ import {
 import { Swipeable } from "react-native-gesture-handler";
 import AppIcon from "../../../src/components/AppIcon";
 import { auth, db } from "../../../src/firebase/firebaseConfig";
+import { useAppTheme } from "../../../src/theme/useAppTheme";
 
 const DEFAULT_PRODUCT_ICON = "package-variant-closed";
 
 export default function MerchantStoresProducts() {
   const router = useRouter();
+  const { colors, isDark } = useAppTheme();
   const [products, setProducts] = useState([]);
   const [soldCounts, setSoldCounts] = useState({});
   const [restockTarget, setRestockTarget] = useState(null);
@@ -38,6 +40,7 @@ export default function MerchantStoresProducts() {
   const [storeMap, setStoreMap] = useState({});
   const [merchantStores, setMerchantStores] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const styles = useMemo(() => createStyles(colors, isDark), [colors, isDark]);
 
   const fetchProducts = async (merchantId) => {
     const q = query(
@@ -161,7 +164,7 @@ export default function MerchantStoresProducts() {
           name="package-variant-closed-remove"
           variant="community"
           size={24}
-          color="#C62828"
+          color={colors.danger}
         />
       </TouchableOpacity>
     </View>
@@ -234,7 +237,7 @@ export default function MerchantStoresProducts() {
           name="package-variant-plus"
           variant="community"
           size={24}
-          color="#2E7D32"
+          color={colors.success}
         />
       </TouchableOpacity>
       <TouchableOpacity
@@ -245,7 +248,7 @@ export default function MerchantStoresProducts() {
           name="store-cog-outline"
           variant="community"
           size={23}
-          color="#1565C0"
+          color={colors.tint}
         />
       </TouchableOpacity>
     </View>
@@ -256,6 +259,7 @@ export default function MerchantStoresProducts() {
       <Text style={styles.title}>All products</Text>
       <TextInput
         placeholder="Search by product or store"
+        placeholderTextColor={colors.textSubtle}
         value={searchQuery}
         onChangeText={setSearchQuery}
         style={styles.search}
@@ -287,7 +291,7 @@ export default function MerchantStoresProducts() {
                     name={item.iconName || DEFAULT_PRODUCT_ICON}
                     variant="community"
                     size={24}
-                    color="#333"
+                    color={colors.text}
                   />
                 </View>
                 <View style={styles.contentWrap}>
@@ -357,6 +361,7 @@ export default function MerchantStoresProducts() {
               onChangeText={setRestockQtyInput}
               keyboardType="numeric"
               placeholder="Enter restock amount"
+              placeholderTextColor={colors.textSubtle}
             />
 
             <TouchableOpacity
@@ -367,7 +372,7 @@ export default function MerchantStoresProducts() {
                 name="check"
                 variant="community"
                 size={18}
-                color="#fff"
+                color={colors.background}
               />
               <Text style={styles.doneButtonText}>Done</Text>
             </TouchableOpacity>
@@ -417,7 +422,7 @@ export default function MerchantStoresProducts() {
                 name="check"
                 variant="community"
                 size={18}
-                color="#fff"
+                color={colors.background}
               />
               <Text style={styles.doneButtonText}>Done</Text>
             </TouchableOpacity>
@@ -426,30 +431,38 @@ export default function MerchantStoresProducts() {
       </Modal>
 
       <TouchableOpacity style={styles.fab} onPress={handleAddProduct}>
-        <AppIcon name="shape-plus" variant="community" size={28} color="#fff" />
+        <AppIcon
+          name="shape-plus"
+          variant="community"
+          size={28}
+          color={colors.background}
+        />
       </TouchableOpacity>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors, isDark) =>
+  StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: "#F2F2F7",
+    backgroundColor: colors.screen,
   },
   title: {
     fontSize: 20,
     fontWeight: "600",
     marginBottom: 12,
+    color: colors.text,
   },
   search: {
-    backgroundColor: "#E5E5EA",
+    backgroundColor: colors.input,
     borderRadius: 10,
     paddingHorizontal: 12,
     paddingVertical: 8,
     fontSize: 16,
     marginBottom: 12,
+    color: colors.text,
   },
   listContent: {
     paddingBottom: 88,
@@ -457,7 +470,7 @@ const styles = StyleSheet.create({
   productCard: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#fff",
+    backgroundColor: colors.surface,
     padding: 14,
     borderRadius: 14,
     marginBottom: 12,
@@ -466,7 +479,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: "#f2f2f2",
+    backgroundColor: colors.surfaceMuted,
     alignItems: "center",
     justifyContent: "center",
     marginRight: 12,
@@ -477,29 +490,30 @@ const styles = StyleSheet.create({
   productName: {
     fontSize: 16,
     fontWeight: "600",
+    color: colors.text,
   },
   productMeta: {
     marginTop: 4,
-    color: "#666",
+    color: colors.textSubtle,
   },
   stockStatus: {
     marginTop: 6,
     fontWeight: "600",
   },
   stockCritical: {
-    color: "#C62828",
+    color: colors.danger,
   },
   stockBackordered: {
-    color: "#C62828",
+    color: colors.danger,
   },
   stockLow: {
-    color: "#EF6C00",
+    color: colors.warning,
   },
   stockGood: {
-    color: "#2E7D32",
+    color: colors.success,
   },
   empty: {
-    color: "#666",
+    color: colors.textSubtle,
     marginTop: 12,
   },
   deleteActionWrap: {
@@ -509,7 +523,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   deleteActionButton: {
-    backgroundColor: "#FFE0E6",
+    backgroundColor: colors.surfaceMuted,
     justifyContent: "center",
     alignItems: "center",
     width: 52,
@@ -525,7 +539,7 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   restockActionButton: {
-    backgroundColor: "#ccf5d7",
+    backgroundColor: colors.successSoft,
     justifyContent: "center",
     alignItems: "center",
     width: 52,
@@ -533,7 +547,7 @@ const styles = StyleSheet.create({
     borderRadius: 26,
   },
   switchStoreActionButton: {
-    backgroundColor: "#c5e4f7",
+    backgroundColor: colors.pill,
     justifyContent: "center",
     alignItems: "center",
     width: 52,
@@ -542,12 +556,12 @@ const styles = StyleSheet.create({
   },
   modalBackdrop: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.28)",
+    backgroundColor: isDark ? "rgba(0,0,0,0.6)" : "rgba(0,0,0,0.28)",
     justifyContent: "center",
     paddingHorizontal: 22,
   },
   modalCard: {
-    backgroundColor: "#fff",
+    backgroundColor: colors.surface,
     borderRadius: 12,
     padding: 14,
   },
@@ -555,23 +569,25 @@ const styles = StyleSheet.create({
     fontSize: 17,
     fontWeight: "700",
     marginBottom: 8,
+    color: colors.text,
   },
   modalMeta: {
     fontSize: 14,
-    color: "#444",
+    color: colors.textMuted,
     marginBottom: 6,
   },
   modalInput: {
     marginTop: 6,
     borderWidth: 1,
-    borderColor: "#ddd",
+    borderColor: colors.border,
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 10,
+    color: colors.text,
   },
   doneButton: {
     marginTop: 12,
-    backgroundColor: "#000",
+    backgroundColor: colors.text,
     borderRadius: 8,
     height: 44,
     alignItems: "center",
@@ -580,7 +596,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   doneButtonText: {
-    color: "#fff",
+    color: colors.background,
     fontWeight: "600",
   },
   radioList: {
@@ -597,7 +613,7 @@ const styles = StyleSheet.create({
     height: 20,
     borderRadius: 10,
     borderWidth: 2,
-    borderColor: "#999",
+    borderColor: colors.textSubtle,
     alignItems: "center",
     justifyContent: "center",
     marginRight: 10,
@@ -606,17 +622,17 @@ const styles = StyleSheet.create({
     width: 10,
     height: 10,
     borderRadius: 5,
-    backgroundColor: "#000",
+    backgroundColor: colors.text,
   },
   radioLabel: {
     fontSize: 15,
-    color: "#222",
+    color: colors.text,
   },
   fab: {
     position: "absolute",
     right: 20,
     bottom: 24,
-    backgroundColor: "#000",
+    backgroundColor: colors.text,
     width: 58,
     height: 58,
     borderRadius: 29,

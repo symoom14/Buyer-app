@@ -1,6 +1,6 @@
 import { useLocalSearchParams } from "expo-router";
 import { collection, doc, getDoc, getDocs, updateDoc } from "firebase/firestore";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -13,14 +13,9 @@ import {
 import AppIcon from "../../../src/components/AppIcon";
 import ScreenContainer from "../../../src/components/ScreenContainer";
 import { auth, db } from "../../../src/firebase/firebaseConfig";
+import { useAppTheme } from "../../../src/theme/useAppTheme";
+import { notifyCustomerOrderStatus } from "../../../src/utils/notifications";
 import { getUserDisplayName } from "../../../src/utils/userDisplayName";
-
-const STATUS_COLORS = {
-  pending: "#FFB300",
-  accepted: "#2196F3",
-  completed: "#4CAF50",
-  cancelled: "#F44336",
-};
 
 const STATUS_LABELS = {
   pending: "Pending",
@@ -33,18 +28,16 @@ const STATUS_ORDER = ["pending", "accepted", "completed"];
 
 export default function MerchantOrderDetailsScreen() {
   const { orderId } = useLocalSearchParams();
+  const { colors, isDark } = useAppTheme();
 
   const [order, setOrder] = useState(null);
   const [customerName, setCustomerName] = useState("");
   const [loading, setLoading] = useState(true);
   const [updatingStatus, setUpdatingStatus] = useState(false);
   const [outOfStockItems, setOutOfStockItems] = useState([]);
+  const styles = useMemo(() => createStyles(colors, isDark), [colors, isDark]);
 
-  useEffect(() => {
-    fetchOrder();
-  }, []);
-
-  const fetchOrder = async () => {
+  const fetchOrder = useCallback(async () => {
     try {
       const snap = await getDoc(doc(db, "orders", orderId));
       if (!snap.exists()) return;
@@ -64,9 +57,9 @@ export default function MerchantOrderDetailsScreen() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [orderId]);
 
-  const checkStock = async (orderData) => {
+  const checkStock = useCallback(async (orderData) => {
     const merchantId = auth.currentUser?.uid;
     if (!merchantId) {
       setOutOfStockItems([]);
@@ -117,13 +110,17 @@ export default function MerchantOrderDetailsScreen() {
       .map((item) => item.name)
       .filter(Boolean);
     setOutOfStockItems(outOfStock);
-  };
+  }, [orderId]);
+
+  useEffect(() => {
+    fetchOrder();
+  }, [fetchOrder]);
 
   useEffect(() => {
     if (order) {
       checkStock(order);
     }
-  }, [order]);
+  }, [checkStock, order]);
 
   const updateStatus = async (newStatus) => {
     if (!order || updatingStatus) return;
@@ -132,6 +129,14 @@ export default function MerchantOrderDetailsScreen() {
       setUpdatingStatus(true);
       const merchantId = auth.currentUser?.uid;
       if (!merchantId) return;
+      const previousStatus =
+        order?.merchantStatuses?.[merchantId]?.status || order?.status || "pending";
+      const uniqueMerchantIds = new Set(
+        (order?.items || [])
+          .map((item) => item.merchantId)
+          .filter(Boolean),
+      );
+      const isPartialUpdate = uniqueMerchantIds.size > 1;
 
       await updateDoc(doc(db, "orders", orderId), {
         status: newStatus,
@@ -140,6 +145,15 @@ export default function MerchantOrderDetailsScreen() {
           status: newStatus,
           statusUpdatedAt: new Date(),
         },
+      });
+
+      await notifyCustomerOrderStatus({
+        customerId: order.customerId,
+        orderId,
+        merchantId,
+        status: newStatus,
+        previousStatus,
+        isPartialUpdate,
       });
 
       // optimistic update
@@ -234,7 +248,7 @@ export default function MerchantOrderDetailsScreen() {
   if (!order) {
     return (
       <ScreenContainer>
-        <Text>Order not available.</Text>
+        <Text style={styles.emptyText}>Order not available.</Text>
       </ScreenContainer>
     );
   }
@@ -266,8 +280,8 @@ export default function MerchantOrderDetailsScreen() {
     accepted: "account-check",
     completed: "truck-fast",
   };
-  const STEP_ACTIVE_COLOR = "#4CAF50";
-  const STEP_IDLE_COLOR = "#BDBDBD";
+  const STEP_ACTIVE_COLOR = colors.success;
+  const STEP_IDLE_COLOR = colors.textSubtle;
 
   return (
     <ScreenContainer>
@@ -346,7 +360,7 @@ export default function MerchantOrderDetailsScreen() {
                 name="close-circle-outline"
                 variant="community"
                 size={18}
-                color="#F44336"
+                color={colors.danger}
               />
               <Text style={styles.cancelButtonText}>Cancel Order</Text>
             </Pressable>
@@ -361,7 +375,7 @@ export default function MerchantOrderDetailsScreen() {
                 name="close-circle"
                 variant="community"
                 size={24}
-                color="#fff"
+                color={colors.background}
               />
               <Text style={styles.cancelledText}>Order Cancelled</Text>
               <Pressable style={styles.reopenButton} onPress={handleReopenOrder}>
@@ -369,7 +383,7 @@ export default function MerchantOrderDetailsScreen() {
                   name="refresh"
                   variant="community"
                   size={18}
-                  color="#F44336"
+                  color={colors.danger}
                 />
                 <Text style={styles.reopenText}>Reopen Order</Text>
               </Pressable>
@@ -445,18 +459,20 @@ export default function MerchantOrderDetailsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors, isDark) =>
+  StyleSheet.create({
   header: {
     marginBottom: 20,
   },
   title: {
     fontSize: 22,
     fontWeight: "600",
+    color: colors.text,
   },
   timelineContainer: {
     marginBottom: 24,
     paddingVertical: 16,
-    backgroundColor: "#f9f9f9",
+    backgroundColor: colors.surface,
     borderRadius: 12,
     paddingHorizontal: 12,
   },
@@ -474,15 +490,15 @@ const styles = StyleSheet.create({
   lineLeft: {
     flex: 1,
     height: 3,
-    backgroundColor: "#ddd",
+    backgroundColor: colors.border,
   },
   lineRight: {
     flex: 1,
     height: 3,
-    backgroundColor: "#ddd",
+    backgroundColor: colors.border,
   },
   lineActive: {
-    backgroundColor: "#4CAF50",
+    backgroundColor: colors.success,
   },
   stepContainer: {
     alignItems: "center",
@@ -492,19 +508,19 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "#ddd",
+    backgroundColor: colors.border,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 3,
-    borderColor: "#fff",
+    borderColor: colors.background,
   },
   stepCircleActive: {
-    backgroundColor: "#e8f5e9",
-    borderColor: "#4CAF50",
+    backgroundColor: isDark ? colors.successSoft : "#e8f5e9",
+    borderColor: colors.success,
   },
   stepCircleCurrent: {
-    backgroundColor: "#e8f5e9",
-    borderColor: "#4CAF50",
+    backgroundColor: isDark ? colors.successSoft : "#e8f5e9",
+    borderColor: colors.success,
     borderWidth: 4,
   },
   stepCircleClickable: {
@@ -513,16 +529,16 @@ const styles = StyleSheet.create({
   stepLabel: {
     marginTop: 8,
     fontSize: 11,
-    color: "#999",
+    color: colors.textSubtle,
     textAlign: "center",
     fontWeight: "500",
   },
   stepLabelActive: {
-    color: "#333",
+    color: colors.textMuted,
     fontWeight: "600",
   },
   stepLabelCurrent: {
-    color: "#2196F3",
+    color: isDark ? colors.tint : "#2196F3",
     fontWeight: "700",
   },
   cancelButton: {
@@ -534,7 +550,7 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   cancelButtonText: {
-    color: "#F44336",
+    color: colors.danger,
     fontSize: 14,
     fontWeight: "600",
   },
@@ -542,7 +558,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#F44336",
+    backgroundColor: colors.danger,
     paddingVertical: 16,
     paddingHorizontal: 20,
     borderRadius: 12,
@@ -550,20 +566,20 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   cancelledText: {
-    color: "#fff",
+    color: colors.background,
     fontSize: 16,
     fontWeight: "600",
   },
   outOfStockBanner: {
     marginBottom: 24,
     padding: 14,
-    backgroundColor: "#fff3e0",
+    backgroundColor: isDark ? colors.surfaceMuted : "#fff3e0",
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: "#ffcc80",
+    borderColor: colors.warning,
   },
   outOfStockText: {
-    color: "#e65100",
+    color: isDark ? colors.warning : "#e65100",
     fontSize: 14,
     fontWeight: "600",
     marginBottom: 6,
@@ -576,12 +592,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderWidth: 1,
-    backgroundColor: "#ffc7c7",
-    borderColor: "#fff",
+    backgroundColor: colors.surface,
+    borderColor: colors.background,
     borderRadius: 16,
   },
   reopenText: {
-    color: "#F44336",
+    color: colors.danger,
     fontSize: 12,
     fontWeight: "600",
   },
@@ -591,37 +607,41 @@ const styles = StyleSheet.create({
   meta: {
     fontSize: 14,
     marginBottom: 6,
+    color: colors.textMuted,
   },
   metaLabel: {
     fontWeight: "600",
+    color: colors.text,
   },
   table: {
     borderWidth: 1,
-    borderColor: "#ddd",
+    borderColor: colors.border,
     borderRadius: 6,
     overflow: "hidden",
+    backgroundColor: colors.surface,
   },
   rowHeader: {
     flexDirection: "row",
-    backgroundColor: "#f5f5f5",
+    backgroundColor: colors.surfaceMuted,
     paddingVertical: 8,
   },
   row: {
     flexDirection: "row",
     paddingVertical: 8,
     borderTopWidth: 1,
-    borderColor: "#eee",
+    borderColor: colors.borderSoft,
   },
   summaryRow: {
     flexDirection: "row",
     paddingVertical: 10,
     borderTopWidth: 2,
-    borderColor: "#ddd",
-    backgroundColor: "#fafafa",
+    borderColor: colors.border,
+    backgroundColor: colors.surfaceMuted,
   },
   cell: {
     paddingHorizontal: 8,
     fontSize: 13,
+    color: colors.text,
   },
   flex2: {
     flex: 2,
@@ -633,5 +653,8 @@ const styles = StyleSheet.create({
   right: {
     flex: 1,
     textAlign: "right",
+  },
+  emptyText: {
+    color: colors.textSubtle,
   },
 });

@@ -1,7 +1,12 @@
 import { StyleSheet, Text, View } from "react-native";
+import { useMemo } from "react";
 import AppIcon from "./AppIcon";
+import { useAppTheme } from "../theme/useAppTheme";
 
 export default function EmptyFieldState({ message }) {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
+
   return (
     <View style={styles.container}>
       <View style={styles.iconLayer}>
@@ -9,7 +14,7 @@ export default function EmptyFieldState({ message }) {
           name="soccer-field"
           variant="community"
           size={150}
-          color="#C7C7CC"
+          color={colors.border}
         />
       </View>
       <View style={styles.messageLayer}>
@@ -19,7 +24,8 @@ export default function EmptyFieldState({ message }) {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors) =>
+  StyleSheet.create({
   container: {
     flex: 1,
   },
@@ -38,7 +44,7 @@ const styles = StyleSheet.create({
   },
   message: {
     textAlign: "center",
-    color: "#8E8E93",
+    color: colors.textSubtle,
     fontSize: 18,
     fontWeight: "400",
     lineHeight: 24,

@@ -2,11 +2,12 @@ import * as Print from "expo-print";
 import { useLocalSearchParams } from "expo-router";
 import * as Sharing from "expo-sharing";
 import { doc, getDoc } from "firebase/firestore";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import AppIcon from "../../../src/components/AppIcon";
 
 import { db } from "../../../src/firebase/firebaseConfig";
+import { useAppTheme } from "../../../src/theme/useAppTheme";
 
 const STATUS_LABELS = {
   pending: "Pending",
@@ -21,31 +22,39 @@ const STATUS_STEP_ICONS = {
   completed: "truck-fast",
   cancelled: "close-circle",
 };
-const STEP_ACTIVE_COLORS = {
-  pending: "#FFB300",
-  accepted: "#2196F3",
-  completed: "#4CAF50",
-  cancelled: "#F44336",
-};
-const STEP_ACTIVE_BACKGROUNDS = {
-  pending: "#fff3e0",
-  accepted: "#e3f2fd",
-  completed: "#e8f5e9",
-  cancelled: "#fdecec",
-};
 
 export default function CustomerOrderDetails() {
   const { orderId, merchantId } = useLocalSearchParams();
+  const { colors, isDark } = useAppTheme();
   const [order, setOrder] = useState(null);
+  const styles = useMemo(() => createStyles(colors, isDark), [colors, isDark]);
+  const stepActiveColors = useMemo(
+    () => ({
+      pending: isDark ? colors.warning : "#FFB300",
+      accepted: isDark ? colors.tint : "#2196F3",
+      completed: isDark ? colors.success : "#4CAF50",
+      cancelled: colors.danger,
+    }),
+    [colors, isDark],
+  );
+  const stepActiveBackgrounds = useMemo(
+    () => ({
+      pending: isDark ? colors.surfaceMuted : "#fff3e0",
+      accepted: isDark ? colors.surfaceMuted : "#e3f2fd",
+      completed: isDark ? colors.successSoft : "#e8f5e9",
+      cancelled: isDark ? colors.surfaceMuted : "#fdecec",
+    }),
+    [colors, isDark],
+  );
+
+  const load = useCallback(async () => {
+    const snap = await getDoc(doc(db, "orders", orderId));
+    if (snap.exists()) setOrder(snap.data());
+  }, [orderId]);
 
   useEffect(() => {
     load();
-  }, []);
-
-  const load = async () => {
-    const snap = await getDoc(doc(db, "orders", orderId));
-    if (snap.exists()) setOrder(snap.data());
-  };
+  }, [load]);
 
   if (!order) {
     return (
@@ -79,8 +88,14 @@ export default function CustomerOrderDetails() {
     ? timelineStatuses.length - 1
     : STATUS_ORDER.indexOf(status);
 
-  const stepIdleColor = isCancelled ? "#F2B8B5" : "#BDBDBD";
-  const lineActiveStyle = { backgroundColor: isCancelled ? "#F44336" : "#4CAF50" };
+  const stepIdleColor = isCancelled
+    ? isDark
+      ? colors.danger
+      : "#F2B8B5"
+    : colors.textSubtle;
+  const lineActiveStyle = {
+    backgroundColor: isCancelled ? colors.danger : colors.success,
+  };
 
   const generateInvoiceHTML = () => {
     if (!order || !order.items) {
@@ -187,9 +202,11 @@ export default function CustomerOrderDetails() {
           {timelineStatuses.map((stepStatus, index) => {
             const isActive = currentIndex >= index;
             const isCurrent = currentIndex === index;
-            const stepActiveColor = STEP_ACTIVE_COLORS[stepStatus] || "#4CAF50";
+            const stepActiveColor =
+              stepActiveColors[stepStatus] || colors.success;
             const stepActiveBackground =
-              STEP_ACTIVE_BACKGROUNDS[stepStatus] || "#e8f5e9";
+              stepActiveBackgrounds[stepStatus] ||
+              (isDark ? colors.successSoft : "#e8f5e9");
 
             return (
               <View key={stepStatus} style={styles.timelineStepWrapper}>
@@ -227,7 +244,7 @@ export default function CustomerOrderDetails() {
                       isActive && styles.stepLabelActive,
                       isCurrent && styles.stepLabelCurrent,
                       isCurrent && {
-                        color: isCancelled ? "#F44336" : stepActiveColor,
+                        color: isCancelled ? colors.danger : stepActiveColor,
                       },
                     ]}
                   >
@@ -256,7 +273,7 @@ export default function CustomerOrderDetails() {
             name="information-box"
             variant="community"
             size={28}
-            color="#cf0000"
+            color={isDark ? colors.danger : "#cf0000"}
           />
           <Text style={styles.cancelledText}>
             Your order was cancelled. Please contact the seller for more
@@ -270,7 +287,7 @@ export default function CustomerOrderDetails() {
             name="store-clock"
             variant="community"
             size={24}
-            color="#0b5ed7"
+            color={isDark ? colors.tint : "#0b5ed7"}
           />
           <Text style={styles.acceptedText}>
             Your order has been processed and will be shipped soon!
@@ -330,17 +347,18 @@ export default function CustomerOrderDetails() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors, isDark) =>
+  StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: "#F2F2F7",
+    backgroundColor: colors.screen,
   },
-  title: { fontSize: 22, fontWeight: "700", marginBottom: 6 },
+  title: { fontSize: 22, fontWeight: "700", marginBottom: 6, color: colors.text },
   timelineContainer: {
     marginBottom: 14,
     paddingVertical: 16,
-    backgroundColor: "#f9f9f9",
+    backgroundColor: colors.surface,
     borderRadius: 12,
     paddingHorizontal: 12,
   },
@@ -358,15 +376,15 @@ const styles = StyleSheet.create({
   lineLeft: {
     flex: 1,
     height: 3,
-    backgroundColor: "#ddd",
+    backgroundColor: colors.border,
   },
   lineRight: {
     flex: 1,
     height: 3,
-    backgroundColor: "#ddd",
+    backgroundColor: colors.border,
   },
   lineActive: {
-    backgroundColor: "#4CAF50",
+    backgroundColor: colors.success,
   },
   stepContainer: {
     alignItems: "center",
@@ -376,49 +394,49 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "#ddd",
+    backgroundColor: colors.border,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 3,
-    borderColor: "#fff",
+    borderColor: colors.background,
   },
   stepCircleActive: {
-    backgroundColor: "#e8f5e9",
-    borderColor: "#4CAF50",
+    backgroundColor: isDark ? colors.successSoft : "#e8f5e9",
+    borderColor: colors.success,
   },
   stepCircleCurrent: {
-    backgroundColor: "#e8f5e9",
-    borderColor: "#4CAF50",
+    backgroundColor: isDark ? colors.successSoft : "#e8f5e9",
+    borderColor: colors.success,
     borderWidth: 4,
   },
   stepLabel: {
     marginTop: 8,
     fontSize: 11,
-    color: "#999",
+    color: colors.textSubtle,
     textAlign: "center",
     fontWeight: "500",
   },
   stepLabelActive: {
-    color: "#333",
+    color: colors.textMuted,
     fontWeight: "600",
   },
   stepLabelCurrent: {
-    color: "#2196F3",
+    color: isDark ? colors.tint : "#2196F3",
     fontWeight: "700",
   },
   cancelledBox: {
     flexDirection: "row",
     alignItems: "flex-start",
     gap: 8,
-    backgroundColor: "#fbc6c6",
+    backgroundColor: isDark ? colors.surfaceMuted : "#fbc6c6",
     borderWidth: 1,
-    borderColor: "#cf0000",
+    borderColor: colors.danger,
     padding: 10,
     borderRadius: 3,
     marginBottom: 12,
   },
   cancelledText: {
-    color: "#cf0000",
+    color: colors.danger,
     fontWeight: "500",
     fontStyle: "",
     flex: 1,
@@ -427,64 +445,65 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "flex-start",
     gap: 8,
-    backgroundColor: "#cce0ff",
+    backgroundColor: isDark ? colors.surfaceMuted : "#cce0ff",
     borderWidth: 1,
-    borderColor: "#0b5ed7",
+    borderColor: isDark ? colors.tint : "#0b5ed7",
     padding: 8,
     borderRadius: 3,
     marginBottom: 10,
   },
   acceptedText: {
-    color: "#0b5ed7",
+    color: isDark ? colors.tint : "#0b5ed7",
     fontWeight: "500",
     fontSize: 13,
     fontStyle: "",
     flex: 1,
   },
-  meta: { fontSize: 13, color: "#555", marginBottom: 8 },
-  metaLabel: { fontWeight: "600" },
+  meta: { fontSize: 13, color: colors.textMuted, marginBottom: 8 },
+  metaLabel: { fontWeight: "600", color: colors.text },
   invoiceCard: {
     marginTop: 12,
     marginBottom: 20,
     padding: 12,
-    backgroundColor: "#fff",
+    backgroundColor: colors.surface,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: "#E5E5EA",
+    borderColor: colors.border,
   },
-  invoiceTitle: { fontSize: 16, fontWeight: "700", marginBottom: 4 },
-  invoiceMeta: { fontSize: 12, color: "#666", marginBottom: 10 },
+  invoiceTitle: { fontSize: 16, fontWeight: "700", marginBottom: 4, color: colors.text },
+  invoiceMeta: { fontSize: 12, color: colors.textSubtle, marginBottom: 10 },
   invoiceButton: {
-    backgroundColor: "#000",
+    backgroundColor: colors.text,
     paddingVertical: 10,
     borderRadius: 6,
     alignItems: "center",
   },
-  invoiceButtonText: { color: "#fff", fontWeight: "600" },
+  invoiceButtonText: { color: colors.background, fontWeight: "600" },
   table: {
-    backgroundColor: "#fff",
+    backgroundColor: colors.surface,
     borderRadius: 3,
     borderWidth: 1,
-    borderColor: "#E5E5EA",
+    borderColor: colors.border,
     overflow: "hidden",
   },
   headerRow: {
-    backgroundColor: "#F5F5F7",
+    backgroundColor: colors.surfaceMuted,
     borderTopWidth: 0,
   },
   headerText: {
     fontWeight: "600",
-    color: "#444",
+    color: colors.textMuted,
   },
   row: {
     flexDirection: "row",
     paddingVertical: 10,
     paddingHorizontal: 10,
     borderTopWidth: 1,
-    borderColor: "#F0F0F0",
+    borderColor: colors.borderSoft,
   },
   cell: {
     fontSize: 13,
+    color: colors.text,
   },
   name: {
     flex: 2,

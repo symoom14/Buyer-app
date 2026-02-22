@@ -9,15 +9,24 @@ function getFavoritesKey(uid) {
   return `favorites:${uid || "guest"}`;
 }
 
+function getStoreFavoritesKey(uid) {
+  return `store-favorites:${uid || "guest"}`;
+}
+
 export function FavoritesProvider({ children }) {
   const [favoriteIds, setFavoriteIds] = useState([]);
+  const [favoriteStoreIds, setFavoriteStoreIds] = useState([]);
   const [storageKey, setStorageKey] = useState(getFavoritesKey(null));
+  const [storeStorageKey, setStoreStorageKey] = useState(getStoreFavoritesKey(null));
   const [ready, setReady] = useState(false);
+  const [storesReady, setStoresReady] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setReady(false);
+      setStoresReady(false);
       setStorageKey(getFavoritesKey(user?.uid || null));
+      setStoreStorageKey(getStoreFavoritesKey(user?.uid || null));
     });
     return unsubscribe;
   }, []);
@@ -43,12 +52,38 @@ export function FavoritesProvider({ children }) {
   }, [storageKey]);
 
   useEffect(() => {
+    let active = true;
+    (async () => {
+      try {
+        const raw = await AsyncStorage.getItem(storeStorageKey);
+        if (!active) return;
+        const parsed = raw ? JSON.parse(raw) : [];
+        setFavoriteStoreIds(Array.isArray(parsed) ? parsed : []);
+      } catch {
+        if (!active) return;
+        setFavoriteStoreIds([]);
+      } finally {
+        if (active) setStoresReady(true);
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, [storeStorageKey]);
+
+  useEffect(() => {
     if (!ready) return;
     AsyncStorage.setItem(storageKey, JSON.stringify(favoriteIds));
   }, [favoriteIds, ready, storageKey]);
 
+  useEffect(() => {
+    if (!storesReady) return;
+    AsyncStorage.setItem(storeStorageKey, JSON.stringify(favoriteStoreIds));
+  }, [favoriteStoreIds, storesReady, storeStorageKey]);
+
   const value = useMemo(() => {
     const hasFavorite = (productId) => favoriteIds.includes(productId);
+    const hasFavoriteStore = (storeId) => favoriteStoreIds.includes(storeId);
 
     const addFavorite = (productId) => {
       if (!productId) return;
@@ -69,15 +104,40 @@ export function FavoritesProvider({ children }) {
       return true;
     };
 
+    const addFavoriteStore = (storeId) => {
+      if (!storeId) return;
+      setFavoriteStoreIds((prev) => (prev.includes(storeId) ? prev : [...prev, storeId]));
+    };
+
+    const removeFavoriteStore = (storeId) => {
+      setFavoriteStoreIds((prev) => prev.filter((id) => id !== storeId));
+    };
+
+    const toggleFavoriteStore = (storeId) => {
+      if (!storeId) return false;
+      if (hasFavoriteStore(storeId)) {
+        removeFavoriteStore(storeId);
+        return false;
+      }
+      addFavoriteStore(storeId);
+      return true;
+    };
+
     return {
       favoriteIds,
+      favoriteStoreIds,
       hasFavorite,
+      hasFavoriteStore,
       addFavorite,
       removeFavorite,
       toggleFavorite,
+      addFavoriteStore,
+      removeFavoriteStore,
+      toggleFavoriteStore,
       clearFavorites: () => setFavoriteIds([]),
+      clearFavoriteStores: () => setFavoriteStoreIds([]),
     };
-  }, [favoriteIds]);
+  }, [favoriteIds, favoriteStoreIds]);
 
   return (
     <FavoritesContext.Provider value={value}>

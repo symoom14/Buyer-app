@@ -2,7 +2,7 @@ import * as Print from "expo-print";
 import { useLocalSearchParams } from "expo-router";
 import * as Sharing from "expo-sharing";
 import { doc, getDoc } from "firebase/firestore";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   StyleSheet,
@@ -12,20 +12,19 @@ import {
 import PdfViewer from "../../../src/components/PdfViewer";
 import ScreenContainer from "../../../src/components/ScreenContainer";
 import { db } from "../../../src/firebase/firebaseConfig";
+import { useAppTheme } from "../../../src/theme/useAppTheme";
 
 export default function InvoicePage() {
   const { orderId } = useLocalSearchParams();
+  const { colors } = useAppTheme();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [invoiceUri, setInvoiceUri] = useState("");
   const [viewerVisible, setViewerVisible] = useState(false);
   const [previewUri, setPreviewUri] = useState("");
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
-  useEffect(() => {
-    fetchOrder();
-  }, []);
-
-  const fetchOrder = async () => {
+  const fetchOrder = useCallback(async () => {
     try {
       const snap = await getDoc(doc(db, "orders", orderId));
       if (snap.exists()) {
@@ -36,7 +35,11 @@ export default function InvoicePage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [orderId]);
+
+  useEffect(() => {
+    fetchOrder();
+  }, [fetchOrder]);
 
   const generateInvoiceHTML = () => {
     if (!order || !order.items) {
@@ -162,7 +165,7 @@ export default function InvoicePage() {
   if (!order) {
     return (
       <ScreenContainer>
-        <Text>Invoice not available yet.</Text>
+        <Text style={styles.unavailableText}>Invoice not available yet.</Text>
       </ScreenContainer>
     );
   }
@@ -194,44 +197,48 @@ export default function InvoicePage() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors) =>
+  StyleSheet.create({
   successTitle: {
     fontSize: 26,
     fontWeight: "700",
-    color: "#1E8E3E",
+    color: colors.success,
     marginBottom: 20,
   },
   subHeading: {
     fontSize: 16,
-    color: "#333",
+    color: colors.textMuted,
     marginBottom: 50,
   },
   helperText: {
     fontSize: 14,
-    color: "#666",
+    color: colors.textSubtle,
     marginBottom: 18,
   },
   previewBtn: {
-    backgroundColor: "#111",
+    backgroundColor: colors.text,
     padding: 14,
     borderRadius: 6,
     alignItems: "center",
     marginBottom: 10,
   },
   previewBtnText: {
-    color: "#fff",
+    color: colors.background,
     fontWeight: "600",
   },
   shareBtn: {
-    backgroundColor: "#fff",
+    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: "#111",
+    borderColor: colors.text,
     padding: 14,
     borderRadius: 6,
     alignItems: "center",
   },
   shareText: {
-    color: "#111",
+    color: colors.text,
     fontWeight: "600",
+  },
+  unavailableText: {
+    color: colors.textSubtle,
   },
 });

@@ -9,7 +9,7 @@ import {
   updateDoc,
   where,
 } from "firebase/firestore";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import {
   Alert,
   Animated,
@@ -25,12 +25,14 @@ import {
 import { Swipeable } from "react-native-gesture-handler";
 import AppIcon from "../../../src/components/AppIcon";
 import { db } from "../../../src/firebase/firebaseConfig";
+import { useAppTheme } from "../../../src/theme/useAppTheme";
 
 const DEFAULT_PRODUCT_ICON = "package-variant-closed";
 
 export default function StorePage() {
   const { storeId } = useLocalSearchParams();
   const router = useRouter();
+  const { colors, isDark } = useAppTheme();
   const [products, setProducts] = useState([]);
   const [soldCounts, setSoldCounts] = useState({});
   const [storeName, setStoreName] = useState("Store");
@@ -42,8 +44,9 @@ export default function StorePage() {
   const [fabVisible, setFabVisible] = useState(true);
   const lastOffsetY = useRef(0);
   const fabAnim = useRef(new Animated.Value(1)).current;
+  const styles = useMemo(() => createStyles(colors, isDark), [colors, isDark]);
 
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     const storeSnap = await getDoc(doc(db, "stores", String(storeId)));
     if (storeSnap.exists()) {
       const currentStoreName = storeSnap.data()?.name || "Store";
@@ -75,12 +78,12 @@ export default function StorePage() {
       });
     });
     setSoldCounts(counts);
-  };
+  }, [storeId]);
 
   useFocusEffect(
     useCallback(() => {
       fetchProducts();
-    }, []),
+    }, [fetchProducts]),
   );
 
   const handleDelete = async (productId) => {
@@ -111,7 +114,7 @@ export default function StorePage() {
           name="package-variant-closed-remove"
           variant="community"
           size={24}
-          color="#C62828"
+          color={colors.danger}
         />
       </TouchableOpacity>
     </View>
@@ -159,7 +162,7 @@ export default function StorePage() {
           name="package-variant-plus"
           variant="community"
           size={24}
-          color="#2E7D32"
+          color={colors.success}
         />
       </TouchableOpacity>
     </View>
@@ -223,7 +226,7 @@ export default function StorePage() {
           name="chevron-right"
           variant="community"
           size={18}
-          color="#8A8A8E"
+          color={colors.textSubtle}
         />
       </TouchableOpacity>
       <Text style={styles.subtitle}>Store Products</Text>
@@ -255,7 +258,7 @@ export default function StorePage() {
                     name={item.iconName || DEFAULT_PRODUCT_ICON}
                     variant="community"
                     size={24}
-                    color="#333"
+                    color={colors.text}
                   />
                 </View>
 
@@ -307,6 +310,7 @@ export default function StorePage() {
               value={storeNameInput}
               onChangeText={setStoreNameInput}
               placeholder="Enter store name"
+              placeholderTextColor={colors.textSubtle}
               autoFocus
               maxLength={80}
             />
@@ -366,10 +370,16 @@ export default function StorePage() {
               onChangeText={setRestockQtyInput}
               keyboardType="numeric"
               placeholder="Enter restock amount"
+              placeholderTextColor={colors.textSubtle}
             />
 
             <TouchableOpacity style={styles.doneButton} onPress={handleDoneRestock}>
-              <AppIcon name="check" variant="community" size={18} color="#fff" />
+              <AppIcon
+                name="check"
+                variant="community"
+                size={18}
+                color={colors.background}
+              />
               <Text style={styles.doneButtonText}>Done</Text>
             </TouchableOpacity>
           </Pressable>
@@ -401,7 +411,7 @@ export default function StorePage() {
             name="shape-plus"
             variant="community"
             size={28}
-            color="#fff"
+            color={colors.background}
           />
         </TouchableOpacity>
       </Animated.View>
@@ -409,24 +419,26 @@ export default function StorePage() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors, isDark) =>
+  StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: "#F2F2F7",
+    backgroundColor: colors.screen,
   },
   title: {
     fontSize: 24,
     fontWeight: "600",
     marginBottom: 8,
+    color: colors.text,
   },
   subtitle: {
     fontSize: 16,
-    color: "#555",
+    color: colors.textMuted,
     marginBottom: 12,
   },
   renameCard: {
-    backgroundColor: "#fff",
+    backgroundColor: colors.surface,
     borderRadius: 12,
     paddingHorizontal: 12,
     height: 46,
@@ -443,12 +455,13 @@ const styles = StyleSheet.create({
   renameCardText: {
     fontSize: 15,
     fontWeight: "600",
+    color: colors.text,
   },
   productCard: {
     flexDirection: "row",
     alignItems: "center",
     padding: 14,
-    backgroundColor: "#fff",
+    backgroundColor: colors.surface,
     borderRadius: 12,
     marginBottom: 12,
   },
@@ -456,7 +469,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: "#f2f2f2",
+    backgroundColor: colors.surfaceMuted,
     alignItems: "center",
     justifyContent: "center",
     marginRight: 12,
@@ -467,29 +480,30 @@ const styles = StyleSheet.create({
   productName: {
     fontWeight: "600",
     fontSize: 16,
+    color: colors.text,
   },
   productMeta: {
     marginTop: 4,
-    color: "#555",
+    color: colors.textMuted,
   },
   stockStatus: {
     marginTop: 6,
     fontWeight: "600",
   },
   stockCritical: {
-    color: "#C62828",
+    color: colors.danger,
   },
   stockBackordered: {
-    color: "#C62828",
+    color: colors.danger,
   },
   stockLow: {
-    color: "#EF6C00",
+    color: colors.warning,
   },
   stockGood: {
-    color: "#2E7D32",
+    color: colors.success,
   },
   empty: {
-    color: "#666",
+    color: colors.textSubtle,
     marginTop: 12,
   },
   deleteActionWrap: {
@@ -499,7 +513,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   deleteActionButton: {
-    backgroundColor: "#FFE0E6",
+    backgroundColor: colors.surfaceMuted,
     justifyContent: "center",
     alignItems: "center",
     width: 52,
@@ -513,7 +527,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   restockActionButton: {
-    backgroundColor: "#E8F7EC",
+    backgroundColor: colors.successSoft,
     justifyContent: "center",
     alignItems: "center",
     width: 52,
@@ -522,12 +536,12 @@ const styles = StyleSheet.create({
   },
   modalBackdrop: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.28)",
+    backgroundColor: isDark ? "rgba(0,0,0,0.6)" : "rgba(0,0,0,0.28)",
     justifyContent: "center",
     paddingHorizontal: 22,
   },
   modalCard: {
-    backgroundColor: "#fff",
+    backgroundColor: colors.surface,
     borderRadius: 12,
     padding: 14,
   },
@@ -535,19 +549,21 @@ const styles = StyleSheet.create({
     fontSize: 17,
     fontWeight: "700",
     marginBottom: 8,
+    color: colors.text,
   },
   modalMeta: {
     fontSize: 14,
-    color: "#444",
+    color: colors.textMuted,
     marginBottom: 6,
   },
   modalInput: {
     marginTop: 6,
     borderWidth: 1,
-    borderColor: "#ddd",
+    borderColor: colors.border,
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 10,
+    color: colors.text,
   },
   renameModalActions: {
     flexDirection: "row",
@@ -559,29 +575,29 @@ const styles = StyleSheet.create({
     height: 34,
     borderRadius: 10,
     paddingHorizontal: 14,
-    backgroundColor: "#E5E5EA",
+    backgroundColor: colors.input,
     alignItems: "center",
     justifyContent: "center",
   },
   cancelButtonText: {
-    color: "#333",
+    color: colors.textMuted,
     fontWeight: "600",
   },
   renameDoneButton: {
     height: 34,
     borderRadius: 10,
     paddingHorizontal: 14,
-    backgroundColor: "#111",
+    backgroundColor: colors.text,
     alignItems: "center",
     justifyContent: "center",
   },
   renameDoneButtonText: {
-    color: "#fff",
+    color: colors.background,
     fontWeight: "600",
   },
   doneButton: {
     marginTop: 12,
-    backgroundColor: "#000",
+    backgroundColor: colors.text,
     borderRadius: 8,
     height: 44,
     alignItems: "center",
@@ -590,7 +606,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   doneButtonText: {
-    color: "#fff",
+    color: colors.background,
     fontWeight: "600",
   },
   fabWrap: {
@@ -599,7 +615,7 @@ const styles = StyleSheet.create({
     bottom: 50,
   },
   fab: {
-    backgroundColor: "#000",
+    backgroundColor: colors.text,
     width: 58,
     height: 58,
     borderRadius: 29,

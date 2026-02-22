@@ -11,11 +11,15 @@ import {
   View,
 } from "react-native";
 import AppIcon from "../../src/components/AppIcon";
+import { useFavorites } from "../../src/context/FavoritesContext";
 import { db } from "../../src/firebase/firebaseConfig";
+import { useAppTheme } from "../../src/theme/useAppTheme";
 import { getUserDisplayName } from "../../src/utils/userDisplayName";
 
 export default function CustomerStores() {
   const router = useRouter();
+  const { colors } = useAppTheme();
+  const { hasFavoriteStore, toggleFavoriteStore } = useFavorites();
   const [stores, setStores] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
@@ -86,6 +90,7 @@ export default function CustomerStores() {
   }, [stores, searchQuery, selectedCategory]);
   const hasFiltersActive =
     searchQuery.trim().length > 0 || selectedCategory !== "All";
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   if (loading) {
     return (
@@ -101,6 +106,7 @@ export default function CustomerStores() {
       <TextInput
         style={styles.search}
         placeholder="Search stores or sellers"
+        placeholderTextColor={colors.textSubtle}
         value={searchQuery}
         onChangeText={setSearchQuery}
         clearButtonMode="while-editing"
@@ -152,52 +158,75 @@ export default function CustomerStores() {
               : "No stores available"}
           </Text>
         ) : null}
-        {visibleStores.map((item) => (
-          <TouchableOpacity
-            key={item.id}
-            style={styles.card}
-            onPress={() => router.push(`/customer/store/${item.id}`)}
-          >
-            <View style={styles.iconWrap}>
-              <AppIcon
-                name="store"
-                variant="community"
-                size={24}
-                color="#333"
-              />
+        {visibleStores.map((item) => {
+          const isFavoriteStore = hasFavoriteStore(item.id);
+          return (
+            <View key={item.id} style={[styles.card, styles.storeCard]}>
+              <TouchableOpacity
+                style={styles.storeCardMain}
+                onPress={() => router.push(`/customer/store/${item.id}`)}
+              >
+                <View style={styles.iconWrap}>
+                  <AppIcon
+                    name="store"
+                    variant="community"
+                    size={24}
+                    color={colors.text}
+                  />
+                </View>
+                <View style={styles.contentWrap}>
+                  <Text style={styles.storeName}>{item.name}</Text>
+                  <Text style={styles.meta}>
+                    Seller: <Text style={styles.bold}>{item.sellerName}</Text>
+                  </Text>
+                </View>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.favoriteStoreButton,
+                  isFavoriteStore
+                    ? styles.favoriteStoreButtonRemove
+                    : styles.favoriteStoreButtonAdd,
+                ]}
+                onPress={() => toggleFavoriteStore(item.id)}
+              >
+                <AppIcon
+                  name={isFavoriteStore ? "store-remove" : "store-check"}
+                  variant="community"
+                  size={18}
+                  color={isFavoriteStore ? colors.danger : colors.success}
+                />
+              </TouchableOpacity>
             </View>
-            <View style={styles.contentWrap}>
-              <Text style={styles.storeName}>{item.name}</Text>
-              <Text style={styles.meta}>
-                Seller: <Text style={styles.bold}>{item.sellerName}</Text>
-              </Text>
-            </View>
-          </TouchableOpacity>
-        ))}
+          );
+        })}
         <View style={{ height: 8 }} />
       </ScrollView>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors) =>
+  StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: "#F2F2F7",
+    backgroundColor: colors.screen,
   },
   title: {
     fontSize: 26,
     fontWeight: "700",
     marginBottom: 12,
+    color: colors.text,
   },
   search: {
-    backgroundColor: "#E5E5EA",
+    backgroundColor: colors.input,
     borderRadius: 10,
     paddingHorizontal: 12,
     paddingVertical: 10,
     fontSize: 16,
     marginBottom: 16,
+    color: colors.text,
   },
   filters: {
     flexDirection: "row",
@@ -206,9 +235,9 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   categoryPill: {
-    backgroundColor: "#EAF1FF",
+    backgroundColor: colors.pill,
     borderWidth: 1,
-    borderColor: "#C9D9FF",
+    borderColor: colors.pillBorder,
     borderRadius: 999,
     paddingHorizontal: 14,
     height: 34,
@@ -216,30 +245,30 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   categoryPillSelected: {
-    backgroundColor: "#D8E7FF",
-    borderColor: "#95B7FF",
+    backgroundColor: colors.pillSelected,
+    borderColor: colors.pillSelectedBorder,
   },
   categoryPillText: {
-    color: "#2357B8",
+    color: colors.pillText,
     fontWeight: "600",
     fontSize: 13,
   },
   categoryPillTextSelected: {
-    color: "#18479E",
+    color: colors.pillTextSelected,
   },
   categoryAllPill: {
-    backgroundColor: "#F2F2F7",
-    borderColor: "#DADAE0",
+    backgroundColor: colors.pillNeutral,
+    borderColor: colors.pillNeutralBorder,
   },
   categoryAllPillSelected: {
-    backgroundColor: "#DDDEE6",
-    borderColor: "#BCBEC9",
+    backgroundColor: colors.pillNeutralSelected,
+    borderColor: colors.pillNeutralSelectedBorder,
   },
   categoryAllPillText: {
-    color: "#4B4E5A",
+    color: colors.pillNeutralText,
   },
   categoryAllPillTextSelected: {
-    color: "#333642",
+    color: colors.pillNeutralTextSelected,
   },
   listContent: {
     paddingTop: 0,
@@ -253,16 +282,26 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 16,
     borderWidth: 1,
-    borderColor: "#eee",
+    borderColor: colors.borderSoft,
     borderRadius: 8,
     marginBottom: 12,
-    backgroundColor: "#fff",
+    backgroundColor: colors.surface,
+  },
+  storeCard: {
+    padding: 0,
+  },
+  storeCardMain: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 16,
+    paddingRight: 10,
   },
   iconWrap: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: "#f2f2f2",
+    backgroundColor: colors.surfaceMuted,
     alignItems: "center",
     justifyContent: "center",
     marginRight: 15,
@@ -270,20 +309,35 @@ const styles = StyleSheet.create({
   contentWrap: {
     flex: 1,
   },
+  favoriteStoreButton: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    marginRight: 12,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  favoriteStoreButtonAdd: {
+    backgroundColor: colors.successSoft,
+  },
+  favoriteStoreButtonRemove: {
+    backgroundColor: "#FDECEC",
+  },
   storeName: {
     fontSize: 16,
     fontWeight: "600",
     marginBottom: 4,
+    color: colors.text,
   },
   meta: {
     fontSize: 14,
-    color: "#555",
+    color: colors.textMuted,
   },
   bold: {
     fontWeight: "500",
   },
   empty: {
-    color: "#666",
+    color: colors.textSubtle,
     marginTop: 20,
   },
 });

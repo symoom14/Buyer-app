@@ -18,6 +18,8 @@ import {
 import AppIcon from "../../src/components/AppIcon";
 import EmptyFieldState from "../../src/components/EmptyFieldState";
 import { auth, db } from "../../src/firebase/firebaseConfig";
+import { useAppTheme } from "../../src/theme/useAppTheme";
+import { getStatusColors } from "../../src/theme/statusPalette";
 import { getUserDisplayName } from "../../src/utils/userDisplayName";
 
 const STATUS_ICONS = {
@@ -27,20 +29,19 @@ const STATUS_ICONS = {
   cancelled: "close-box",
 };
 
-const STATUS_COLORS = {
-  pending: "#FFB300",
-  accepted: "#2196F3",
-  completed: "#4CAF50",
-  cancelled: "#F44336",
-};
-
 export default function CustomerOrders() {
   const [orders, setOrders] = useState([]);
   const router = useRouter();
+  const { colors, isDark } = useAppTheme();
   const [expandedId, setExpandedId] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("all");
   const [searchFocused, setSearchFocused] = useState(false);
+  const styles = useMemo(() => createStyles(colors), [colors]);
+  const statusColors = useMemo(
+    () => getStatusColors(colors, isDark),
+    [colors, isDark],
+  );
 
   if (
     Platform.OS === "android" &&
@@ -175,6 +176,7 @@ export default function CustomerOrders() {
         <>
           <TextInput
             placeholder="Search by merchant or product"
+            placeholderTextColor={colors.textSubtle}
             value={searchQuery}
             onChangeText={setSearchQuery}
             style={styles.search}
@@ -211,7 +213,7 @@ export default function CustomerOrders() {
                       styles.filterText,
                       isInactive && styles.filterTextInactive,
                       !isInactive && !isSelected && { color: filter.dark },
-                      !isInactive && isSelected && { color: "#fff" },
+                      !isInactive && isSelected && { color: colors.background },
                     ]}
                   >
                     {filter.label}
@@ -268,7 +270,7 @@ export default function CustomerOrders() {
                   <AppIcon
                     variant="community"
                     name={STATUS_ICONS[item.status]}
-                    color={STATUS_COLORS[item.status]}
+                    color={statusColors[item.status] || statusColors.pending}
                     size={26}
                   />
                   <Text style={styles.price}>${item.total.toFixed(2)}</Text>
@@ -310,19 +312,21 @@ export default function CustomerOrders() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors) =>
+  StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: "#F2F2F7",
+    backgroundColor: colors.screen,
   },
   search: {
-    backgroundColor: "#E5E5EA",
+    backgroundColor: colors.input,
     borderRadius: 10,
     paddingHorizontal: 12,
     paddingVertical: 8,
     fontSize: 16,
     marginBottom: 12,
+    color: colors.text,
   },
   filters: {
     flexDirection: "row",
@@ -339,7 +343,7 @@ const styles = StyleSheet.create({
     marginBottom: 7,
   },
   filterInactive: {
-    backgroundColor: "#E6E6EA",
+    backgroundColor: colors.input,
     borderColor: "transparent",
   },
   filterText: {
@@ -347,29 +351,29 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   filterTextInactive: {
-    color: "#777",
+    color: colors.textSubtle,
   },
   card: {
     flexDirection: "row",
     justifyContent: "space-between",
     padding: 14,
     borderRadius: 9,
-    backgroundColor: "#fff",
+    backgroundColor: colors.surface,
     marginBottom: 12,
   },
-  title: { fontSize: 17, fontWeight: "600" },
-  sub: { fontSize: 13, color: "#666", marginTop: 4 },
-  meta: { fontSize: 12, color: "#777", marginTop: 4 },
+  title: { fontSize: 17, fontWeight: "600", color: colors.text },
+  sub: { fontSize: 13, color: colors.textSubtle, marginTop: 4 },
+  meta: { fontSize: 12, color: colors.textSubtle, marginTop: 4 },
   right: { alignItems: "flex-end", gap: 6 },
-  price: { fontSize: 16, fontWeight: "700" },
+  price: { fontSize: 16, fontWeight: "700", color: colors.text },
   preview: {
     marginTop: -6,
     marginBottom: 12,
     padding: 12,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.surface,
     borderRadius: 9,
     borderWidth: 1,
-    borderColor: "#E5E5EA",
+    borderColor: colors.border,
   },
   previewRow: {
     flexDirection: "row",
@@ -378,27 +382,27 @@ const styles = StyleSheet.create({
   },
   previewLabel: {
     fontSize: 12,
-    color: "#777",
+    color: colors.textSubtle,
     fontWeight: "600",
   },
   previewValue: {
     fontSize: 12,
-    color: "#111",
+    color: colors.text,
     fontWeight: "600",
   },
   previewItem: {
     fontSize: 13,
-    color: "#111",
+    color: colors.text,
     marginTop: 2,
   },
   previewMore: {
     fontSize: 12,
-    color: "#777",
+    color: colors.textSubtle,
     marginTop: 4,
   },
   empty: {
     textAlign: "center",
-    color: "#666",
+    color: colors.textSubtle,
     marginTop: 40,
   },
   listEmptyContainer: {

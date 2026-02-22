@@ -1,5 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import { onAuthStateChanged } from "firebase/auth";
+import { collection, onSnapshot, query, where } from "firebase/firestore";
+import { useEffect, useState } from "react";
 import {
   ScrollView,
   StyleSheet,
@@ -9,24 +12,82 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import AppIcon from "../../src/components/AppIcon";
 import DashboardSection from "../../src/components/DashboardSection";
 import ScreenContainer from "../../src/components/ScreenContainer";
+import { auth, db } from "../../src/firebase/firebaseConfig";
+import { useAppTheme } from "../../src/theme/useAppTheme";
 
 export default function MerchantDashboard() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { colors } = useAppTheme();
+  const [hasUnreadNotifications, setHasUnreadNotifications] = useState(false);
+  const styles = createStyles(colors);
+
+  useEffect(() => {
+    let unsubscribeNotifications = () => {};
+
+    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+      unsubscribeNotifications();
+
+      if (!user?.uid) {
+        setHasUnreadNotifications(false);
+        return;
+      }
+
+      const unreadQuery = query(
+        collection(db, "notifications"),
+        where("recipientId", "==", user.uid),
+        where("read", "==", false),
+      );
+
+      unsubscribeNotifications = onSnapshot(
+        unreadQuery,
+        (snap) => {
+          const hasUnread = snap.docs.some(
+            (docSnap) => docSnap.data()?.recipientRole === "merchant",
+          );
+          setHasUnreadNotifications(hasUnread);
+        },
+        () => setHasUnreadNotifications(false),
+      );
+    });
+
+    return () => {
+      unsubscribeNotifications();
+      unsubscribeAuth();
+    };
+  }, []);
 
   return (
     <ScreenContainer>
       <View style={[styles.hero, { paddingTop: insets.top + 28 }]}>
         <View style={styles.heroRow}>
           <Text style={styles.heroTitle}>Merchant</Text>
-          <TouchableOpacity
-            style={styles.profileBtn}
-            onPress={() => router.push("/merchant/profile")}
-          >
-            <Ionicons name="person-circle-outline" size={30} color="#fff" />
-          </TouchableOpacity>
+          <View style={styles.headerActions}>
+            <TouchableOpacity
+              style={styles.actionBtn}
+              onPress={() => router.push("/merchant/notifications")}
+            >
+              <AppIcon
+                name={hasUnreadNotifications ? "bell-badge" : "bell"}
+                variant="community"
+                size={26}
+                color={colors.merchantHeaderText}
+              />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.actionBtn}
+              onPress={() => router.push("/merchant/profile")}
+            >
+              <Ionicons
+                name="person-circle-outline"
+                size={30}
+                color={colors.merchantHeaderText}
+              />
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
 
@@ -88,6 +149,7 @@ export default function MerchantDashboard() {
           tiles={[
             {
               title: "Store analytics",
+              onPress: () => router.push("/merchant/stores/analytics?mode=store"),
               icon: "chart-line",
               iconVariant: "community",
               backgroundColor: "#F2E8FF",
@@ -96,6 +158,8 @@ export default function MerchantDashboard() {
             },
             {
               title: "Earnings analytics",
+              onPress: () =>
+                router.push("/merchant/stores/analytics?mode=earnings"),
               icon: "finance",
               iconVariant: "community",
               backgroundColor: "#E8F7EC",
@@ -109,9 +173,10 @@ export default function MerchantDashboard() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors) =>
+  StyleSheet.create({
   hero: {
-    backgroundColor: "#0b6be0",
+    backgroundColor: colors.merchantHeaderBg,
     marginHorizontal: -16,
     marginTop: -16,
     paddingHorizontal: 16,
@@ -123,14 +188,19 @@ const styles = StyleSheet.create({
   heroTitle: {
     fontSize: 42,
     fontWeight: "800",
-    color: "#fff",
+    color: colors.merchantHeaderText,
   },
   heroRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
   },
-  profileBtn: {
+  headerActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  actionBtn: {
     width: 32,
     height: 32,
     borderRadius: 16,

@@ -1,16 +1,20 @@
 import { useRouter } from "expo-router";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import LottieView from "lottie-react-native";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import AppIcon from "../../src/components/AppIcon";
 import ScreenContainer from "../../src/components/ScreenContainer";
 import { useCart } from "../../src/context/CartContext";
 import { auth, db } from "../../src/firebase/firebaseConfig";
+import { useAppTheme } from "../../src/theme/useAppTheme";
+import { notifyMerchantNewOrder } from "../../src/utils/notifications";
 
 export default function CheckoutPage() {
   const router = useRouter();
   const { cart, clearCart } = useCart();
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const [isPaying, setIsPaying] = useState(false);
   const [animationStage, setAnimationStage] = useState("payment");
   const [animationCompleted, setAnimationCompleted] = useState(false);
@@ -54,6 +58,23 @@ export default function CheckoutPage() {
         createdAt: serverTimestamp(),
       });
 
+      const merchantIds = [
+        ...new Set(
+          cart
+            .map((item) => item.merchantId)
+            .filter(Boolean),
+        ),
+      ];
+
+      await Promise.all(
+        merchantIds.map((merchantId) =>
+          notifyMerchantNewOrder({
+            merchantId,
+            orderId: orderRef.id,
+          }),
+        ),
+      );
+
       clearCart();
       setPendingInvoiceId(orderRef.id);
     } catch (err) {
@@ -95,7 +116,7 @@ export default function CheckoutPage() {
                     name="chevron-right"
                     variant="community"
                     size={14}
-                    color="#5C5C5C"
+                    color={colors.textMuted}
                   />
                 </View>
                 <Text style={styles.sellerStoreText}>
@@ -148,7 +169,7 @@ export default function CheckoutPage() {
             name="contactless-payment-circle-outline"
             variant="community"
             size={20}
-            color="#fff"
+            color={colors.background}
           />
           <Text style={styles.payText}>Pay ${total.toFixed(2)}</Text>
         </TouchableOpacity>
@@ -157,16 +178,18 @@ export default function CheckoutPage() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors) =>
+  StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: "600",
     marginBottom: 16,
+    color: colors.text,
   },
   itemsCard: {
-    backgroundColor: "#fff",
+    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: "#EAEAEA",
+    borderColor: colors.border,
     borderRadius: 12,
     overflow: "hidden",
   },
@@ -179,7 +202,7 @@ const styles = StyleSheet.create({
   },
   itemRowDivider: {
     borderBottomWidth: 1,
-    borderBottomColor: "#F0F0F0",
+    borderBottomColor: colors.borderSoft,
   },
   itemLeft: {
     flex: 1,
@@ -204,10 +227,10 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 17,
     fontWeight: "600",
-    color: "#1F1F1F",
+    color: colors.text,
   },
   qtyBadge: {
-    backgroundColor: "#E7F1FF",
+    backgroundColor: colors.pill,
     width: 24,
     height: 24,
     borderRadius: 12,
@@ -217,25 +240,25 @@ const styles = StyleSheet.create({
   qtyBadgeText: {
     fontSize: 13,
     fontWeight: "700",
-    color: "#1F5FBF",
+    color: colors.pillText,
   },
   sellerStoreText: {
     fontSize: 12,
-    color: "#666",
+    color: colors.textSubtle,
     fontWeight: "500",
   },
   arrowChip: {
     width: 20,
     height: 20,
     borderRadius: 10,
-    backgroundColor: "#F2F2F7",
+    backgroundColor: colors.screen,
     alignItems: "center",
     justifyContent: "center",
   },
   itemAmount: {
     fontSize: 17,
     fontWeight: "700",
-    color: "#111",
+    color: colors.text,
   },
   totalRow: {
     marginTop: 14,
@@ -246,13 +269,15 @@ const styles = StyleSheet.create({
   totalLabel: {
     fontSize: 18,
     fontWeight: "600",
+    color: colors.text,
   },
   totalValue: {
     fontSize: 18,
     fontWeight: "600",
+    color: colors.text,
   },
   payButton: {
-    backgroundColor: "#000",
+    backgroundColor: colors.text,
     padding: 16,
     width: "80%",
     alignSelf: "center",
@@ -264,7 +289,7 @@ const styles = StyleSheet.create({
     marginTop: 40,
   },
   payText: {
-    color: "#fff",
+    color: colors.background,
     fontSize: 16,
     fontWeight: "600",
   },
@@ -284,6 +309,6 @@ const styles = StyleSheet.create({
     transform: [{ scale: 0.85 }],
   },
   disabled: {
-    backgroundColor: "#999",
+    backgroundColor: colors.textSubtle,
   },
 });

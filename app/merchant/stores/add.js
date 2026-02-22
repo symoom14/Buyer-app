@@ -1,6 +1,6 @@
 import { useRouter } from "expo-router";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Alert,
   StyleSheet,
@@ -10,6 +10,7 @@ import {
   View,
 } from "react-native";
 import { auth, db } from "../../../src/firebase/firebaseConfig";
+import { useAppTheme } from "../../../src/theme/useAppTheme";
 
 const STORE_CATEGORIES = [
   "Electronics",
@@ -26,6 +27,8 @@ export default function MerchantStoresAdd() {
   const [storeName, setStoreName] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const router = useRouter();
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   const handleCreateStore = async () => {
     if (!storeName.trim()) return;
@@ -52,6 +55,7 @@ export default function MerchantStoresAdd() {
       <TextInput
         style={styles.input}
         placeholder="New store name"
+        placeholderTextColor={colors.textSubtle}
         value={storeName}
         onChangeText={setStoreName}
       />
@@ -87,29 +91,32 @@ export default function MerchantStoresAdd() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors) =>
+  StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: "#F2F2F7",
+    backgroundColor: colors.screen,
   },
   title: {
     fontSize: 20,
     fontWeight: "600",
     marginBottom: 12,
+    color: colors.text,
   },
   input: {
     borderWidth: 1,
-    borderColor: "#ddd",
+    borderColor: colors.border,
     borderRadius: 6,
     padding: 12,
     marginBottom: 8,
-    backgroundColor: "#fff",
+    backgroundColor: colors.surface,
+    color: colors.text,
   },
   label: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#555",
+    color: colors.textMuted,
     marginBottom: 8,
   },
   categoryWrap: {
@@ -119,9 +126,9 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   categoryPill: {
-    backgroundColor: "#EAF1FF",
+    backgroundColor: colors.pill,
     borderWidth: 1,
-    borderColor: "#C9D9FF",
+    borderColor: colors.pillBorder,
     borderRadius: 999,
     paddingHorizontal: 12,
     height: 32,
@@ -129,26 +136,26 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   categoryPillSelected: {
-    backgroundColor: "#D8E7FF",
-    borderColor: "#95B7FF",
+    backgroundColor: colors.pillSelected,
+    borderColor: colors.pillSelectedBorder,
   },
   categoryPillText: {
-    color: "#2357B8",
+    color: colors.pillText,
     fontWeight: "600",
     fontSize: 13,
   },
   categoryPillTextSelected: {
-    color: "#18479E",
+    color: colors.pillTextSelected,
   },
   button: {
-    backgroundColor: "#000",
+    backgroundColor: colors.text,
     padding: 14,
     borderRadius: 6,
     alignItems: "center",
     marginBottom: 16,
   },
   buttonText: {
-    color: "#fff",
+    color: colors.background,
     fontWeight: "600",
   },
 });

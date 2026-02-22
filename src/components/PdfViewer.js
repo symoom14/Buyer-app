@@ -1,13 +1,17 @@
 import { Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useMemo } from "react";
 import {
   SafeAreaView,
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
 import { WebView } from "react-native-webview";
 import AppIcon from "./AppIcon";
+import { useAppTheme } from "../theme/useAppTheme";
 
 export default function PdfViewer({ visible, uri, onClose }) {
   const insets = useSafeAreaInsets();
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   return (
     <Modal
@@ -31,7 +35,7 @@ export default function PdfViewer({ visible, uri, onClose }) {
                 name="window-close"
                 variant="community"
                 size={18}
-                color="#B71C1C"
+                color={colors.danger}
               />
             </TouchableOpacity>
           </View>
@@ -57,24 +61,25 @@ export default function PdfViewer({ visible, uri, onClose }) {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors) =>
+  StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F2F2F7",
+    backgroundColor: colors.screen,
     paddingHorizontal: 16,
   },
   viewerCard: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: colors.surface,
     borderRadius: 14,
     overflow: "hidden",
     borderWidth: 1,
-    borderColor: "#E5E5EA",
+    borderColor: colors.border,
   },
   header: {
     height: 58,
     borderBottomWidth: 1,
-    borderBottomColor: "#E5E5EA",
+    borderBottomColor: colors.border,
     paddingHorizontal: 14,
     flexDirection: "row",
     alignItems: "center",
@@ -83,19 +88,19 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 16,
     fontWeight: "700",
-    color: "#111",
+    color: colors.text,
   },
   closeBtn: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: "#FDE4E4",
+    backgroundColor: colors.surfaceMuted,
     alignItems: "center",
     justifyContent: "center",
   },
   webview: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: colors.surface,
   },
   emptyWrap: {
     flex: 1,
@@ -103,6 +108,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   emptyText: {
-    color: "#666",
+    color: colors.textSubtle,
   },
 });

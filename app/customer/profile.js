@@ -14,17 +14,22 @@ import {
 } from "react-native";
 
 import AppIcon from "../../src/components/AppIcon";
+import { useThemePreference } from "../../src/context/ThemePreferenceContext";
 import { auth, db } from "../../src/firebase/firebaseConfig";
+import { useAppTheme } from "../../src/theme/useAppTheme";
 import { getUserDisplayName } from "../../src/utils/userDisplayName";
 
 export default function ProfileScreen() {
   const router = useRouter();
+  const { colors, isDark } = useAppTheme();
+  const { setScheme } = useThemePreference();
   const [displayName, setDisplayName] = useState("");
   const [draftName, setDraftName] = useState("");
   const [username, setUsername] = useState("");
   const [loadingProfile, setLoadingProfile] = useState(true);
   const [savingName, setSavingName] = useState(false);
   const [isNameModalVisible, setIsNameModalVisible] = useState(false);
+  const styles = useMemo(() => createStyles(colors, isDark), [colors, isDark]);
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -97,10 +102,14 @@ export default function ProfileScreen() {
     ]);
   };
 
+  const handleToggleTheme = () => {
+    setScheme(isDark ? "light" : "dark");
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.avatarWrap}>
-        <AppIcon name="account" variant="community" size={52} color="#3A3A3C" />
+        <AppIcon name="account" variant="community" size={52} color={colors.textMuted} />
       </View>
       <Text style={styles.username}>{userName}</Text>
 
@@ -118,19 +127,31 @@ export default function ProfileScreen() {
           name="chevron-right"
           variant="community"
           size={20}
-          color="#8A8A8E"
+          color={colors.textSubtle}
         />
       </Pressable>
 
-      <View style={styles.card}>
-        <AppIcon name="store" variant="community" size={22} />
-        <Text style={styles.cardText}>Orders</Text>
-      </View>
-
-      <View style={styles.card}>
-        <AppIcon name="cog-outline" variant="community" size={22} />
-        <Text style={styles.cardText}>Settings</Text>
-      </View>
+      <Pressable style={styles.actionCard} onPress={handleToggleTheme}>
+        <View style={styles.cardLeft}>
+          <AppIcon
+            name={isDark ? "weather-night" : "white-balance-sunny"}
+            variant="community"
+            size={22}
+          />
+          <View>
+            <Text style={styles.cardText}>Theme</Text>
+            <Text style={styles.cardMeta}>
+              {isDark ? "Dark mode" : "Light mode"}
+            </Text>
+          </View>
+        </View>
+        <AppIcon
+          name="autorenew"
+          variant="community"
+          size={20}
+          color={colors.textSubtle}
+        />
+      </Pressable>
 
       <Modal
         visible={isNameModalVisible}
@@ -147,6 +168,7 @@ export default function ProfileScreen() {
                   value={draftName}
                   onChangeText={setDraftName}
                   placeholder="Enter your name"
+                  placeholderTextColor={colors.textSubtle}
                   style={styles.nameInput}
                   maxLength={50}
                   autoFocus
@@ -182,11 +204,12 @@ export default function ProfileScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors, isDark) =>
+  StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: "#F2F2F7",
+    backgroundColor: colors.screen,
   },
   username: {
     fontSize: 28,
@@ -194,12 +217,13 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginTop: 14,
     marginBottom: 16,
+    color: colors.text,
   },
   avatarWrap: {
     width: 92,
     height: 92,
     borderRadius: 46,
-    backgroundColor: "#E5E5EA",
+    backgroundColor: colors.input,
     alignSelf: "center",
     alignItems: "center",
     justifyContent: "center",
@@ -209,7 +233,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: "#fff",
+    backgroundColor: colors.surface,
     borderRadius: 14,
     padding: 14,
     marginBottom: 14,
@@ -222,35 +246,36 @@ const styles = StyleSheet.create({
   cardMeta: {
     marginTop: 2,
     fontSize: 13,
-    color: "#666",
+    color: colors.textSubtle,
   },
   nameInput: {
-    backgroundColor: "#F2F2F7",
+    backgroundColor: colors.input,
     borderRadius: 10,
     paddingHorizontal: 12,
     paddingVertical: 10,
     fontSize: 16,
+    color: colors.text,
   },
   saveNameButton: {
     height: 34,
     borderRadius: 17,
-    backgroundColor: "#111",
+    backgroundColor: colors.text,
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 14,
   },
   saveNameText: {
-    color: "#fff",
+    color: colors.background,
     fontWeight: "600",
   },
   modalBackdrop: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.35)",
+    backgroundColor: isDark ? "rgba(0,0,0,0.6)" : "rgba(0,0,0,0.35)",
     justifyContent: "center",
     padding: 20,
   },
   modalCard: {
-    backgroundColor: "#fff",
+    backgroundColor: colors.surface,
     borderRadius: 14,
     padding: 16,
     gap: 12,
@@ -258,7 +283,7 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 18,
     fontWeight: "700",
-    color: "#111",
+    color: colors.text,
   },
   modalButtons: {
     flexDirection: "row",
@@ -269,19 +294,19 @@ const styles = StyleSheet.create({
     height: 34,
     borderRadius: 17,
     paddingHorizontal: 14,
-    backgroundColor: "#E5E5EA",
+    backgroundColor: colors.input,
     alignItems: "center",
     justifyContent: "center",
   },
   modalCancelText: {
-    color: "#333",
+    color: colors.textMuted,
     fontWeight: "600",
   },
   card: {
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.surface,
     padding: 16,
     borderRadius: 14,
     marginBottom: 12,
@@ -289,17 +314,18 @@ const styles = StyleSheet.create({
   cardText: {
     fontSize: 16,
     fontWeight: "500",
+    color: colors.text,
   },
   logoutButton: {
     marginTop: 40,
-    backgroundColor: "#FF3B30",
+    backgroundColor: colors.danger,
     width: 130,
     alignSelf: "center",
     paddingVertical: 14,
     borderRadius: 999,
   },
   logoutText: {
-    color: "white",
+    color: colors.background,
     fontSize: 16,
     fontWeight: "600",
     textAlign: "center",

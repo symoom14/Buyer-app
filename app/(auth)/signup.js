@@ -2,7 +2,7 @@ import LottieView from "lottie-react-native";
 import { useRouter } from "expo-router";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, serverTimestamp, setDoc } from "firebase/firestore";
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
   Animated,
   KeyboardAvoidingView,
@@ -18,9 +18,11 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import AppIcon from "../../src/components/AppIcon";
 import { auth, db } from "../../src/firebase/firebaseConfig";
+import { useAppTheme } from "../../src/theme/useAppTheme";
 
 export default function SignUp() {
   const router = useRouter();
+  const { colors } = useAppTheme();
 
   const [role, setRole] = useState("customer");
   const [error, setError] = useState("");
@@ -29,13 +31,16 @@ export default function SignUp() {
   const usernameRef = useRef("");
   const passwordRef = useRef("");
   const buttonAnim = useRef(new Animated.Value(0)).current;
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
-  const buttonBg = useRef(
+  const buttonBg = useMemo(
+    () =>
     buttonAnim.interpolate({
       inputRange: [0, 1],
-      outputRange: ["#000000", "#0b6be0"],
+      outputRange: [colors.text, colors.merchantHeaderBg],
     }),
-  ).current;
+    [buttonAnim, colors],
+  );
 
   const handleSignUp = async () => {
     setError("");
@@ -109,6 +114,7 @@ export default function SignUp() {
             <TextInput
               style={styles.input}
               placeholder="Username"
+              placeholderTextColor={colors.textSubtle}
               autoCapitalize="none"
               onChangeText={(text) => {
                 usernameRef.current = text;
@@ -118,13 +124,14 @@ export default function SignUp() {
             <TextInput
               style={styles.input}
               placeholder="Password"
+              placeholderTextColor={colors.textSubtle}
               secureTextEntry
               onChangeText={(text) => {
                 passwordRef.current = text;
               }}
             />
 
-            <Text style={styles.roleLabel}>I'm signing up as a:</Text>
+            <Text style={styles.roleLabel}>I&apos;m signing up as a:</Text>
             <View style={styles.roleRow}>
               <TouchableOpacity
                 style={[
@@ -190,7 +197,7 @@ export default function SignUp() {
                     name="account-plus"
                     variant="community"
                     size={20}
-                    color="#fff"
+                    color={colors.background}
                   />
                   <Text style={styles.buttonText}>Create Account</Text>
                 </Animated.View>
@@ -207,10 +214,11 @@ export default function SignUp() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors) =>
+  StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#F2F2F7",
+    backgroundColor: colors.screen,
   },
   scrollContent: {
     flexGrow: 1,
@@ -218,14 +226,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   card: {
-    backgroundColor: "#fff",
+    backgroundColor: colors.surface,
     borderRadius: 16,
     paddingVertical: 28,
     paddingHorizontal: 22,
     alignSelf: "center",
     width: "88%",
     maxWidth: 360,
-    shadowColor: "#000",
+    shadowColor: colors.text,
     shadowOpacity: 0.08,
     shadowRadius: 12,
     shadowOffset: { width: 0, height: 6 },
@@ -237,24 +245,26 @@ const styles = StyleSheet.create({
   brand: {
     fontSize: 18,
     fontWeight: "700",
-    color: "#0b6be0",
+    color: colors.merchantHeaderBg,
     marginBottom: 10,
   },
   title: {
     fontSize: 24,
     fontWeight: "700",
     marginBottom: 10,
+    color: colors.text,
   },
   subtitle: {
     fontSize: 13,
-    color: "#666",
+    color: colors.textSubtle,
     lineHeight: 18,
   },
   input: {
-    backgroundColor: "#F5F5F7",
+    backgroundColor: colors.surfaceMuted,
     borderRadius: 10,
     padding: 12,
     marginBottom: 12,
+    color: colors.text,
   },
   roleRow: {
     flexDirection: "row",
@@ -263,7 +273,7 @@ const styles = StyleSheet.create({
   },
   roleLabel: {
     fontSize: 15,
-    color: "#666",
+    color: colors.textSubtle,
     fontWeight: "600",
     marginTop: 20,
     marginBottom: 1,
@@ -272,24 +282,24 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 12,
     borderRadius: 10,
-    backgroundColor: "#F5F5F7",
+    backgroundColor: colors.surfaceMuted,
     alignItems: "center",
   },
   activeRole: {
-    backgroundColor: "#E6F0FF",
+    backgroundColor: colors.pill,
   },
   activeRoleCustomer: {
     backgroundColor: "#FFF6CC",
   },
   roleText: {
     fontWeight: "600",
-    color: "#333",
+    color: colors.textMuted,
   },
   roleTextCustomerActive: {
     color: "#db7800",
   },
   roleTextMerchantActive: {
-    color: "#0B5ED7",
+    color: colors.merchantHeaderBg,
   },
   button: {
     padding: 14,
@@ -311,17 +321,17 @@ const styles = StyleSheet.create({
     height: 72,
   },
   buttonText: {
-    color: "#fff",
+    color: colors.background,
     fontWeight: "700",
   },
   error: {
-    color: "red",
+    color: colors.danger,
     marginTop: 8,
     textAlign: "left",
   },
   link: {
     marginTop: 20,
     textAlign: "center",
-    color: "#555",
+    color: colors.textMuted,
   },
 });

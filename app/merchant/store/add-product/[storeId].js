@@ -2,7 +2,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
   KeyboardAvoidingView,
   Modal,
@@ -20,6 +20,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import AppIcon from "../../../../src/components/AppIcon";
 import ScreenContainer from "../../../../src/components/ScreenContainer";
 import { auth, db } from "../../../../src/firebase/firebaseConfig";
+import { useAppTheme } from "../../../../src/theme/useAppTheme";
 
 const CATEGORIES = [
   "Personal",
@@ -39,6 +40,7 @@ export default function AddProductPage() {
   const { storeId } = useLocalSearchParams();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { colors, isDark } = useAppTheme();
   const scrollRef = useRef(null);
   const fieldYRef = useRef({
     price: 0,
@@ -53,6 +55,7 @@ export default function AddProductPage() {
   const [iconQuery, setIconQuery] = useState("");
   const [iconName, setIconName] = useState(DEFAULT_PRODUCT_ICON);
   const [iconModalVisible, setIconModalVisible] = useState(false);
+  const styles = useMemo(() => createStyles(colors, isDark), [colors, isDark]);
 
   const normalizedQuery = iconQuery.trim().toLowerCase();
   const visibleIcons = normalizedQuery
@@ -114,7 +117,7 @@ export default function AddProductPage() {
                   name={iconName}
                   variant="community"
                   size={28}
-                  color="#222"
+                  color={colors.text}
                 />
               </TouchableOpacity>
             </View>
@@ -122,6 +125,7 @@ export default function AddProductPage() {
             <TextInput
               style={styles.input}
               placeholder="Product name"
+              placeholderTextColor={colors.textSubtle}
               value={name}
               onChangeText={setName}
             />
@@ -129,6 +133,7 @@ export default function AddProductPage() {
             <TextInput
               style={[styles.input, styles.textArea]}
               placeholder="Product description"
+              placeholderTextColor={colors.textSubtle}
               value={description}
               onChangeText={setDescription}
               multiline
@@ -150,6 +155,7 @@ export default function AddProductPage() {
               <TextInput
                 style={styles.input}
                 placeholder="Price"
+                placeholderTextColor={colors.textSubtle}
                 keyboardType="numeric"
                 value={price}
                 onChangeText={setPrice}
@@ -165,6 +171,7 @@ export default function AddProductPage() {
               <TextInput
                 style={styles.input}
                 placeholder="Quantity"
+                placeholderTextColor={colors.textSubtle}
                 keyboardType="numeric"
                 value={quantity}
                 onChangeText={setQuantity}
@@ -194,6 +201,7 @@ export default function AddProductPage() {
               <TextInput
                 style={styles.input}
                 placeholder="Search icon (e.g. shoe, laptop, food)"
+                placeholderTextColor={colors.textSubtle}
                 value={iconQuery}
                 onChangeText={setIconQuery}
                 autoCapitalize="none"
@@ -226,7 +234,7 @@ export default function AddProductPage() {
                           name={icon}
                           variant="community"
                           size={22}
-                          color={isSelected ? "#fff" : "#333"}
+                          color={isSelected ? colors.background : colors.text}
                         />
                       </TouchableOpacity>
                     );
@@ -241,7 +249,8 @@ export default function AddProductPage() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors, isDark) =>
+  StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     paddingBottom: 40,
@@ -250,13 +259,16 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "600",
     marginBottom: 16,
+    color: colors.text,
   },
   input: {
     borderWidth: 1,
-    borderColor: "#ddd",
+    borderColor: colors.border,
     borderRadius: 6,
     padding: 12,
     marginBottom: 8,
+    color: colors.text,
+    backgroundColor: colors.surface,
   },
   textArea: {
     minHeight: 80,
@@ -264,10 +276,11 @@ const styles = StyleSheet.create({
   },
   pickerWrapper: {
     borderWidth: 1,
-    borderColor: "#ddd",
+    borderColor: colors.border,
     borderRadius: 6,
     marginBottom: 8,
     overflow: "hidden",
+    backgroundColor: colors.surface,
   },
   selectedIconRow: {
     alignItems: "center",
@@ -279,10 +292,10 @@ const styles = StyleSheet.create({
     height: 46,
     borderRadius: 23,
     borderWidth: 1,
-    borderColor: "#ddd",
+    borderColor: colors.border,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#f5f5f5",
+    backgroundColor: colors.surfaceMuted,
   },
   iconGrid: {
     flexDirection: "row",
@@ -296,23 +309,23 @@ const styles = StyleSheet.create({
     height: 44,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: "#ddd",
+    borderColor: colors.border,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#fff",
+    backgroundColor: colors.surface,
   },
   iconChipSelected: {
-    backgroundColor: "#111",
-    borderColor: "#111",
+    backgroundColor: colors.text,
+    borderColor: colors.text,
   },
   modalBackdrop: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.28)",
+    backgroundColor: isDark ? "rgba(0,0,0,0.6)" : "rgba(0,0,0,0.28)",
     justifyContent: "center",
     paddingHorizontal: 20,
   },
   modalCard: {
-    backgroundColor: "#fff",
+    backgroundColor: colors.surface,
     borderRadius: 5,
     padding: 14,
     minHeight: "20%",
@@ -320,21 +333,21 @@ const styles = StyleSheet.create({
   },
   modalHint: {
     textAlign: "center",
-    color: "#777",
+    color: colors.textSubtle,
     fontSize: 14,
     lineHeight: 20,
     marginTop: 20,
     marginBottom: 8,
   },
   button: {
-    backgroundColor: "#000",
+    backgroundColor: colors.text,
     padding: 14,
     borderRadius: 6,
     alignItems: "center",
     marginTop: 12,
   },
   buttonText: {
-    color: "#fff",
+    color: colors.background,
     fontWeight: "600",
   },
 });

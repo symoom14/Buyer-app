@@ -2,7 +2,7 @@ import LottieView from "lottie-react-native";
 import { useRouter } from "expo-router";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
   Animated,
   KeyboardAvoidingView,
@@ -18,9 +18,11 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import AppIcon from "../../src/components/AppIcon";
 import { auth, db } from "../../src/firebase/firebaseConfig";
+import { useAppTheme } from "../../src/theme/useAppTheme";
 
 export default function Login() {
   const router = useRouter();
+  const { colors } = useAppTheme();
 
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -28,14 +30,16 @@ export default function Login() {
   const usernameRef = useRef("");
   const passwordRef = useRef("");
   const buttonAnim = useRef(new Animated.Value(0)).current;
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
-  // Move interpolation to useRef to prevent recalculation on every render
-  const buttonBg = useRef(
+  const buttonBg = useMemo(
+    () =>
     buttonAnim.interpolate({
       inputRange: [0, 1],
-      outputRange: ["#000000", "#14bd1c"],
+      outputRange: [colors.text, colors.success],
     }),
-  ).current;
+    [buttonAnim, colors],
+  );
 
   const handleLogin = async () => {
     setError("");
@@ -80,7 +84,7 @@ export default function Login() {
       } else {
         throw new Error("Invalid user role");
       }
-    } catch (err) {
+    } catch (_err) {
       Animated.timing(buttonAnim, {
         toValue: 0,
         duration: 200,
@@ -114,6 +118,7 @@ export default function Login() {
             <TextInput
               style={styles.input}
               placeholder="Username"
+              placeholderTextColor={colors.textSubtle}
               autoCapitalize="none"
               onChangeText={(text) => {
                 usernameRef.current = text;
@@ -123,6 +128,7 @@ export default function Login() {
             <TextInput
               style={styles.input}
               placeholder="Password"
+              placeholderTextColor={colors.textSubtle}
               secureTextEntry
               onChangeText={(text) => {
                 passwordRef.current = text;
@@ -157,7 +163,7 @@ export default function Login() {
                     name="arrow-right-circle"
                     variant="community"
                     size={20}
-                    color="#fff"
+                    color={colors.background}
                   />
                   <Text style={styles.buttonText}>Log In</Text>
                 </Animated.View>
@@ -176,10 +182,11 @@ export default function Login() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors) =>
+  StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#F2F2F7",
+    backgroundColor: colors.screen,
   },
   scrollContent: {
     flexGrow: 1,
@@ -187,14 +194,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   card: {
-    backgroundColor: "#fff",
+    backgroundColor: colors.surface,
     borderRadius: 16,
     paddingVertical: 28,
     paddingHorizontal: 22,
     alignSelf: "center",
     width: "88%",
     maxWidth: 360,
-    shadowColor: "#000",
+    shadowColor: colors.text,
     shadowOpacity: 0.08,
     shadowRadius: 12,
     shadowOffset: { width: 0, height: 6 },
@@ -206,24 +213,26 @@ const styles = StyleSheet.create({
   brand: {
     fontSize: 18,
     fontWeight: "700",
-    color: "#ff9100",
+    color: colors.customerHeaderBg,
     marginBottom: 10,
   },
   title: {
     fontSize: 26,
     fontWeight: "700",
     marginBottom: 10,
+    color: colors.text,
   },
   subtitle: {
     fontSize: 13,
-    color: "#666",
+    color: colors.textSubtle,
     lineHeight: 18,
   },
   input: {
-    backgroundColor: "#F5F5F7",
+    backgroundColor: colors.surfaceMuted,
     borderRadius: 10,
     padding: 12,
     marginBottom: 12,
+    color: colors.text,
   },
   button: {
     padding: 14,
@@ -245,17 +254,17 @@ const styles = StyleSheet.create({
     height: 72,
   },
   buttonText: {
-    color: "#fff",
+    color: colors.background,
     fontWeight: "700",
   },
   error: {
-    color: "red",
+    color: colors.danger,
     marginTop: 12,
     textAlign: "left",
   },
   link: {
     marginTop: 20,
     textAlign: "center",
-    color: "#555",
+    color: colors.textMuted,
   },
 });

@@ -8,7 +8,7 @@ import {
   query,
   where,
 } from "firebase/firestore";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -18,7 +18,9 @@ import {
   View,
 } from "react-native";
 import AppIcon from "../../../src/components/AppIcon";
+import { useCart } from "../../../src/context/CartContext";
 import { db } from "../../../src/firebase/firebaseConfig";
+import { useAppTheme } from "../../../src/theme/useAppTheme";
 import { getUserDisplayName } from "../../../src/utils/userDisplayName";
 
 const DEFAULT_PRODUCT_ICON = "package-variant-closed";
@@ -33,16 +35,19 @@ const ICON_COLOR_POOL = [
 
 export default function CustomerStorePage() {
   const router = useRouter();
+  const { colors } = useAppTheme();
+  const { addToCart } = useCart();
   const { storeId } = useLocalSearchParams();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   const getRandomIconColor = () => {
     const idx = Math.floor(Math.random() * ICON_COLOR_POOL.length);
     return ICON_COLOR_POOL[idx];
   };
 
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     try {
       const productsQuery = query(
         collection(db, "products"),
@@ -85,11 +90,24 @@ export default function CustomerStorePage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [storeId]);
 
   useEffect(() => {
     fetchProducts();
-  }, []);
+  }, [fetchProducts]);
+
+  const handleQuickAddToCart = (product) => {
+    addToCart({
+      productId: product.id,
+      name: product.name,
+      price: Number(product.price) || 0,
+      quantity: 1,
+      storeId: product.storeId,
+      storeName: product.storeName || "Unknown Store",
+      merchantId: product.merchantId || "unknown",
+      merchantName: product.sellerName || "Unknown Seller",
+    });
+  };
 
   if (loading) {
     return (
@@ -111,64 +129,85 @@ export default function CustomerStorePage() {
           <Text style={styles.empty}>No products in this store</Text>
         }
         renderItem={({ item }) => (
-          <TouchableOpacity
-            style={styles.card}
-            onPress={() => router.push(`/customer/product/${item.id}`)}
-          >
-            <View style={styles.iconWrap}>
+          <View style={styles.card}>
+            <TouchableOpacity
+              style={styles.productCardMain}
+              onPress={() => router.push(`/customer/product/${item.id}`)}
+            >
+              <View style={styles.iconWrap}>
+                <AppIcon
+                  name={item.iconName || DEFAULT_PRODUCT_ICON}
+                  variant="community"
+                  size={24}
+                  color={item.iconColor || colors.text}
+                />
+              </View>
+              <View style={styles.contentWrap}>
+                <Text style={styles.productName}>{item.name}</Text>
+
+                <Text style={styles.meta}>
+                  Store: <Text style={styles.bold}>{item.storeName}</Text>
+                </Text>
+
+                <Text style={styles.meta}>
+                  Seller: <Text style={styles.bold}>{item.sellerName}</Text>
+                </Text>
+
+                <Text style={styles.price}>${item.price}</Text>
+              </View>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.quickAddButton}
+              onPress={() => handleQuickAddToCart(item)}
+            >
               <AppIcon
-                name={item.iconName || DEFAULT_PRODUCT_ICON}
+                name="basket-plus"
                 variant="community"
-                size={24}
-                color={item.iconColor || "#333"}
+                size={18}
+                color="#1E8E3E"
               />
-            </View>
-            <View style={styles.contentWrap}>
-              <Text style={styles.productName}>{item.name}</Text>
-
-              <Text style={styles.meta}>
-                Store: <Text style={styles.bold}>{item.storeName}</Text>
-              </Text>
-
-              <Text style={styles.meta}>
-                Seller: <Text style={styles.bold}>{item.sellerName}</Text>
-              </Text>
-
-              <Text style={styles.price}>${item.price}</Text>
-            </View>
-          </TouchableOpacity>
+            </TouchableOpacity>
+          </View>
         )}
       />
     </View>
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors) =>
+  StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: "#F2F2F7",
+    backgroundColor: colors.screen,
   },
   pageTitle: {
     fontSize: 26,
     fontWeight: "700",
     marginBottom: 16,
+    color: colors.text,
   },
   card: {
     flexDirection: "row",
     alignItems: "center",
     padding: 16,
     borderWidth: 1,
-    borderColor: "#eee",
+    borderColor: colors.borderSoft,
     borderRadius: 8,
     marginBottom: 12,
-    backgroundColor: "#fff",
+    backgroundColor: colors.surface,
+  },
+  productCardMain: {
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1,
   },
   iconWrap: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: "#f2f2f2",
+    backgroundColor: colors.surfaceMuted,
     alignItems: "center",
     justifyContent: "center",
     marginRight: 15,
@@ -180,10 +219,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     marginBottom: 6,
+    color: colors.text,
   },
   meta: {
     fontSize: 14,
-    color: "#555",
+    color: colors.textMuted,
   },
   bold: {
     fontWeight: "500",
@@ -192,9 +232,19 @@ const styles = StyleSheet.create({
     marginTop: 8,
     fontSize: 17,
     fontWeight: "600",
+    color: colors.text,
+  },
+  quickAddButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: colors.successSoft,
+    alignItems: "center",
+    justifyContent: "center",
+    marginLeft: 8,
   },
   empty: {
-    color: "#666",
+    color: colors.textSubtle,
     marginTop: 20,
   },
 });

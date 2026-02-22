@@ -15,14 +15,9 @@ import {
 import AppIcon from "../../src/components/AppIcon";
 import EmptyFieldState from "../../src/components/EmptyFieldState";
 import { auth, db } from "../../src/firebase/firebaseConfig";
+import { useAppTheme } from "../../src/theme/useAppTheme";
+import { getStatusColors } from "../../src/theme/statusPalette";
 import { getUserDisplayName } from "../../src/utils/userDisplayName";
-
-const STATUS_COLORS = {
-  pending: "#FFB300",
-  accepted: "#2196F3",
-  completed: "#4CAF50",
-  cancelled: "#F44336",
-};
 
 const STATUS_ICONS = {
   pending: "receipt-clock",
@@ -37,8 +32,14 @@ export default function MerchantOrdersScreen() {
   const [searchQuery, setSearchQuery] = useState("");
   const [error, setError] = useState("");
   const router = useRouter();
+  const { colors, isDark } = useAppTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
+  const statusColors = useMemo(
+    () => getStatusColors(colors, isDark),
+    [colors, isDark],
+  );
 
-  const fetchOrders = async (merchantId) => {
+  const fetchOrders = useCallback(async (merchantId) => {
     try {
       setError("");
 
@@ -86,26 +87,24 @@ export default function MerchantOrdersScreen() {
         ...new Set(filteredOrders.map((o) => o.customerId)),
       ];
 
-      const newCache = { ...userCache };
+      const fetchedCache = {};
 
       await Promise.all(
         uniqueCustomerIds.map(async (id) => {
-          if (newCache[id]) return;
-
           const userSnap = await getDoc(doc(db, "users", id));
           if (userSnap.exists()) {
-            newCache[id] = getUserDisplayName(userSnap.data(), "Unknown user");
+            fetchedCache[id] = getUserDisplayName(userSnap.data(), "Unknown user");
           } else {
-            newCache[id] = "Unknown user";
+            fetchedCache[id] = "Unknown user";
           }
         }),
       );
 
-      setUserCache(newCache);
-    } catch (err) {
+      setUserCache((prev) => ({ ...prev, ...fetchedCache }));
+    } catch (_err) {
       setError("Failed to load orders.");
     }
-  };
+  }, []);
 
   useFocusEffect(
     useCallback(() => {
@@ -120,7 +119,7 @@ export default function MerchantOrdersScreen() {
       });
 
       return unsubscribe;
-    }, []),
+    }, [fetchOrders]),
   );
 
   const visibleOrders = useMemo(() => {
@@ -163,7 +162,7 @@ export default function MerchantOrdersScreen() {
             name={STATUS_ICONS[item.status]}
             variant="community"
             size={26}
-            color={STATUS_COLORS[item.status]}
+            color={statusColors[item.status] || statusColors.pending}
           />
 
           <Text style={styles.price}>${item.total?.toFixed(2)}</Text>
@@ -176,6 +175,7 @@ export default function MerchantOrdersScreen() {
     <View style={styles.container}>
       <TextInput
         placeholder="Search by customer"
+        placeholderTextColor={colors.textSubtle}
         value={searchQuery}
         onChangeText={setSearchQuery}
         style={styles.search}
@@ -201,24 +201,26 @@ export default function MerchantOrdersScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors) =>
+  StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: "#F2F2F7",
+    backgroundColor: colors.screen,
   },
   search: {
-    backgroundColor: "#E5E5EA",
+    backgroundColor: colors.input,
     borderRadius: 10,
     paddingHorizontal: 12,
     paddingVertical: 8,
     fontSize: 16,
     marginBottom: 12,
+    color: colors.text,
   },
   card: {
     flexDirection: "row",
     justifyContent: "space-between",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.surface,
     padding: 14,
     borderRadius: 14,
     marginBottom: 12,
@@ -235,18 +237,20 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "600",
     marginBottom: 4,
+    color: colors.text,
   },
   meta: {
     fontSize: 13,
-    color: "#555",
+    color: colors.textMuted,
   },
   price: {
     fontSize: 16,
     fontWeight: "700",
+    color: colors.text,
   },
   empty: {
     textAlign: "center",
-    color: "#666",
+    color: colors.textSubtle,
     marginTop: 40,
   },
   listEmptyContainer: {

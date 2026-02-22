@@ -1,8 +1,9 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
+import { useHeaderHeight } from "@react-navigation/elements";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -18,10 +19,10 @@ import {
   TouchableWithoutFeedback,
   View,
 } from "react-native";
-import { useHeaderHeight } from "@react-navigation/elements";
 import AppIcon from "../../../../src/components/AppIcon";
 import ScreenContainer from "../../../../src/components/ScreenContainer";
 import { db } from "../../../../src/firebase/firebaseConfig";
+import { useAppTheme } from "../../../../src/theme/useAppTheme";
 
 const CATEGORIES = [
   "Personal",
@@ -41,6 +42,7 @@ export default function EditProductPage() {
   const { productId } = useLocalSearchParams();
   const router = useRouter();
   const headerHeight = useHeaderHeight();
+  const { colors, isDark } = useAppTheme();
   const scrollRef = useRef(null);
   const fieldYRef = useRef({
     price: 0,
@@ -57,6 +59,7 @@ export default function EditProductPage() {
   const [iconQuery, setIconQuery] = useState("");
   const [iconName, setIconName] = useState(DEFAULT_PRODUCT_ICON);
   const [iconModalVisible, setIconModalVisible] = useState(false);
+  const styles = useMemo(() => createStyles(colors, isDark), [colors, isDark]);
 
   const normalizedQuery = iconQuery.trim().toLowerCase();
   const visibleIcons = normalizedQuery
@@ -66,11 +69,7 @@ export default function EditProductPage() {
       )
     : [];
 
-  useEffect(() => {
-    fetchProduct();
-  }, []);
-
-  const fetchProduct = async () => {
+  const fetchProduct = useCallback(async () => {
     try {
       const snap = await getDoc(doc(db, "products", productId));
       if (!snap.exists()) return;
@@ -84,7 +83,11 @@ export default function EditProductPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [productId]);
+
+  useEffect(() => {
+    fetchProduct();
+  }, [fetchProduct]);
 
   const handleSave = async () => {
     if (saving) return;
@@ -165,7 +168,7 @@ export default function EditProductPage() {
                     name={iconName}
                     variant="community"
                     size={28}
-                    color="#222"
+                    color={colors.text}
                   />
                 </TouchableOpacity>
               </View>
@@ -173,6 +176,7 @@ export default function EditProductPage() {
               <TextInput
                 style={styles.input}
                 placeholder="Product name"
+                placeholderTextColor={colors.textSubtle}
                 value={name}
                 onChangeText={setName}
               />
@@ -180,6 +184,7 @@ export default function EditProductPage() {
               <TextInput
                 style={[styles.input, styles.textArea]}
                 placeholder="Product description"
+                placeholderTextColor={colors.textSubtle}
                 value={description}
                 onChangeText={setDescription}
                 multiline
@@ -201,6 +206,7 @@ export default function EditProductPage() {
                 <TextInput
                   style={styles.input}
                   placeholder="Price"
+                  placeholderTextColor={colors.textSubtle}
                   keyboardType="numeric"
                   value={price}
                   onChangeText={setPrice}
@@ -216,6 +222,7 @@ export default function EditProductPage() {
                 <TextInput
                   style={styles.input}
                   placeholder="Quantity"
+                  placeholderTextColor={colors.textSubtle}
                   keyboardType="numeric"
                   value={quantity}
                   onChangeText={setQuantity}
@@ -251,6 +258,7 @@ export default function EditProductPage() {
               <TextInput
                 style={styles.input}
                 placeholder="Search icon (e.g. shoe, laptop, food)"
+                placeholderTextColor={colors.textSubtle}
                 value={iconQuery}
                 onChangeText={setIconQuery}
                 autoCapitalize="none"
@@ -283,7 +291,7 @@ export default function EditProductPage() {
                           name={icon}
                           variant="community"
                           size={22}
-                          color={isSelected ? "#fff" : "#333"}
+                          color={isSelected ? colors.background : colors.text}
                         />
                       </TouchableOpacity>
                     );
@@ -298,7 +306,8 @@ export default function EditProductPage() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors, isDark) =>
+  StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     paddingBottom: 40,
@@ -307,13 +316,16 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "600",
     marginBottom: 16,
+    color: colors.text,
   },
   input: {
     borderWidth: 1,
-    borderColor: "#ddd",
+    borderColor: colors.border,
     borderRadius: 6,
     padding: 12,
     marginBottom: 8,
+    color: colors.text,
+    backgroundColor: colors.surface,
   },
   textArea: {
     minHeight: 80,
@@ -321,10 +333,11 @@ const styles = StyleSheet.create({
   },
   pickerWrapper: {
     borderWidth: 1,
-    borderColor: "#ddd",
+    borderColor: colors.border,
     borderRadius: 6,
     marginBottom: 8,
     overflow: "hidden",
+    backgroundColor: colors.surface,
   },
   selectedIconRow: {
     alignItems: "center",
@@ -336,10 +349,10 @@ const styles = StyleSheet.create({
     height: 46,
     borderRadius: 23,
     borderWidth: 1,
-    borderColor: "#ddd",
+    borderColor: colors.border,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#f5f5f5",
+    backgroundColor: colors.surfaceMuted,
   },
   iconGrid: {
     flexDirection: "row",
@@ -353,23 +366,23 @@ const styles = StyleSheet.create({
     height: 44,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: "#ddd",
+    borderColor: colors.border,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#fff",
+    backgroundColor: colors.surface,
   },
   iconChipSelected: {
-    backgroundColor: "#111",
-    borderColor: "#111",
+    backgroundColor: colors.text,
+    borderColor: colors.text,
   },
   modalBackdrop: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.28)",
+    backgroundColor: isDark ? "rgba(0,0,0,0.6)" : "rgba(0,0,0,0.28)",
     justifyContent: "center",
     paddingHorizontal: 20,
   },
   modalCard: {
-    backgroundColor: "#fff",
+    backgroundColor: colors.surface,
     borderRadius: 5,
     padding: 14,
     minHeight: "20%",
@@ -377,14 +390,14 @@ const styles = StyleSheet.create({
   },
   modalHint: {
     textAlign: "center",
-    color: "#777",
+    color: colors.textSubtle,
     fontSize: 14,
     lineHeight: 20,
     marginTop: 20,
     marginBottom: 8,
   },
   button: {
-    backgroundColor: "#000",
+    backgroundColor: colors.text,
     padding: 14,
     borderRadius: 6,
     alignItems: "center",
@@ -394,7 +407,7 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   buttonText: {
-    color: "#fff",
+    color: colors.background,
     fontWeight: "600",
   },
 });

@@ -12,11 +12,25 @@ import "react-native-reanimated";
 import { CartProvider } from "../src/context/CartContext";
 import { FavoritesProvider } from "../src/context/FavoritesContext";
 
-import { useColorScheme } from "@/hooks/use-color-scheme";
 import { AuthProvider } from "../src/context/AuthContext";
+import {
+  ThemePreferenceProvider,
+  useThemePreference,
+} from "../src/context/ThemePreferenceContext";
+
+function RootNavigation() {
+  const { scheme, isReady } = useThemePreference();
+  if (!isReady) return null;
+
+  return (
+    <ThemeProvider value={scheme === "dark" ? DarkTheme : DefaultTheme}>
+      <Stack screenOptions={{ headerShown: false }} />
+      <StatusBar style={scheme === "dark" ? "light" : "dark"} />
+    </ThemeProvider>
+  );
+}
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
   const [fontsLoaded] = useFonts({
     "GoogleSans-Regular": require("../assets/fonts/GoogleSans-Regular.ttf"),
     "GoogleSans-Medium": require("../assets/fonts/GoogleSans-Medium.ttf"),
@@ -43,18 +57,15 @@ export default function RootLayout() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <CartProvider>
-        <FavoritesProvider>
-          <AuthProvider>
-            <ThemeProvider
-              value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
-            >
-              <Stack screenOptions={{ headerShown: false }} />
-              <StatusBar style="auto" />
-            </ThemeProvider>
-          </AuthProvider>
-        </FavoritesProvider>
-      </CartProvider>
+      <ThemePreferenceProvider>
+        <CartProvider>
+          <FavoritesProvider>
+            <AuthProvider>
+              <RootNavigation />
+            </AuthProvider>
+          </FavoritesProvider>
+        </CartProvider>
+      </ThemePreferenceProvider>
     </GestureHandlerRootView>
   );
 }
