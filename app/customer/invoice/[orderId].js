@@ -99,7 +99,7 @@ export default function InvoicePage() {
           <div class="meta">
             <p><b>Order ID:</b> ${orderId}</p>
             <p><b>Date/Time:</b> ${now}</p>
-            <p><b>Payment method:</b> Credit card ending 1234</p>
+            <p><b>Payment method:</b> ${order.paymentMethod || "Card ending 1234"}</p>
           </div>
 
           <table>

@@ -1,4 +1,6 @@
+import * as Print from "expo-print";
 import { useFocusEffect, useLocalSearchParams } from "expo-router";
+import * as Sharing from "expo-sharing";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { useCallback, useMemo, useState } from "react";
 import {
@@ -13,6 +15,7 @@ import {
 import Svg, { Circle, G, Rect, Text as SvgText } from "react-native-svg";
 
 import AppIcon from "../../../src/components/AppIcon";
+import PdfViewer from "../../../src/components/PdfViewer";
 import { auth, db } from "../../../src/firebase/firebaseConfig";
 import { getStatusColors } from "../../../src/theme/statusPalette";
 import { useAppTheme } from "../../../src/theme/useAppTheme";
@@ -75,18 +78,64 @@ function readableTextColor(backgroundColor) {
   return luminance > 0.62 ? "#11181C" : "#FFFFFF";
 }
 
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function formatDateTime(date) {
+  const day = date.getDate();
+  const month = date.getMonth() + 1;
+  const year = date.getFullYear();
+  const hours24 = date.getHours();
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  const seconds = String(date.getSeconds()).padStart(2, "0");
+  const ampm = hours24 >= 12 ? "pm" : "am";
+  const hours12 = hours24 % 12 || 12;
+  return `${day}/${month}/${year} ${hours12}:${minutes}:${seconds}${ampm}`;
+}
+
+function getPeriodRange(periodKey, endDate = new Date()) {
+  const end = new Date(endDate);
+  if (periodKey === "all") return { start: null, end };
+
+  const start = new Date(end);
+  if (periodKey === "today") {
+    start.setHours(0, 0, 0, 0);
+  } else if (periodKey === "7d") {
+    start.setDate(end.getDate() - 7);
+  } else if (periodKey === "30d") {
+    start.setDate(end.getDate() - 30);
+  }
+  return { start, end };
+}
+
 export default function MerchantStoresAnalytics() {
   const params = useLocalSearchParams();
   const initialMode = params?.mode === "earnings" ? "earnings" : "store";
+  const initialPeriodParam = Array.isArray(params?.period)
+    ? params.period[0]
+    : params?.period;
+  const initialPeriod = PERIODS.some((period) => period.key === initialPeriodParam)
+    ? initialPeriodParam
+    : "7d";
   const { colors, isDark } = useAppTheme();
   const { width: windowWidth } = useWindowDimensions();
 
-  const [selectedPeriod, setSelectedPeriod] = useState("7d");
+  const [selectedPeriod, setSelectedPeriod] = useState(initialPeriod);
   const [mode] = useState(initialMode);
   const [loading, setLoading] = useState(true);
   const [merchantOrders, setMerchantOrders] = useState([]);
   const [products, setProducts] = useState([]);
   const [storesById, setStoresById] = useState({});
+  const [viewerVisible, setViewerVisible] = useState(false);
+  const [previewUri, setPreviewUri] = useState("");
+  const [buildingPdf, setBuildingPdf] = useState(false);
+  const [sharingPdf, setSharingPdf] = useState(false);
 
   const fetchAnalytics = async () => {
     const merchantId = auth.currentUser?.uid;
@@ -455,6 +504,206 @@ export default function MerchantStoresAnalytics() {
     };
   }, [colors, potentialRevenue, statusColors, topProducts]);
   const mosaicSize = Math.max(Math.min(windowWidth - 96, 250), 180);
+  const selectedPeriodLabel = useMemo(
+    () =>
+      PERIODS.find((period) => period.key === selectedPeriod)?.label || "N/A",
+    [selectedPeriod],
+  );
+  const selectedPeriodScope = useMemo(() => {
+    const { start, end } = getPeriodRange(selectedPeriod, new Date());
+    if (!start) return `All time (until ${formatDateTime(end)})`;
+
+    const prefix =
+      selectedPeriod === "today"
+        ? "Today"
+        : selectedPeriod === "7d"
+          ? "7 days"
+          : selectedPeriod === "30d"
+            ? "30 days"
+            : selectedPeriodLabel;
+    return `${prefix} (${formatDateTime(end)} - ${formatDateTime(start)})`;
+  }, [selectedPeriod, selectedPeriodLabel]);
+
+  const buildReportHtml = useCallback(() => {
+    const generatedAt = new Date().toLocaleString();
+    const statusRows = STATUS_ORDER.map((status) => {
+      const label = status[0].toUpperCase() + status.slice(1);
+      return `<tr><td>${escapeHtml(label)}</td><td>${statusCounts[status] || 0}</td></tr>`;
+    }).join("");
+
+    const topProductRows =
+      topProducts.length > 0
+        ? topProducts
+            .map(
+              (product) => `
+              <tr>
+                <td>${escapeHtml(product.name)}</td>
+                <td>${Number(product.units || 0)}</td>
+                <td>${escapeHtml(money(product.revenue))}</td>
+                <td>${((Number(product.revenue || 0) / (potentialRevenue || 1)) * 100).toFixed(1)}%</td>
+              </tr>
+            `,
+            )
+            .join("")
+        : `<tr><td colspan="4">No product activity in this period.</td></tr>`;
+
+    const storeRows =
+      storeBreakdown.length > 0
+        ? storeBreakdown
+            .map(
+              (store) => `
+              <tr>
+                <td>${escapeHtml(store.storeName)}</td>
+                <td>${Number(store.units || 0)}</td>
+                <td>${escapeHtml(money(store.revenue))}</td>
+                <td>${((Number(store.revenue || 0) / (potentialRevenue || 1)) * 100).toFixed(1)}%</td>
+              </tr>
+            `,
+            )
+            .join("")
+        : `<tr><td colspan="4">No store-level data in this period.</td></tr>`;
+
+    return `
+      <html>
+        <head>
+          <style>
+            body {
+              font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+              padding: 24px;
+              color: #111;
+            }
+            h1 { margin: 0 0 4px 0; font-size: 26px; }
+            h2 { margin: 0 0 20px 0; font-size: 20px; }
+            .meta { margin-bottom: 16px; }
+            .meta p { margin: 4px 0; }
+            .kpis {
+              display: grid;
+              grid-template-columns: 1fr 1fr;
+              gap: 10px;
+              margin-bottom: 16px;
+            }
+            .kpi {
+              border: 1px solid #ddd;
+              border-radius: 8px;
+              padding: 10px;
+            }
+            .kpi-label { font-size: 12px; color: #555; margin-bottom: 3px; }
+            .kpi-value { font-size: 20px; font-weight: 700; }
+            table {
+              width: 100%;
+              border-collapse: collapse;
+              margin-top: 8px;
+              margin-bottom: 16px;
+            }
+            th, td {
+              border: 1px solid #ddd;
+              padding: 8px;
+              font-size: 13px;
+              text-align: left;
+            }
+            th { background-color: #f7f7f7; }
+            .section-title { margin: 16px 0 8px 0; font-size: 16px; font-weight: 700; }
+          </style>
+        </head>
+        <body>
+          <h1>Buyer</h1>
+          <h2>Merchant Analytics Report</h2>
+
+          <div class="meta">
+            <p><b>Generated:</b> ${escapeHtml(generatedAt)}</p>
+            <p><b>Scope:</b> ${escapeHtml(selectedPeriodScope)}</p>
+            <p><b>Analytics Mode:</b> ${escapeHtml(screenTitle)}</p>
+          </div>
+
+          <div class="kpis">
+            <div class="kpi">
+              <div class="kpi-label">Completed Revenue</div>
+              <div class="kpi-value">${escapeHtml(money(completedRevenue))}</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-label">Potential Revenue</div>
+              <div class="kpi-value">${escapeHtml(money(potentialRevenue))}</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-label">Orders</div>
+              <div class="kpi-value">${totalOrders}</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-label">Cancellation Rate</div>
+              <div class="kpi-value">${cancelRate.toFixed(1)}%</div>
+            </div>
+          </div>
+
+          <div class="section-title">Order Status Breakdown</div>
+          <table>
+            <thead>
+              <tr><th>Status</th><th>Count</th></tr>
+            </thead>
+            <tbody>
+              ${statusRows}
+            </tbody>
+          </table>
+
+          <div class="section-title">Top Products</div>
+          <table>
+            <thead>
+              <tr><th>Product</th><th>Units Sold</th><th>Revenue</th><th>Percentage of Revenue</th></tr>
+            </thead>
+            <tbody>
+              ${topProductRows}
+            </tbody>
+          </table>
+
+          <div class="section-title">Store Comparison</div>
+          <table>
+            <thead>
+              <tr><th>Store</th><th>Units</th><th>Revenue</th><th>Percentage of Revenue</th></tr>
+            </thead>
+            <tbody>
+              ${storeRows}
+            </tbody>
+          </table>
+        </body>
+      </html>
+    `;
+  }, [
+    cancelRate,
+    completedRevenue,
+    potentialRevenue,
+    screenTitle,
+    selectedPeriodScope,
+    statusCounts,
+    storeBreakdown,
+    topProducts,
+    totalOrders,
+  ]);
+
+  const handlePreviewReport = useCallback(async () => {
+    try {
+      setBuildingPdf(true);
+      const html = buildReportHtml();
+      const { uri } = await Print.printToFileAsync({ html });
+      setPreviewUri(uri);
+      setViewerVisible(true);
+    } catch (error) {
+      console.error("Failed to generate analytics PDF preview:", error);
+    } finally {
+      setBuildingPdf(false);
+    }
+  }, [buildReportHtml]);
+
+  const handleShareReport = useCallback(async () => {
+    try {
+      setSharingPdf(true);
+      const html = buildReportHtml();
+      const { uri } = await Print.printToFileAsync({ html });
+      await Sharing.shareAsync(uri);
+    } catch (error) {
+      console.error("Failed to share analytics PDF:", error);
+    } finally {
+      setSharingPdf(false);
+    }
+  }, [buildReportHtml]);
 
   if (loading) {
     return (
@@ -466,28 +715,69 @@ export default function MerchantStoresAnalytics() {
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      <PdfViewer
+        visible={viewerVisible}
+        uri={previewUri}
+        onClose={() => setViewerVisible(false)}
+      />
+
       <Text style={styles.title}>{screenTitle}</Text>
 
-      <View style={styles.filters}>
-        {PERIODS.map((period) => {
-          const selected = period.key === selectedPeriod;
-          return (
-            <TouchableOpacity
-              key={period.key}
-              style={[styles.filterPill, selected && styles.filterPillSelected]}
-              onPress={() => setSelectedPeriod(period.key)}
-            >
-              <Text
+      <View style={styles.filtersRow}>
+        <View style={styles.filters}>
+          {PERIODS.map((period) => {
+            const selected = period.key === selectedPeriod;
+            return (
+              <TouchableOpacity
+                key={period.key}
                 style={[
-                  styles.filterText,
-                  selected && styles.filterTextSelected,
+                  styles.filterPill,
+                  selected && styles.filterPillSelected,
                 ]}
+                onPress={() => setSelectedPeriod(period.key)}
               >
-                {period.label}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
+                <Text
+                  style={[
+                    styles.filterText,
+                    selected && styles.filterTextSelected,
+                  ]}
+                >
+                  {period.label}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+
+        <View style={styles.reportActions}>
+          <TouchableOpacity
+            style={[
+              styles.actionIconBtn,
+              buildingPdf && styles.previewBtnDisabled,
+            ]}
+            onPress={handlePreviewReport}
+            disabled={buildingPdf || sharingPdf}
+          >
+            <AppIcon
+              name="chart-box-outline"
+              variant="community"
+              size={18}
+              color={colors.background}
+            />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.shareBtn, sharingPdf && styles.previewBtnDisabled]}
+            onPress={handleShareReport}
+            disabled={sharingPdf || buildingPdf}
+          >
+            <AppIcon
+              name="printer-outline"
+              variant="community"
+              size={18}
+              color={colors.text}
+            />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <View style={styles.kpiGrid}>
@@ -719,11 +1009,18 @@ const createStyles = (colors) =>
       marginBottom: 10,
       color: colors.text,
     },
+    filtersRow: {
+      flexDirection: "row",
+      alignItems: "flex-start",
+      justifyContent: "space-between",
+      marginBottom: 12,
+      gap: 8,
+    },
     filters: {
       flexDirection: "row",
       gap: 8,
-      marginBottom: 12,
       flexWrap: "wrap",
+      flex: 1,
     },
     filterPill: {
       backgroundColor: colors.input,
@@ -741,6 +1038,31 @@ const createStyles = (colors) =>
     },
     filterTextSelected: {
       color: colors.background,
+    },
+    actionIconBtn: {
+      backgroundColor: colors.text,
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    previewBtnDisabled: {
+      opacity: 0.75,
+    },
+    reportActions: {
+      flexDirection: "row",
+      gap: 8,
+      marginLeft: "auto",
+      alignItems: "center",
+    },
+    shareBtn: {
+      backgroundColor: "#e2e2e2",
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      alignItems: "center",
+      justifyContent: "center",
     },
     kpiGrid: {
       flexDirection: "row",

@@ -1,4 +1,4 @@
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { collection, getDocs, orderBy, query } from "firebase/firestore";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -15,7 +15,7 @@ import {
 import AppIcon from "../../src/components/AppIcon";
 import { useCart } from "../../src/context/CartContext";
 import { useFavorites } from "../../src/context/FavoritesContext";
-import { db } from "../../src/firebase/firebaseConfig";
+import { auth, db } from "../../src/firebase/firebaseConfig";
 import { useAppTheme } from "../../src/theme/useAppTheme";
 import {
   PRODUCT_SORT_MODES,
@@ -33,8 +33,47 @@ const ICON_COLOR_POOL = [
   "#111111", // black
 ];
 
+function toHexChannel(value) {
+  return Math.max(0, Math.min(255, Math.round(value)))
+    .toString(16)
+    .padStart(2, "0");
+}
+
+function getLightIconBackground(iconColor, fallbackColor) {
+  if (typeof iconColor !== "string" || !iconColor.startsWith("#")) {
+    return fallbackColor;
+  }
+
+  const compactHex = iconColor.slice(1);
+  const fullHex =
+    compactHex.length === 3
+      ? compactHex
+          .split("")
+          .map((ch) => `${ch}${ch}`)
+          .join("")
+      : compactHex;
+
+  if (fullHex.length !== 6) return fallbackColor;
+
+  const r = parseInt(fullHex.slice(0, 2), 16);
+  const g = parseInt(fullHex.slice(2, 4), 16);
+  const b = parseInt(fullHex.slice(4, 6), 16);
+
+  if ([r, g, b].every((channel) => channel <= 30)) {
+    return "#E5E7EB";
+  }
+
+  const mix = 0.78; // blend toward white for a soft pastel tint
+  const bgR = r + (255 - r) * mix;
+  const bgG = g + (255 - g) * mix;
+  const bgB = b + (255 - b) * mix;
+
+  return `#${toHexChannel(bgR)}${toHexChannel(bgG)}${toHexChannel(bgB)}`;
+}
+
 export default function CustomerProducts() {
   const router = useRouter();
+  const params = useLocalSearchParams();
   const { addToCart } = useCart();
   const { hasFavoriteStore, toggleFavoriteStore } = useFavorites();
   const { colors, isDark } = useAppTheme();
@@ -42,6 +81,7 @@ export default function CustomerProducts() {
   const [products, setProducts] = useState([]);
   const [stores, setStores] = useState([]);
   const [sellers, setSellers] = useState([]);
+  const [pastOrderProducts, setPastOrderProducts] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [loading, setLoading] = useState(true);
@@ -57,15 +97,19 @@ export default function CustomerProducts() {
         collection(db, "products"),
         orderBy("createdAt", "desc"),
       );
-      const productSnapshot = await getDocs(productsQuery);
+      const [productSnapshot, storeSnapshot, userSnapshot, orderSnapshot] =
+        await Promise.all([
+          getDocs(productsQuery),
+          getDocs(collection(db, "stores")),
+          getDocs(collection(db, "users")),
+          getDocs(collection(db, "orders")),
+        ]);
 
       const rawProducts = productSnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
 
-      // Fetch stores
-      const storeSnapshot = await getDocs(collection(db, "stores"));
       const storeMap = {};
       const storeList = [];
       storeSnapshot.docs.forEach((doc) => {
@@ -79,8 +123,6 @@ export default function CustomerProducts() {
       });
       setStores(storeList);
 
-      // Fetch merchants
-      const userSnapshot = await getDocs(collection(db, "users"));
       const merchantMap = {};
       const merchantList = [];
       userSnapshot.docs.forEach((doc) => {
@@ -104,6 +146,35 @@ export default function CustomerProducts() {
       }));
 
       setProducts(enrichedProducts);
+
+      const customerId = auth.currentUser?.uid;
+      if (!customerId) {
+        setPastOrderProducts([]);
+      } else {
+        const orderProductRows = orderSnapshot.docs
+          .flatMap((docSnap) => {
+            const data = docSnap.data();
+            if (data.customerId !== customerId) return [];
+
+            return (data.items || []).map((item, idx) => ({
+              id: `${docSnap.id}:${item.merchantId || "unknown"}:${idx}`,
+              orderId: docSnap.id,
+              merchantId: item.merchantId || "unknown",
+              merchantName:
+                merchantMap[item.merchantId] ||
+                item.merchantName ||
+                "Unknown Seller",
+              productName: item.name || "Unknown product",
+              quantity: Number(item.quantity || 0),
+              price: Number(item.price || 0),
+              createdAt: data.createdAt?.toDate?.() || new Date(0),
+              status:
+                data.merchantStatuses?.[item.merchantId]?.status || "pending",
+            }));
+          })
+          .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+        setPastOrderProducts(orderProductRows);
+      }
     } catch (error) {
       console.error("Error loading products:", error);
     } finally {
@@ -115,19 +186,43 @@ export default function CustomerProducts() {
     fetchProducts();
   }, [fetchProducts]);
 
+  useEffect(() => {
+    const raw = Array.isArray(params?.q) ? params.q[0] : params?.q;
+    if (typeof raw !== "string") return;
+    setSearchQuery(raw);
+  }, [params?.q]);
+
+  const masterMaxPrice = useMemo(() => {
+    const raw = Array.isArray(params?.maxPrice)
+      ? params.maxPrice[0]
+      : params?.maxPrice;
+    const parsed = Number(raw);
+    if (!Number.isFinite(parsed) || parsed <= 0) return null;
+    return parsed;
+  }, [params?.maxPrice]);
+
+  const masterFilteredProducts = useMemo(() => {
+    if (masterMaxPrice == null) return products;
+    return products.filter((p) => Number(p.price || 0) <= masterMaxPrice);
+  }, [masterMaxPrice, products]);
+
   const trimmedQuery = searchQuery.trim().toLowerCase();
   const isSearching = trimmedQuery.length > 0;
   const categoryOptions = useMemo(() => {
     const unique = new Set(
-      products.map((p) => String(p.category || "").trim()).filter(Boolean),
+      masterFilteredProducts
+        .map((p) => String(p.category || "").trim())
+        .filter(Boolean),
     );
     return ["All", ...Array.from(unique).sort((a, b) => a.localeCompare(b))];
-  }, [products]);
+  }, [masterFilteredProducts]);
 
   const categoryFilteredProducts = useMemo(() => {
-    if (selectedCategory === "All") return products;
-    return products.filter((p) => p.category === selectedCategory);
-  }, [products, selectedCategory]);
+    if (selectedCategory === "All") return masterFilteredProducts;
+    return masterFilteredProducts.filter(
+      (p) => p.category === selectedCategory,
+    );
+  }, [masterFilteredProducts, selectedCategory]);
 
   const sortedCategoryProducts = useMemo(
     () =>
@@ -145,6 +240,17 @@ export default function CustomerProducts() {
       PRODUCT_SORT_MODES.RECOMMENDED,
     );
   }, [categoryFilteredProducts, isSearching, trimmedQuery]);
+  const overBudgetProductResults = useMemo(() => {
+    if (!isSearching || masterMaxPrice == null) return [];
+    return sortProducts(
+      products.filter((product) => {
+        const productName = (product.name || "").toLowerCase();
+        const price = Number(product.price || 0);
+        return productName.includes(trimmedQuery) && price > masterMaxPrice;
+      }),
+      PRODUCT_SORT_MODES.RECOMMENDED,
+    );
+  }, [isSearching, masterMaxPrice, products, trimmedQuery]);
 
   const storeResults = useMemo(() => {
     if (!isSearching) return [];
@@ -159,6 +265,48 @@ export default function CustomerProducts() {
       (seller.name || "").toLowerCase().includes(trimmedQuery),
     );
   }, [isSearching, sellers, trimmedQuery]);
+  const pastOrderProductResults = useMemo(() => {
+    if (!isSearching) return [];
+    return pastOrderProducts.filter((row) =>
+      (row.productName || "").toLowerCase().includes(trimmedQuery),
+    );
+  }, [isSearching, pastOrderProducts, trimmedQuery]);
+  const searchSections = useMemo(() => {
+    if (!isSearching) return [];
+    if (masterMaxPrice != null) {
+      return [
+        { key: "products", title: "Products", items: productResults },
+        {
+          key: "over-budget-products",
+          title: `Products above $${masterMaxPrice}`,
+          items: overBudgetProductResults,
+        },
+        {
+          key: "past-order-products",
+          title: "Product matches in past orders",
+          items: pastOrderProductResults,
+        },
+      ];
+    }
+    return [
+      { key: "products", title: "Products", items: productResults },
+      { key: "stores", title: "Stores", items: storeResults },
+      { key: "sellers", title: "Sellers", items: sellerResults },
+      {
+        key: "past-order-products",
+        title: "Product matches in past orders",
+        items: pastOrderProductResults,
+      },
+    ];
+  }, [
+    isSearching,
+    masterMaxPrice,
+    overBudgetProductResults,
+    pastOrderProductResults,
+    productResults,
+    sellerResults,
+    storeResults,
+  ]);
   const styles = useMemo(() => createStyles(colors), [colors]);
 
   const handleQuickAddToCart = (product) => {
@@ -174,56 +322,66 @@ export default function CustomerProducts() {
     });
   };
 
-  const renderProductCard = (product, key) => (
-    <View key={key} style={[styles.card, styles.productCard]}>
-      <TouchableOpacity
-        style={styles.productCardMain}
-        onPress={() => router.push(`/customer/product/${product.id}`)}
-      >
-        <View style={styles.iconWrap}>
-          <AppIcon
-            name={product.iconName || DEFAULT_PRODUCT_ICON}
-            variant="community"
-            size={27}
-            color={product.iconColor || (isDark ? colors.textMuted : "#333")}
-          />
-        </View>
-
-        <View style={styles.contentWrap}>
-          <Text style={styles.productName}>{product.name}</Text>
-
-          <View style={styles.metaWrap}>
-            <Text style={styles.sellerStoreText}>{product.sellerName}</Text>
-            <View style={styles.storeRow}>
-              <View style={styles.arrowChip}>
-                <AppIcon
-                  name="chevron-right"
-                  variant="community"
-                  size={14}
-                  color={colors.textMuted}
-                />
-              </View>
-              <Text style={styles.sellerStoreText}>{product.storeName}</Text>
-            </View>
+  const renderProductCard = (product, key, options = {}) => {
+    const { showCategoryBadge = false } = options;
+    const categoryLabel =
+      String(product.category || "").trim() || "Uncategorized";
+    return (
+      <View key={key} style={[styles.card, styles.productCard]}>
+        <TouchableOpacity
+          style={styles.productCardMain}
+          onPress={() => router.push(`/customer/product/${product.id}`)}
+        >
+          <View
+            style={[
+              styles.iconWrap,
+              {
+                backgroundColor: getLightIconBackground(
+                  product.iconColor,
+                  colors.surfaceMuted,
+                ),
+              },
+            ]}
+          >
+            <AppIcon
+              name={product.iconName || DEFAULT_PRODUCT_ICON}
+              variant="community"
+              size={27}
+              color={product.iconColor || (isDark ? colors.textMuted : "#333")}
+            />
           </View>
 
-          <Text style={styles.price}>${product.price}</Text>
-        </View>
-      </TouchableOpacity>
+          <View style={styles.contentWrap}>
+            <View style={styles.metaWrap}>
+              <Text style={styles.sellerStoreText}>{product.sellerName}</Text>
+            </View>
+            <Text style={styles.productName}>{product.name}</Text>
+            {showCategoryBadge ? (
+              <View style={styles.resultCategoryBadge}>
+                <Text style={styles.resultCategoryBadgeText}>
+                  {categoryLabel}
+                </Text>
+              </View>
+            ) : null}
 
-      <TouchableOpacity
-        style={styles.quickAddButton}
-        onPress={() => handleQuickAddToCart(product)}
-      >
-        <AppIcon
-          name="basket-plus"
-          variant="community"
-          size={18}
-          color="#1E8E3E"
-        />
-      </TouchableOpacity>
-    </View>
-  );
+            <Text style={styles.price}>${product.price}</Text>
+          </View>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.quickAddButton}
+          onPress={() => handleQuickAddToCart(product)}
+        >
+          <AppIcon
+            name="basket-plus"
+            variant="community"
+            size={18}
+            color="#1E8E3E"
+          />
+        </TouchableOpacity>
+      </View>
+    );
+  };
 
   if (loading) {
     return (
@@ -235,7 +393,6 @@ export default function CustomerProducts() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.pageTitle}>Latest products in store</Text>
       <TextInput
         style={styles.search}
         placeholder="Search products, stores, sellers"
@@ -244,51 +401,49 @@ export default function CustomerProducts() {
         onChangeText={setSearchQuery}
         clearButtonMode="while-editing"
       />
-      <View style={styles.filters}>
-        {categoryOptions.map((category) => {
-          const isSelected = category === selectedCategory;
-          const isAll = category === "All";
-          return (
-            <TouchableOpacity
-              key={category}
-              onPress={() => setSelectedCategory(category)}
-              style={[
-                styles.categoryPill,
-                isAll
-                  ? isSelected
-                    ? styles.categoryAllPillSelected
-                    : styles.categoryAllPill
-                  : isSelected
-                    ? styles.categoryPillSelected
-                    : null,
-              ]}
-            >
-              <Text
+      {!isSearching ? (
+        <View style={styles.filters}>
+          {categoryOptions.map((category) => {
+            const isSelected = category === selectedCategory;
+            const isAll = category === "All";
+            return (
+              <TouchableOpacity
+                key={category}
+                onPress={() => setSelectedCategory(category)}
                 style={[
-                  styles.categoryPillText,
+                  styles.categoryPill,
                   isAll
                     ? isSelected
-                      ? styles.categoryAllPillTextSelected
-                      : styles.categoryAllPillText
+                      ? styles.categoryAllPillSelected
+                      : styles.categoryAllPill
                     : isSelected
-                      ? styles.categoryPillTextSelected
+                      ? styles.categoryPillSelected
                       : null,
                 ]}
               >
-                {category}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
-      </View>
+                <Text
+                  style={[
+                    styles.categoryPillText,
+                    isAll
+                      ? isSelected
+                        ? styles.categoryAllPillTextSelected
+                        : styles.categoryAllPillText
+                      : isSelected
+                        ? styles.categoryPillTextSelected
+                        : null,
+                  ]}
+                >
+                  {category}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+      ) : null}
 
       {isSearching ? (
         <FlatList
-          data={[
-            { key: "stores", title: "Stores", items: storeResults },
-            { key: "sellers", title: "Sellers", items: sellerResults },
-            { key: "products", title: "Products", items: productResults },
-          ]}
+          data={searchSections}
           keyExtractor={(item) => item.key}
           centerContent={false}
           showsVerticalScrollIndicator={false}
@@ -307,10 +462,15 @@ export default function CustomerProducts() {
                 ? section.items.map((store) => {
                     const isFavoriteStore = hasFavoriteStore(store.id);
                     return (
-                      <View key={store.id} style={[styles.card, styles.storeCard]}>
+                      <View
+                        key={store.id}
+                        style={[styles.card, styles.storeCard]}
+                      >
                         <TouchableOpacity
                           style={styles.storeCardMain}
-                          onPress={() => router.push(`/customer/store/${store.id}`)}
+                          onPress={() =>
+                            router.push(`/customer/store/${store.id}`)
+                          }
                         >
                           <View style={styles.iconWrap}>
                             <AppIcon
@@ -335,10 +495,14 @@ export default function CustomerProducts() {
                           onPress={() => toggleFavoriteStore(store.id)}
                         >
                           <AppIcon
-                            name={isFavoriteStore ? "store-remove" : "store-check"}
+                            name={
+                              isFavoriteStore ? "store-remove" : "store-check"
+                            }
                             variant="community"
                             size={18}
-                            color={isFavoriteStore ? colors.danger : colors.success}
+                            color={
+                              isFavoriteStore ? colors.danger : colors.success
+                            }
                           />
                         </TouchableOpacity>
                       </View>
@@ -351,7 +515,9 @@ export default function CustomerProducts() {
                     <TouchableOpacity
                       key={seller.id}
                       style={styles.card}
-                      onPress={() => router.push(`/customer/seller/${seller.id}`)}
+                      onPress={() =>
+                        router.push(`/customer/seller/${seller.id}`)
+                      }
                     >
                       <View style={styles.iconWrap}>
                         <AppIcon
@@ -369,10 +535,50 @@ export default function CustomerProducts() {
                   ))
                 : null}
 
-              {section.key === "products"
+              {section.key === "products" ||
+              section.key === "over-budget-products"
                 ? section.items.map((product) =>
-                    renderProductCard(product, product.id),
+                    renderProductCard(product, product.id, {
+                      showCategoryBadge: true,
+                    }),
                   )
+                : null}
+
+              {section.key === "past-order-products"
+                ? section.items.map((row) => (
+                    <TouchableOpacity
+                      key={row.id}
+                      style={styles.card}
+                      onPress={() =>
+                        router.push(
+                          `/customer/orders/${row.orderId}?merchantId=${row.merchantId}`,
+                        )
+                      }
+                    >
+                      <View style={styles.iconWrap}>
+                        <AppIcon
+                          name="history"
+                          variant="community"
+                          size={24}
+                          color={colors.text}
+                        />
+                      </View>
+                      <View style={styles.contentWrap}>
+                        <Text style={styles.productName}>
+                          {row.productName}
+                        </Text>
+                        <Text style={styles.meta}>
+                          {row.merchantName} · {row.quantity}x
+                        </Text>
+                        <Text style={styles.meta}>
+                          {row.createdAt?.toLocaleString?.() || "—"}
+                        </Text>
+                      </View>
+                      <Text style={styles.pastOrderPrice}>
+                        ${(row.price * row.quantity).toFixed(2)}
+                      </Text>
+                    </TouchableOpacity>
+                  ))
                 : null}
             </View>
           )}
@@ -397,193 +603,208 @@ export default function CustomerProducts() {
 
 const createStyles = (colors) =>
   StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 16,
-    backgroundColor: colors.screen,
-  },
-  card: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 16,
-    borderWidth: 1,
-    borderColor: colors.borderSoft,
-    borderRadius: 8,
-    marginBottom: 12,
-    backgroundColor: colors.surface,
-  },
-  iconWrap: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: colors.surfaceMuted,
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 15,
-  },
-  contentWrap: {
-    flex: 1,
-  },
-  productCard: {
-    padding: 0,
-  },
-  storeCard: {
-    padding: 0,
-  },
-  productCardMain: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 16,
-    paddingRight: 10,
-  },
-  storeCardMain: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 16,
-    paddingRight: 10,
-  },
-  quickAddButton: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    marginRight: 12,
-    backgroundColor: colors.successSoft,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  favoriteStoreButton: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    marginRight: 12,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  favoriteStoreButtonAdd: {
-    backgroundColor: colors.successSoft,
-  },
-  favoriteStoreButtonRemove: {
-    backgroundColor: "#FDECEC",
-  },
-  pageTitle: {
-    fontSize: 26,
-    fontWeight: "700",
-    marginBottom: 12,
-    color: colors.text,
-  },
-  search: {
-    backgroundColor: colors.input,
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    fontSize: 16,
-    marginBottom: 14,
-    color: colors.text,
-  },
-  filters: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-    marginBottom: 12,
-  },
+    container: {
+      flex: 1,
+      padding: 16,
+      backgroundColor: colors.screen,
+    },
+    card: {
+      flexDirection: "row",
+      alignItems: "center",
+      padding: 12,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 12,
+      marginBottom: 10,
+      backgroundColor: colors.surface,
+    },
+    iconWrap: {
+      width: 42,
+      height: 42,
+      borderRadius: 10,
+      backgroundColor: colors.surfaceMuted,
+      alignItems: "center",
+      justifyContent: "center",
+      marginRight: 12,
+    },
+    contentWrap: {
+      flex: 1,
+    },
+    productCard: {
+      padding: 0,
+    },
+    storeCard: {
+      padding: 0,
+    },
+    productCardMain: {
+      flex: 1,
+      flexDirection: "row",
+      alignItems: "center",
+      padding: 12,
+      paddingRight: 8,
+    },
+    storeCardMain: {
+      flex: 1,
+      flexDirection: "row",
+      alignItems: "center",
+      padding: 12,
+      paddingRight: 8,
+    },
+    quickAddButton: {
+      width: 34,
+      height: 34,
+      borderRadius: 17,
+      marginRight: 10,
+      backgroundColor: colors.successSoft,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    favoriteStoreButton: {
+      width: 34,
+      height: 34,
+      borderRadius: 17,
+      marginRight: 10,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    favoriteStoreButtonAdd: {
+      backgroundColor: colors.successSoft,
+    },
+    favoriteStoreButtonRemove: {
+      backgroundColor: "#FDECEC",
+    },
+    pageTitle: {
+      fontSize: 26,
+      fontWeight: "700",
+      marginBottom: 12,
+      color: colors.text,
+    },
+    search: {
+      backgroundColor: colors.input,
+      borderRadius: 10,
+      paddingHorizontal: 12,
+      paddingVertical: 10,
+      fontSize: 16,
+      marginBottom: 14,
+      color: colors.text,
+    },
+    filters: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      gap: 8,
+      marginBottom: 12,
+    },
   categoryPill: {
     backgroundColor: colors.pill,
     borderWidth: 1,
     borderColor: colors.pillBorder,
     borderRadius: 999,
-    paddingHorizontal: 14,
-    height: 34,
+    paddingHorizontal: 11,
+    height: 30,
     alignItems: "center",
     justifyContent: "center",
   },
-  categoryPillSelected: {
-    backgroundColor: colors.pillSelected,
-    borderColor: colors.pillSelectedBorder,
-  },
+    categoryPillSelected: {
+      backgroundColor: colors.pillSelected,
+      borderColor: colors.pillSelectedBorder,
+    },
   categoryPillText: {
     color: colors.pillText,
     fontWeight: "600",
-    fontSize: 13,
-  },
-  categoryPillTextSelected: {
-    color: colors.pillTextSelected,
-  },
-  categoryAllPill: {
-    backgroundColor: colors.pillNeutral,
-    borderColor: colors.pillNeutralBorder,
-  },
-  categoryAllPillSelected: {
-    backgroundColor: colors.pillNeutralSelected,
-    borderColor: colors.pillNeutralSelectedBorder,
-  },
-  categoryAllPillText: {
-    color: colors.pillNeutralText,
-  },
-  categoryAllPillTextSelected: {
-    color: colors.pillNeutralTextSelected,
-  },
-  listContent: {
-    paddingTop: 0,
-    paddingBottom: 8,
-    justifyContent: "flex-start",
-    alignItems: "stretch",
-    flexGrow: 0,
-  },
-  productName: {
-    fontSize: 18,
-    fontWeight: "700",
-    marginBottom: 4,
-    color: colors.text,
-  },
-  metaWrap: {
-    marginTop: 4,
-  },
-  storeRow: {
-    marginTop: 4,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-  sellerStoreText: {
     fontSize: 12,
-    color: colors.textSubtle,
-    fontWeight: "500",
   },
-  arrowChip: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: colors.screen,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  price: {
-    marginTop: 16,
-    fontSize: 17,
-    fontWeight: "600",
-    color: colors.text,
-  },
-  empty: {
-    color: colors.textSubtle,
-    marginTop: 20,
-  },
-  sectionWrap: {
-    marginBottom: 14,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    marginBottom: 8,
-    color: colors.text,
-  },
-  sectionEmpty: {
-    color: colors.textSubtle,
-    marginBottom: 10,
-  },
-  meta: {
-    fontSize: 14,
-    color: colors.textMuted,
-  },
-});
+    categoryPillTextSelected: {
+      color: colors.pillTextSelected,
+    },
+    categoryAllPill: {
+      backgroundColor: colors.pillNeutral,
+      borderColor: colors.pillNeutralBorder,
+    },
+    categoryAllPillSelected: {
+      backgroundColor: colors.pillNeutralSelected,
+      borderColor: colors.pillNeutralSelectedBorder,
+    },
+    categoryAllPillText: {
+      color: colors.pillNeutralText,
+    },
+    categoryAllPillTextSelected: {
+      color: colors.pillNeutralTextSelected,
+    },
+    listContent: {
+      paddingTop: 0,
+      paddingBottom: 8,
+      justifyContent: "flex-start",
+      alignItems: "stretch",
+      flexGrow: 0,
+    },
+    productName: {
+      fontSize: 15,
+      fontWeight: "600",
+      marginBottom: 2,
+      color: colors.text,
+    },
+    productNameRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 6,
+      marginBottom: 4,
+    },
+    resultCategoryBadge: {
+      backgroundColor: colors.pill,
+      borderWidth: 1,
+      borderColor: colors.pillBorder,
+      borderRadius: 999,
+      alignSelf: "flex-start",
+      paddingHorizontal: 8,
+      height: 20,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    resultCategoryBadgeText: {
+      fontSize: 11,
+      fontWeight: "600",
+      color: colors.pillText,
+    },
+    metaWrap: {
+      marginTop: 2,
+      marginBottom: 4,
+    },
+    sellerStoreText: {
+      fontSize: 12,
+      color: colors.textSubtle,
+      fontWeight: "500",
+    },
+    price: {
+      marginTop: 8,
+      fontSize: 16,
+      fontWeight: "700",
+      color: colors.text,
+    },
+    empty: {
+      color: colors.textSubtle,
+      marginTop: 20,
+    },
+    sectionWrap: {
+      marginBottom: 14,
+    },
+    sectionTitle: {
+      fontSize: 18,
+      fontWeight: "700",
+      marginBottom: 8,
+      color: colors.text,
+    },
+    sectionEmpty: {
+      color: colors.textSubtle,
+      marginBottom: 10,
+    },
+    meta: {
+      fontSize: 12,
+      color: colors.textMuted,
+    },
+    pastOrderPrice: {
+      fontSize: 14,
+      fontWeight: "700",
+      color: colors.text,
+      marginLeft: 8,
+    },
+  });

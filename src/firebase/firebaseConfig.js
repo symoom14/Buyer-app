@@ -30,6 +30,7 @@ try {
 }
 
 export { auth };
+export { firebaseConfig };
 
 export const db = getFirestore(app);
 export const storage = getStorage(app);

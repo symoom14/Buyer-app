@@ -177,7 +177,7 @@ export default function CustomerStores() {
                 <View style={styles.contentWrap}>
                   <Text style={styles.storeName}>{item.name}</Text>
                   <Text style={styles.meta}>
-                    Seller: <Text style={styles.bold}>{item.sellerName}</Text>
+                    By <Text style={styles.bold}>{item.sellerName}</Text>
                   </Text>
                 </View>
               </TouchableOpacity>

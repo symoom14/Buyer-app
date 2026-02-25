@@ -1,6 +1,6 @@
 import LottieView from "lottie-react-native";
 import { useRouter } from "expo-router";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { useMemo, useRef, useState } from "react";
 import {
@@ -21,6 +21,8 @@ import { auth, db } from "../../src/firebase/firebaseConfig";
 import { useAppTheme } from "../../src/theme/useAppTheme";
 
 export default function Login() {
+  const DEACTIVATED_MESSAGE =
+    "Oops, looks like your account was deactivated. Open a new account to continue.";
   const router = useRouter();
   const { colors } = useAppTheme();
 
@@ -70,17 +72,29 @@ export default function Login() {
       const userDoc = await getDoc(doc(db, "users", uid));
 
       if (!userDoc.exists()) {
-        throw new Error("User profile not found");
+        await signOut(auth);
+        Animated.timing(buttonAnim, {
+          toValue: 0,
+          duration: 200,
+          useNativeDriver: false,
+        }).start();
+        setLoading(false);
+        setError(
+          DEACTIVATED_MESSAGE,
+        );
+        return;
       }
 
-      const { role } = userDoc.data();
+      const normalizedRole = String(userDoc.data().role || "")
+        .trim()
+        .toLowerCase();
 
-      if (role === "merchant") {
+      if (normalizedRole === "merchant") {
         setPendingRoute("/merchant/dashboard");
-      } else if (role === "customer") {
+      } else if (normalizedRole === "customer") {
         setPendingRoute("/customer/home");
-      } else if (role === "admin") {
-        setPendingRoute("/admin");
+      } else if (normalizedRole === "admin") {
+        setPendingRoute("/admin/panel");
       } else {
         throw new Error("Invalid user role");
       }
@@ -135,7 +149,18 @@ export default function Login() {
               }}
             />
 
-            {error ? <Text style={styles.error}>{error}</Text> : null}
+            {error === DEACTIVATED_MESSAGE ? (
+              <Text style={styles.error}>
+                Oops, looks like your account was deactivated.{" "}
+                <Text style={styles.errorLink} onPress={() => router.push("/signup")}>
+                  Open a new account
+                </Text>{" "}
+                to continue.
+              </Text>
+            ) : null}
+            {error && error !== DEACTIVATED_MESSAGE ? (
+              <Text style={styles.error}>{error}</Text>
+            ) : null}
 
             {loading ? (
               <View style={styles.lottieWrap}>
@@ -261,6 +286,11 @@ const createStyles = (colors) =>
     color: colors.danger,
     marginTop: 12,
     textAlign: "left",
+  },
+  errorLink: {
+    color: colors.danger,
+    textDecorationLine: "underline",
+    fontWeight: "700",
   },
   link: {
     marginTop: 20,

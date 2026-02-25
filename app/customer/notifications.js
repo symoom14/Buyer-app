@@ -179,6 +179,36 @@ export default function CustomerNotificationsScreen() {
       Alert.alert("Action failed", "Could not mark all notifications as read.");
     }
   };
+  const clearAllNotifications = async () => {
+    if (!items.length) return;
+
+    Alert.alert(
+      "Clear all notifications",
+      "This will permanently delete all notifications in this list.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Clear all",
+          style: "destructive",
+          onPress: async () => {
+            const previous = items;
+            setItems([]);
+            try {
+              await Promise.all(
+                previous.map((row) =>
+                  deleteDoc(doc(db, "notifications", row.id)),
+                ),
+              );
+            } catch (err) {
+              setItems(previous);
+              console.error("Failed to clear notifications:", err);
+              Alert.alert("Action failed", "Could not clear notifications.");
+            }
+          },
+        },
+      ],
+    );
+  };
 
   const filteredItems = useMemo(() => {
     if (selectedFilter === "read") return items.filter((item) => !!item.read);
@@ -222,21 +252,38 @@ export default function CustomerNotificationsScreen() {
             );
           })}
         </View>
-        <TouchableOpacity
-          style={[
-            styles.markAllButton,
-            unreadCount === 0 && styles.markAllButtonDisabled,
-          ]}
-          onPress={markAllAsRead}
-          disabled={unreadCount === 0}
-        >
-          <AppIcon
-            name="check-all"
-            variant="community"
-            size={18}
-            color={unreadCount === 0 ? colors.textSubtle : colors.tint}
-          />
-        </TouchableOpacity>
+        <View style={styles.filterActions}>
+          <TouchableOpacity
+            style={[
+              styles.markAllButton,
+              unreadCount === 0 && styles.markAllButtonDisabled,
+            ]}
+            onPress={markAllAsRead}
+            disabled={unreadCount === 0}
+          >
+            <AppIcon
+              name="check-all"
+              variant="community"
+              size={18}
+              color={unreadCount === 0 ? colors.textSubtle : colors.tint}
+            />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.clearAllButton,
+              items.length === 0 && styles.clearAllButtonDisabled,
+            ]}
+            onPress={clearAllNotifications}
+            disabled={items.length === 0}
+          >
+            <AppIcon
+              name="notification-clear-all"
+              variant="community"
+              size={18}
+              color={items.length === 0 ? colors.textSubtle : colors.danger}
+            />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <FlatList
@@ -367,6 +414,22 @@ const createStyles = (colors, isDark) =>
       borderColor: colors.borderSoft,
     },
     markAllButtonDisabled: {
+      backgroundColor: colors.input,
+    },
+    filterActions: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
+    },
+    clearAllButton: {
+      width: 34,
+      height: 34,
+      borderRadius: 17,
+      backgroundColor: "#FADDDD",
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    clearAllButtonDisabled: {
       backgroundColor: colors.input,
     },
     card: {

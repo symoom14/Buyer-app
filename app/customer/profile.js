@@ -1,9 +1,10 @@
 import { useRouter } from "expo-router";
 import { signOut } from "firebase/auth";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { useEffect, useMemo, useState } from "react";
 import {
   Alert,
+  ScrollView,
   Modal,
   Pressable,
   StyleSheet,
@@ -12,15 +13,22 @@ import {
   TouchableWithoutFeedback,
   View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import AppIcon from "../../src/components/AppIcon";
 import { useThemePreference } from "../../src/context/ThemePreferenceContext";
 import { auth, db } from "../../src/firebase/firebaseConfig";
+import {
+  DEFAULT_PAYMENT_METHOD_ID,
+  PAYMENT_METHOD_PRESETS,
+  normalizePaymentMethod,
+} from "../../src/constants/paymentMethods";
 import { useAppTheme } from "../../src/theme/useAppTheme";
 import { getUserDisplayName } from "../../src/utils/userDisplayName";
 
 export default function ProfileScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { colors, isDark } = useAppTheme();
   const { setScheme } = useThemePreference();
   const [displayName, setDisplayName] = useState("");
@@ -28,7 +36,13 @@ export default function ProfileScreen() {
   const [username, setUsername] = useState("");
   const [loadingProfile, setLoadingProfile] = useState(true);
   const [savingName, setSavingName] = useState(false);
+  const [savingPaymentMethods, setSavingPaymentMethods] = useState(false);
   const [isNameModalVisible, setIsNameModalVisible] = useState(false);
+  const [isPaymentModalVisible, setIsPaymentModalVisible] = useState(false);
+  const [paymentMethods, setPaymentMethods] = useState([]);
+  const [defaultPaymentMethodId, setDefaultPaymentMethodId] = useState(
+    DEFAULT_PAYMENT_METHOD_ID,
+  );
   const styles = useMemo(() => createStyles(colors, isDark), [colors, isDark]);
 
   useEffect(() => {
@@ -37,10 +51,31 @@ export default function ProfileScreen() {
         const uid = auth.currentUser?.uid;
         if (!uid) return;
         const snap = await getDoc(doc(db, "users", uid));
-        if (!snap.exists()) return;
+        if (!snap.exists()) {
+          setPaymentMethods(PAYMENT_METHOD_PRESETS);
+          setDefaultPaymentMethodId(DEFAULT_PAYMENT_METHOD_ID);
+          return;
+        }
         const data = snap.data();
         setDisplayName(data.name || "");
         setUsername(data.username || "");
+        const methodsFromProfile = Array.isArray(data.paymentMethods)
+          ? data.paymentMethods.map(normalizePaymentMethod).filter(Boolean)
+          : [];
+        const mergedMethods = PAYMENT_METHOD_PRESETS.map((preset) => {
+          const existing = methodsFromProfile.find((method) => method.id === preset.id);
+          return existing || preset;
+        });
+        setPaymentMethods(mergedMethods);
+        const defaultIdFromProfile = String(
+          data.defaultPaymentMethodId || DEFAULT_PAYMENT_METHOD_ID,
+        );
+        const defaultExists = mergedMethods.some(
+          (method) => method.id === defaultIdFromProfile,
+        );
+        setDefaultPaymentMethodId(
+          defaultExists ? defaultIdFromProfile : (mergedMethods[0]?.id || DEFAULT_PAYMENT_METHOD_ID),
+        );
       } catch (err) {
         console.error("Failed to load profile:", err);
       } finally {
@@ -59,6 +94,15 @@ export default function ProfileScreen() {
       ),
     [displayName, username],
   );
+  const paymentMethodsById = useMemo(() => {
+    const map = {};
+    paymentMethods.forEach((method) => {
+      map[method.id] = method;
+    });
+    return map;
+  }, [paymentMethods]);
+  const defaultPaymentMethodLabel =
+    paymentMethodsById[defaultPaymentMethodId]?.label || "Not set";
 
   const handleSaveName = async () => {
     const uid = auth.currentUser?.uid;
@@ -87,6 +131,33 @@ export default function ProfileScreen() {
     setDraftName(displayName);
     setIsNameModalVisible(true);
   };
+  const savePaymentConfig = async (nextMethods, nextDefaultId) => {
+    const uid = auth.currentUser?.uid;
+    if (!uid) return false;
+    try {
+      setSavingPaymentMethods(true);
+      await setDoc(
+        doc(db, "users", uid),
+        {
+          paymentMethods: nextMethods,
+          defaultPaymentMethodId: nextDefaultId,
+        },
+        { merge: true },
+      );
+      setPaymentMethods(nextMethods);
+      setDefaultPaymentMethodId(nextDefaultId);
+      return true;
+    } catch (error) {
+      console.error("Failed to save payment methods:", error);
+      Alert.alert("Failed", "Could not save payment method settings.");
+      return false;
+    } finally {
+      setSavingPaymentMethods(false);
+    }
+  };
+  const handleSetDefaultPaymentMethod = async (methodId) => {
+    await savePaymentConfig(paymentMethods, methodId);
+  };
 
   const handleLogout = async () => {
     Alert.alert("Log out", "Are you sure you want to log out?", [
@@ -107,7 +178,14 @@ export default function ProfileScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView
+      style={styles.screen}
+      contentContainerStyle={[
+        styles.container,
+        { paddingBottom: insets.bottom + 110 },
+      ]}
+      showsVerticalScrollIndicator={false}
+    >
       <View style={styles.avatarWrap}>
         <AppIcon name="account" variant="community" size={52} color={colors.textMuted} />
       </View>
@@ -115,7 +193,12 @@ export default function ProfileScreen() {
 
       <Pressable style={styles.actionCard} onPress={handleOpenNameModal}>
         <View style={styles.cardLeft}>
-          <AppIcon name="badge-account" variant="community" size={22} />
+          <AppIcon
+            name="badge-account"
+            variant="community"
+            size={22}
+            color="#F57C00"
+          />
           <View>
             <Text style={styles.cardText}>Change display name</Text>
             <Text style={styles.cardMeta}>
@@ -137,6 +220,7 @@ export default function ProfileScreen() {
             name={isDark ? "weather-night" : "white-balance-sunny"}
             variant="community"
             size={22}
+            color={isDark ? "#7E57C2" : "#FBC02D"}
           />
           <View>
             <Text style={styles.cardText}>Theme</Text>
@@ -147,6 +231,75 @@ export default function ProfileScreen() {
         </View>
         <AppIcon
           name="autorenew"
+          variant="community"
+          size={20}
+          color={colors.textSubtle}
+        />
+      </Pressable>
+
+      <Pressable
+        style={styles.actionCard}
+        onPress={() => setIsPaymentModalVisible(true)}
+      >
+        <View style={styles.cardLeft}>
+          <AppIcon
+            name="credit-card-outline"
+            variant="community"
+            size={22}
+            color={isDark ? "#8BC34A" : "#2E7D32"}
+          />
+          <View>
+            <Text style={styles.cardText}>Payment methods</Text>
+            <Text style={styles.cardMeta}>
+              Default: {loadingProfile ? "Loading..." : defaultPaymentMethodLabel}
+            </Text>
+          </View>
+        </View>
+        <AppIcon
+          name="chevron-right"
+          variant="community"
+          size={20}
+          color={colors.textSubtle}
+        />
+      </Pressable>
+
+      <Pressable
+        style={styles.actionCard}
+        onPress={() => router.push("/customer/saved-products")}
+      >
+        <View style={styles.cardLeft}>
+          <AppIcon name="heart" variant="community" size={22} color="#D32F2F" />
+          <View>
+            <Text style={styles.cardText}>Saved products</Text>
+            <Text style={styles.cardMeta}>Your favourite items</Text>
+          </View>
+        </View>
+        <AppIcon
+          name="chevron-right"
+          variant="community"
+          size={20}
+          color={colors.textSubtle}
+        />
+      </Pressable>
+
+      <Pressable
+        style={styles.actionCard}
+        onPress={() => router.push("/customer/saved-stores")}
+      >
+        <View style={styles.cardLeft}>
+          <AppIcon
+            name="store-check"
+            variant="community"
+            size={22}
+            color="#1976D2"
+          />
+          <View>
+            <Text style={styles.cardText}>Saved stores</Text>
+            <Text style={styles.cardMeta}>Shops you follow</Text>
+          </View>
+        </View>
+        <AppIcon
+          name="chevron-right"
           variant="community"
           size={20}
           color={colors.textSubtle}
@@ -197,19 +350,111 @@ export default function ProfileScreen() {
         </TouchableWithoutFeedback>
       </Modal>
 
+      <Modal
+        visible={isPaymentModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setIsPaymentModalVisible(false)}
+      >
+        <TouchableWithoutFeedback onPress={() => setIsPaymentModalVisible(false)}>
+          <View style={styles.modalBackdrop}>
+            <TouchableWithoutFeedback>
+              <View style={styles.modalCardLarge}>
+                <Text style={styles.modalTitle}>Payment methods</Text>
+                <ScrollView
+                  style={styles.paymentScroll}
+                  contentContainerStyle={styles.paymentScrollContent}
+                  showsVerticalScrollIndicator={false}
+                >
+                  <Text style={styles.paymentSectionTitle}>Available methods</Text>
+                  {paymentMethods.length === 0 ? (
+                    <Text style={styles.paymentEmpty}>
+                      No payment methods available.
+                    </Text>
+                  ) : (
+                    <View style={styles.paymentMethodsCard}>
+                      {paymentMethods.map((method, index) => {
+                        const isDefault = method.id === defaultPaymentMethodId;
+                        const hasDivider = index < paymentMethods.length - 1;
+                        return (
+                          <View
+                            key={method.id}
+                            style={[
+                              styles.paymentMethodRow,
+                              hasDivider && styles.paymentMethodDivider,
+                            ]}
+                          >
+                            <View style={styles.paymentMethodLeft}>
+                              <AppIcon
+                                name={method.iconName || "credit-card-outline"}
+                                variant="community"
+                                size={20}
+                                color={colors.text}
+                              />
+                              <View style={styles.paymentMethodTextWrap}>
+                                <Text style={styles.paymentMethodLabel}>
+                                  {method.label}
+                                </Text>
+                                <Text style={styles.paymentMethodMeta}>
+                                  {isDefault ? "Default method" : "Available"}
+                                </Text>
+                              </View>
+                            </View>
+                            <Pressable
+                              onPress={() => handleSetDefaultPaymentMethod(method.id)}
+                              disabled={savingPaymentMethods || isDefault}
+                              style={[
+                                styles.defaultBtn,
+                                isDefault && styles.defaultBtnActive,
+                              ]}
+                            >
+                              <Text
+                                style={[
+                                  styles.defaultBtnText,
+                                  isDefault && styles.defaultBtnTextActive,
+                                ]}
+                              >
+                                {isDefault ? "Default" : "Set default"}
+                              </Text>
+                            </Pressable>
+                          </View>
+                        );
+                      })}
+                    </View>
+                  )}
+
+                </ScrollView>
+                <View style={styles.modalButtons}>
+                  <Pressable
+                    style={styles.modalCancelButton}
+                    onPress={() => setIsPaymentModalVisible(false)}
+                  >
+                    <Text style={styles.modalCancelText}>Close</Text>
+                  </Pressable>
+                </View>
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
+
       <Pressable style={styles.logoutButton} onPress={handleLogout}>
         <Text style={styles.logoutText}>Log out</Text>
       </Pressable>
-    </View>
+    </ScrollView>
   );
 }
 
 const createStyles = (colors, isDark) =>
   StyleSheet.create({
-  container: {
+  screen: {
     flex: 1,
+    backgroundColor: colors.screen,
+  },
+  container: {
     padding: 20,
     backgroundColor: colors.screen,
+    flexGrow: 1,
   },
   username: {
     fontSize: 28,
@@ -280,10 +525,97 @@ const createStyles = (colors, isDark) =>
     padding: 16,
     gap: 12,
   },
+  modalCardLarge: {
+    backgroundColor: colors.surface,
+    borderRadius: 14,
+    padding: 16,
+    gap: 12,
+    maxHeight: "78%",
+  },
   modalTitle: {
     fontSize: 18,
     fontWeight: "700",
     color: colors.text,
+  },
+  paymentScroll: {
+    maxHeight: 420,
+  },
+  paymentScrollContent: {
+    gap: 8,
+    paddingBottom: 4,
+  },
+  paymentSectionTitle: {
+    marginTop: 2,
+    marginBottom: 2,
+    fontSize: 13,
+    fontWeight: "700",
+    color: colors.textMuted,
+  },
+  paymentEmpty: {
+    fontSize: 13,
+    color: colors.textSubtle,
+    marginBottom: 6,
+  },
+  paymentMethodRow: {
+    minHeight: 56,
+    paddingHorizontal: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 10,
+    backgroundColor: "transparent",
+  },
+  paymentMethodsCard: {
+    borderWidth: 1,
+    borderColor: colors.borderSoft,
+    borderRadius: 10,
+    backgroundColor: colors.background,
+    overflow: "hidden",
+  },
+  paymentMethodDivider: {
+    borderBottomWidth: 1,
+    borderBottomColor: colors.borderSoft,
+  },
+  paymentMethodLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    flex: 1,
+  },
+  paymentMethodTextWrap: {
+    flex: 1,
+  },
+  paymentMethodLabel: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: colors.text,
+  },
+  paymentMethodMeta: {
+    marginTop: 2,
+    fontSize: 12,
+    color: colors.textSubtle,
+  },
+  defaultBtn: {
+    height: 32,
+    borderRadius: 16,
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: colors.border,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: colors.surface,
+  },
+  defaultBtnActive: {
+    borderColor: colors.success,
+    backgroundColor: colors.successSoft,
+  },
+  defaultBtnText: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: colors.text,
+  },
+  defaultBtnTextActive: {
+    color: colors.success,
   },
   modalButtons: {
     flexDirection: "row",

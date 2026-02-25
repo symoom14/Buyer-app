@@ -1,4 +1,4 @@
-import { useFocusEffect, useRouter } from "expo-router";
+import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import { onAuthStateChanged } from "firebase/auth";
 import {
   collection,
@@ -27,8 +27,10 @@ import { auth, db } from "../../../src/firebase/firebaseConfig";
 import { useAppTheme } from "../../../src/theme/useAppTheme";
 
 const DEFAULT_PRODUCT_ICON = "package-variant-closed";
+const LOW_STOCK_THRESHOLD = 10;
 
 export default function MerchantStoresProducts() {
+  const params = useLocalSearchParams();
   const router = useRouter();
   const { colors, isDark } = useAppTheme();
   const [products, setProducts] = useState([]);
@@ -93,14 +95,19 @@ export default function MerchantStoresProducts() {
   );
 
   const visibleProducts = useMemo(() => {
+    const lowStockOnly =
+      (Array.isArray(params?.stock) ? params.stock[0] : params?.stock) === "low";
+    const source = lowStockOnly
+      ? products.filter((product) => Number(product.quantity || 0) <= LOW_STOCK_THRESHOLD)
+      : products;
     const q = searchQuery.trim().toLowerCase();
-    if (!q) return products;
-    return products.filter((product) => {
+    if (!q) return source;
+    return source.filter((product) => {
       const name = (product.name || "").toLowerCase();
       const storeName = (storeMap[product.storeId] || "").toLowerCase();
       return name.includes(q) || storeName.includes(q);
     });
-  }, [products, storeMap, searchQuery]);
+  }, [params?.stock, products, storeMap, searchQuery]);
 
   const handleAddProduct = () => {
     if (merchantStores.length === 0) {

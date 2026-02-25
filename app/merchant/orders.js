@@ -1,10 +1,11 @@
 // app/merchant/orders.js
-import { useFocusEffect, useRouter } from "expo-router";
+import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import { onAuthStateChanged } from "firebase/auth";
 import { collection, doc, getDoc, getDocs } from "firebase/firestore";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   FlatList,
+  Pressable,
   StyleSheet,
   Text,
   TextInput,
@@ -15,8 +16,8 @@ import {
 import AppIcon from "../../src/components/AppIcon";
 import EmptyFieldState from "../../src/components/EmptyFieldState";
 import { auth, db } from "../../src/firebase/firebaseConfig";
-import { useAppTheme } from "../../src/theme/useAppTheme";
 import { getStatusColors } from "../../src/theme/statusPalette";
+import { useAppTheme } from "../../src/theme/useAppTheme";
 import { getUserDisplayName } from "../../src/utils/userDisplayName";
 
 const STATUS_ICONS = {
@@ -27,9 +28,11 @@ const STATUS_ICONS = {
 };
 
 export default function MerchantOrdersScreen() {
+  const params = useLocalSearchParams();
   const [orders, setOrders] = useState([]);
   const [userCache, setUserCache] = useState({});
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState("all");
   const [error, setError] = useState("");
   const router = useRouter();
   const { colors, isDark } = useAppTheme();
@@ -38,6 +41,22 @@ export default function MerchantOrdersScreen() {
     () => getStatusColors(colors, isDark),
     [colors, isDark],
   );
+
+  useEffect(() => {
+    const rawStatus = Array.isArray(params?.status)
+      ? params.status[0]
+      : params?.status;
+    const validStatuses = new Set([
+      "all",
+      "pending",
+      "accepted",
+      "completed",
+      "cancelled",
+    ]);
+    if (typeof rawStatus === "string" && validStatuses.has(rawStatus)) {
+      setSelectedStatus(rawStatus);
+    }
+  }, [params?.status]);
 
   const fetchOrders = useCallback(async (merchantId) => {
     try {
@@ -93,7 +112,10 @@ export default function MerchantOrdersScreen() {
         uniqueCustomerIds.map(async (id) => {
           const userSnap = await getDoc(doc(db, "users", id));
           if (userSnap.exists()) {
-            fetchedCache[id] = getUserDisplayName(userSnap.data(), "Unknown user");
+            fetchedCache[id] = getUserDisplayName(
+              userSnap.data(),
+              "Unknown user",
+            );
           } else {
             fetchedCache[id] = "Unknown user";
           }
@@ -123,15 +145,53 @@ export default function MerchantOrdersScreen() {
   );
 
   const visibleOrders = useMemo(() => {
-    if (!searchQuery.trim()) return orders;
+    const filteredByStatus =
+      selectedStatus === "all"
+        ? orders
+        : orders.filter((order) => order.status === selectedStatus);
+
+    if (!searchQuery.trim()) return filteredByStatus;
 
     const q = searchQuery.toLowerCase();
 
-    return orders.filter((order) => {
+    return filteredByStatus.filter((order) => {
       const customerName = userCache[order.customerId] || "";
       return customerName.toLowerCase().includes(q);
     });
-  }, [orders, userCache, searchQuery]);
+  }, [orders, selectedStatus, userCache, searchQuery]);
+
+  const statusFilters = [
+    {
+      key: "all",
+      label: "All",
+      light: "#E5E5EA",
+      dark: "#6E6E73",
+    },
+    {
+      key: "pending",
+      label: "Pending",
+      light: "#FFF4CC",
+      dark: "#B38300",
+    },
+    {
+      key: "accepted",
+      label: "Accepted",
+      light: "#DDEEFF",
+      dark: "#0B5ED7",
+    },
+    {
+      key: "completed",
+      label: "Completed",
+      light: "#DFF7E6",
+      dark: "#1E8E3E",
+    },
+    {
+      key: "cancelled",
+      label: "Cancelled",
+      light: "#FFE0E0",
+      dark: "#C62828",
+    },
+  ];
 
   const isOnboardingEmpty =
     !error && !searchQuery.trim() && orders.length === 0;
@@ -181,6 +241,38 @@ export default function MerchantOrdersScreen() {
         style={styles.search}
         clearButtonMode="while-editing"
       />
+      <View style={styles.filters}>
+        {statusFilters.map((filter) => {
+          const isSelected = selectedStatus === filter.key;
+          return (
+            <Pressable
+              key={filter.key}
+              style={[
+                styles.filterPill,
+                !isSelected && {
+                  backgroundColor: filter.light,
+                  borderColor: "transparent",
+                },
+                isSelected && {
+                  backgroundColor: filter.dark,
+                  borderColor: filter.light,
+                },
+              ]}
+              onPress={() => setSelectedStatus(filter.key)}
+            >
+              <Text
+                style={[
+                  styles.filterText,
+                  !isSelected && { color: filter.dark },
+                  isSelected && { color: colors.background },
+                ]}
+              >
+                {filter.label}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </View>
 
       <FlatList
         data={visibleOrders}
@@ -203,57 +295,73 @@ export default function MerchantOrdersScreen() {
 
 const createStyles = (colors) =>
   StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 16,
-    backgroundColor: colors.screen,
-  },
-  search: {
-    backgroundColor: colors.input,
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    fontSize: 16,
-    marginBottom: 12,
-    color: colors.text,
-  },
-  card: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    backgroundColor: colors.surface,
-    padding: 14,
-    borderRadius: 14,
-    marginBottom: 12,
-  },
-  left: {
-    flexShrink: 1,
-  },
-  right: {
-    justifyContent: "center",
-    alignItems: "flex-end",
-    gap: 6,
-  },
-  date: {
-    fontSize: 14,
-    fontWeight: "600",
-    marginBottom: 4,
-    color: colors.text,
-  },
-  meta: {
-    fontSize: 13,
-    color: colors.textMuted,
-  },
-  price: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: colors.text,
-  },
-  empty: {
-    textAlign: "center",
-    color: colors.textSubtle,
-    marginTop: 40,
-  },
-  listEmptyContainer: {
-    flexGrow: 1,
-  },
-});
+    container: {
+      flex: 1,
+      padding: 16,
+      backgroundColor: colors.screen,
+    },
+    search: {
+      backgroundColor: colors.input,
+      borderRadius: 10,
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+      fontSize: 16,
+      marginBottom: 12,
+      color: colors.text,
+    },
+    filters: {
+      flexDirection: "row",
+      gap: 8,
+      marginBottom: 12,
+    },
+    filterPill: {
+      borderRadius: 999,
+      paddingHorizontal: 8,
+      height: 30,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    filterText: {
+      fontSize: 12,
+      fontWeight: "600",
+    },
+    card: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      backgroundColor: colors.surface,
+      padding: 14,
+      borderRadius: 14,
+      marginBottom: 12,
+    },
+    left: {
+      flexShrink: 1,
+    },
+    right: {
+      justifyContent: "center",
+      alignItems: "flex-end",
+      gap: 6,
+    },
+    date: {
+      fontSize: 14,
+      fontWeight: "600",
+      marginBottom: 4,
+      color: colors.text,
+    },
+    meta: {
+      fontSize: 13,
+      color: colors.textMuted,
+    },
+    price: {
+      fontSize: 16,
+      fontWeight: "700",
+      color: colors.text,
+    },
+    empty: {
+      textAlign: "center",
+      color: colors.textSubtle,
+      marginTop: 40,
+    },
+    listEmptyContainer: {
+      flexGrow: 1,
+    },
+  });

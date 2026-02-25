@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { auth, db } from "../firebase/firebaseConfig";
 
 const AuthContext = createContext(null);
+const normalizeRole = (value) => String(value || "").trim().toLowerCase();
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
@@ -23,7 +24,7 @@ export function AuthProvider({ children }) {
 
       if (userDoc.exists()) {
         setUser(firebaseUser);
-        setRole(userDoc.data().role);
+        setRole(normalizeRole(userDoc.data().role));
       } else {
         setUser(null);
         setRole(null);

@@ -1,4 +1,4 @@
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import {
   collection,
   doc,
@@ -39,6 +39,7 @@ export default function CustomerStorePage() {
   const { addToCart } = useCart();
   const { storeId } = useLocalSearchParams();
   const [products, setProducts] = useState([]);
+  const [storeName, setStoreName] = useState("");
   const [loading, setLoading] = useState(true);
   const styles = useMemo(() => createStyles(colors), [colors]);
 
@@ -67,6 +68,7 @@ export default function CustomerStorePage() {
 
       const storeData = storeSnapshot.exists() ? storeSnapshot.data() : {};
       const storeName = storeData?.name || "Unknown Store";
+      setStoreName(storeData?.name || "");
 
       let sellerName = "Unknown Seller";
       if (storeData?.merchantId) {
@@ -119,6 +121,7 @@ export default function CustomerStorePage() {
 
   return (
     <View style={styles.container}>
+      <Stack.Screen options={{ title: storeName }} />
       <Text style={styles.pageTitle}>Products</Text>
 
       <FlatList
@@ -142,19 +145,15 @@ export default function CustomerStorePage() {
                   color={item.iconColor || colors.text}
                 />
               </View>
-              <View style={styles.contentWrap}>
-                <Text style={styles.productName}>{item.name}</Text>
+                <View style={styles.contentWrap}>
+                  <Text style={styles.productName}>{item.name}</Text>
 
-                <Text style={styles.meta}>
-                  Store: <Text style={styles.bold}>{item.storeName}</Text>
-                </Text>
+                  <Text style={styles.meta}>
+                    Sold by: <Text style={styles.bold}>{item.sellerName}</Text>
+                  </Text>
 
-                <Text style={styles.meta}>
-                  Seller: <Text style={styles.bold}>{item.sellerName}</Text>
-                </Text>
-
-                <Text style={styles.price}>${item.price}</Text>
-              </View>
+                  <Text style={styles.price}>${item.price}</Text>
+                </View>
             </TouchableOpacity>
 
             <TouchableOpacity

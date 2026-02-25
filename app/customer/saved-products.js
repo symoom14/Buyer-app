@@ -11,6 +11,7 @@ import {
 } from "react-native";
 
 import AppIcon from "../../src/components/AppIcon";
+import { useCart } from "../../src/context/CartContext";
 import { useFavorites } from "../../src/context/FavoritesContext";
 import { db } from "../../src/firebase/firebaseConfig";
 import { useAppTheme } from "../../src/theme/useAppTheme";
@@ -34,6 +35,7 @@ function getRandomIconColor() {
 export default function CustomerSavedProducts() {
   const router = useRouter();
   const { favoriteIds } = useFavorites();
+  const { addToCart } = useCart();
   const { colors } = useAppTheme();
 
   const [allProducts, setAllProducts] = useState([]);
@@ -98,6 +100,19 @@ export default function CustomerSavedProducts() {
     return allProducts.filter((product) => favoritesSet.has(product.id));
   }, [allProducts, favoriteIds]);
 
+  const handleQuickAddToCart = (product) => {
+    addToCart({
+      productId: product.id,
+      name: product.name,
+      price: Number(product.price) || 0,
+      quantity: 1,
+      storeId: product.storeId,
+      storeName: product.storeName || "Unknown Store",
+      merchantId: product.merchantId || "unknown",
+      merchantName: product.sellerName || "Unknown Seller",
+    });
+  };
+
   if (loading) {
     return (
       <View style={styles.container}>
@@ -118,33 +133,47 @@ export default function CustomerSavedProducts() {
           <Text style={styles.empty}>No saved products yet</Text>
         }
         renderItem={({ item }) => (
-          <TouchableOpacity
-            style={styles.card}
-            onPress={() => router.push(`/customer/product/${item.id}`)}
-          >
-            <View style={styles.iconWrap}>
+          <View style={[styles.card, styles.productCard]}>
+            <TouchableOpacity
+              style={styles.productCardMain}
+              onPress={() => router.push(`/customer/product/${item.id}`)}
+            >
+              <View style={styles.iconWrap}>
+                <AppIcon
+                  name={item.iconName || DEFAULT_PRODUCT_ICON}
+                  variant="community"
+                  size={24}
+                  color={item.iconColor || colors.text}
+                />
+              </View>
+
+              <View style={styles.contentWrap}>
+                <Text style={styles.productName}>{item.name}</Text>
+
+                <Text style={styles.meta}>
+                  Store: <Text style={styles.bold}>{item.storeName}</Text>
+                </Text>
+
+                <Text style={styles.meta}>
+                  Seller: <Text style={styles.bold}>{item.sellerName}</Text>
+                </Text>
+
+                <Text style={styles.price}>${item.price}</Text>
+              </View>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.quickAddButton}
+              onPress={() => handleQuickAddToCart(item)}
+            >
               <AppIcon
-                name={item.iconName || DEFAULT_PRODUCT_ICON}
+                name="basket-plus"
                 variant="community"
-                size={24}
-                color={item.iconColor || colors.text}
+                size={18}
+                color="#1E8E3E"
               />
-            </View>
-
-            <View style={styles.contentWrap}>
-              <Text style={styles.productName}>{item.name}</Text>
-
-              <Text style={styles.meta}>
-                Store: <Text style={styles.bold}>{item.storeName}</Text>
-              </Text>
-
-              <Text style={styles.meta}>
-                Seller: <Text style={styles.bold}>{item.sellerName}</Text>
-              </Text>
-
-              <Text style={styles.price}>${item.price}</Text>
-            </View>
-          </TouchableOpacity>
+            </TouchableOpacity>
+          </View>
         )}
       />
     </View>
@@ -167,6 +196,16 @@ const createStyles = (colors) =>
     borderRadius: 8,
     marginBottom: 12,
     backgroundColor: colors.surface,
+  },
+  productCard: {
+    padding: 0,
+  },
+  productCardMain: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 16,
+    paddingRight: 10,
   },
   iconWrap: {
     width: 44,
@@ -204,6 +243,15 @@ const createStyles = (colors) =>
     fontSize: 17,
     fontWeight: "600",
     color: colors.text,
+  },
+  quickAddButton: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    marginRight: 12,
+    backgroundColor: colors.successSoft,
+    alignItems: "center",
+    justifyContent: "center",
   },
   empty: {
     color: colors.textSubtle,

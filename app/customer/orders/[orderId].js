@@ -3,8 +3,15 @@ import { useLocalSearchParams } from "expo-router";
 import * as Sharing from "expo-sharing";
 import { doc, getDoc } from "firebase/firestore";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import AppIcon from "../../../src/components/AppIcon";
+import PdfViewer from "../../../src/components/PdfViewer";
 
 import { db } from "../../../src/firebase/firebaseConfig";
 import { useAppTheme } from "../../../src/theme/useAppTheme";
@@ -27,6 +34,9 @@ export default function CustomerOrderDetails() {
   const { orderId, merchantId } = useLocalSearchParams();
   const { colors, isDark } = useAppTheme();
   const [order, setOrder] = useState(null);
+  const [invoiceUri, setInvoiceUri] = useState("");
+  const [viewerVisible, setViewerVisible] = useState(false);
+  const [previewUri, setPreviewUri] = useState("");
   const styles = useMemo(() => createStyles(colors, isDark), [colors, isDark]);
   const stepActiveColors = useMemo(
     () => ({
@@ -155,7 +165,7 @@ export default function CustomerOrderDetails() {
           <div class="meta">
             <p><b>Order ID:</b> ${orderId}</p>
             <p><b>Date/Time:</b> ${now}</p>
-            <p><b>Payment method:</b> Credit card ending 1234</p>
+            <p><b>Payment method:</b> ${order.paymentMethod || "Card ending 1234"}</p>
           </div>
 
           <table>
@@ -183,10 +193,27 @@ export default function CustomerOrderDetails() {
     `;
   };
 
+  const getInvoiceUri = async () => {
+    if (invoiceUri) return invoiceUri;
+    const html = generateInvoiceHTML();
+    const { uri } = await Print.printToFileAsync({ html });
+    setInvoiceUri(uri);
+    return uri;
+  };
+
+  const handleViewInvoice = async () => {
+    try {
+      const uri = await getInvoiceUri();
+      setPreviewUri(uri);
+      setViewerVisible(true);
+    } catch (err) {
+      console.error("Invoice preview failed:", err.message);
+    }
+  };
+
   const handleDownloadInvoice = async () => {
     try {
-      const html = generateInvoiceHTML();
-      const { uri } = await Print.printToFileAsync({ html });
+      const uri = await getInvoiceUri();
       await Sharing.shareAsync(uri);
     } catch (err) {
       console.error("Invoice generation failed:", err.message);
@@ -195,6 +222,11 @@ export default function CustomerOrderDetails() {
 
   return (
     <View style={styles.container}>
+      <PdfViewer
+        visible={viewerVisible}
+        uri={previewUri}
+        onClose={() => setViewerVisible(false)}
+      />
       <Text style={styles.title}>Order Details</Text>
 
       <View style={styles.timelineContainer}>
@@ -307,11 +339,14 @@ export default function CustomerOrderDetails() {
         <View style={styles.invoiceCard}>
           <Text style={styles.invoiceTitle}>Invoice</Text>
           <Text style={styles.invoiceMeta}>
-            Download a PDF invoice for this order.
+            Preview your invoice and save a PDF copy.
           </Text>
-          <View style={styles.invoiceButton} onTouchEnd={handleDownloadInvoice}>
-            <Text style={styles.invoiceButtonText}>Download Invoice (PDF)</Text>
-          </View>
+          <TouchableOpacity style={styles.invoiceButton} onPress={handleViewInvoice}>
+            <Text style={styles.invoiceButtonText}>View Invoice</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.invoiceButtonAlt} onPress={handleDownloadInvoice}>
+            <Text style={styles.invoiceButtonAltText}>Save Invoice (PDF)</Text>
+          </TouchableOpacity>
         </View>
       )}
 
@@ -477,8 +512,21 @@ const createStyles = (colors, isDark) =>
     paddingVertical: 10,
     borderRadius: 6,
     alignItems: "center",
+    marginBottom: 8,
   },
   invoiceButtonText: { color: colors.background, fontWeight: "600" },
+  invoiceButtonAlt: {
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.text,
+    paddingVertical: 10,
+    borderRadius: 6,
+    alignItems: "center",
+  },
+  invoiceButtonAltText: {
+    color: colors.text,
+    fontWeight: "600",
+  },
   table: {
     backgroundColor: colors.surface,
     borderRadius: 3,

@@ -1,16 +1,16 @@
 import * as Haptics from "expo-haptics";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import {
   addDoc,
   collection,
   doc,
   getDoc,
-  getDocs,
   serverTimestamp,
 } from "firebase/firestore";
 import LottieView from "lottie-react-native";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
+  ActivityIndicator,
   Modal,
   Pressable,
   ScrollView,
@@ -20,19 +20,19 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import AppIcon from "../../src/components/AppIcon";
-import ScreenContainer from "../../src/components/ScreenContainer";
+import AppIcon from "../../../src/components/AppIcon";
+import ScreenContainer from "../../../src/components/ScreenContainer";
 import {
   DEFAULT_PAYMENT_METHOD_ID,
   PAYMENT_METHOD_PRESETS,
   normalizePaymentMethod,
-} from "../../src/constants/paymentMethods";
-import { useCart } from "../../src/context/CartContext";
-import { auth, db } from "../../src/firebase/firebaseConfig";
-import { useAppTheme } from "../../src/theme/useAppTheme";
-import { notifyMerchantNewOrder } from "../../src/utils/notifications";
+} from "../../../src/constants/paymentMethods";
+import { auth, db } from "../../../src/firebase/firebaseConfig";
+import { useAppTheme } from "../../../src/theme/useAppTheme";
+import { notifyMerchantNewOrder } from "../../../src/utils/notifications";
+import { getUserDisplayName } from "../../../src/utils/userDisplayName";
 
-const CHECKOUT_FIXED_AREA_HEIGHT = 250;
+const QUICK_CHECKOUT_FIXED_AREA_HEIGHT = 236;
 const DEFAULT_PRODUCT_ICON = "package-variant-closed";
 const ICON_COLOR_POOL = [
   "#E53935",
@@ -43,31 +43,23 @@ const ICON_COLOR_POOL = [
   "#111111",
 ];
 
-export default function CheckoutPage() {
+export default function QuickCheckoutPage() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { cart, clearCart } = useCart();
+  const { productId } = useLocalSearchParams();
   const { colors } = useAppTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [quantity, setQuantity] = useState(1);
   const [isPaying, setIsPaying] = useState(false);
   const [animationCompleted, setAnimationCompleted] = useState(false);
   const [pendingInvoiceId, setPendingInvoiceId] = useState(null);
-  const [cartSnapshot, setCartSnapshot] = useState([]);
-  const [productVisualsById, setProductVisualsById] = useState({});
   const [paymentMethods, setPaymentMethods] = useState([]);
   const [defaultPaymentMethodId, setDefaultPaymentMethodId] = useState("");
   const [selectedPaymentMethodId, setSelectedPaymentMethodId] = useState("");
   const [paymentPickerVisible, setPaymentPickerVisible] = useState(false);
 
-  const visibleCart = isPaying ? cartSnapshot : cart;
-  const total = visibleCart.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0,
-  );
-  const getRandomIconColor = useCallback(() => {
-    const idx = Math.floor(Math.random() * ICON_COLOR_POOL.length);
-    return ICON_COLOR_POOL[idx];
-  }, []);
   const availablePaymentMethods = useMemo(() => {
     if (paymentMethods.length > 0) return paymentMethods;
     return PAYMENT_METHOD_PRESETS;
@@ -86,26 +78,79 @@ export default function CheckoutPage() {
     [availablePaymentMethods, effectivePaymentMethodId],
   );
 
+  const unitPrice = Number(product?.price || 0);
+  const total = unitPrice * quantity;
+
   useEffect(() => {
-    const loadProductVisuals = async () => {
+    if (!animationCompleted || !pendingInvoiceId) return;
+    router.replace(`/customer/invoice/${pendingInvoiceId}`);
+  }, [animationCompleted, pendingInvoiceId, router]);
+
+  useEffect(() => {
+    const loadCheckoutProduct = async () => {
       try {
-        const snapshot = await getDocs(collection(db, "products"));
-        const visuals = {};
-        snapshot.docs.forEach((docSnap) => {
-          const data = docSnap.data();
-          visuals[docSnap.id] = {
-            iconName: data?.iconName || data?.icon || DEFAULT_PRODUCT_ICON,
-            iconColor: getRandomIconColor(),
-          };
+        setLoading(true);
+        const targetProductId = String(productId || "");
+        if (!targetProductId) {
+          setProduct(null);
+          return;
+        }
+
+        const productSnap = await getDoc(doc(db, "products", targetProductId));
+        if (!productSnap.exists()) {
+          setProduct(null);
+          return;
+        }
+
+        const productData = productSnap.data() || {};
+        const merchantId =
+          productData.merchantId || productData.sellerId || productData.userId || "";
+        let storeName = "Unknown Store";
+        let resolvedMerchantId = merchantId;
+        let merchantName = "Unknown Seller";
+
+        if (productData.storeId) {
+          const storeSnap = await getDoc(doc(db, "stores", productData.storeId));
+          if (storeSnap.exists()) {
+            const storeData = storeSnap.data() || {};
+            storeName = storeData.name || storeName;
+            resolvedMerchantId = resolvedMerchantId || storeData.merchantId || "";
+          }
+        }
+
+        if (resolvedMerchantId) {
+          const merchantSnap = await getDoc(doc(db, "users", resolvedMerchantId));
+          if (merchantSnap.exists()) {
+            merchantName = getUserDisplayName(merchantSnap.data(), "Unknown Seller");
+          }
+        }
+
+        const idText = String(targetProductId);
+        const colorIndex =
+          idText.split("").reduce((sum, ch) => sum + ch.charCodeAt(0), 0) %
+          ICON_COLOR_POOL.length;
+
+        setProduct({
+          id: targetProductId,
+          name: productData.name || "Product",
+          price: Number(productData.price || 0),
+          iconName: productData.iconName || productData.icon || DEFAULT_PRODUCT_ICON,
+          iconColor: ICON_COLOR_POOL[colorIndex],
+          storeId: productData.storeId,
+          storeName,
+          merchantId: resolvedMerchantId || "unknown",
+          merchantName,
         });
-        setProductVisualsById(visuals);
       } catch (error) {
-        console.error("Failed to load product visuals for checkout:", error);
+        console.error("Failed to load quick checkout product:", error);
+        setProduct(null);
+      } finally {
+        setLoading(false);
       }
     };
 
-    loadProductVisuals();
-  }, [getRandomIconColor]);
+    loadCheckoutProduct();
+  }, [productId]);
 
   useEffect(() => {
     const loadPaymentMethods = async () => {
@@ -152,67 +197,70 @@ export default function CheckoutPage() {
     loadPaymentMethods();
   }, []);
 
-  useEffect(() => {
-    if (!animationCompleted || !pendingInvoiceId) return;
-    router.replace(`/customer/invoice/${pendingInvoiceId}`);
-  }, [animationCompleted, pendingInvoiceId, router]);
-
   const handlePay = async () => {
     try {
-      if (!cart.length) {
-        throw new Error("Cart is empty");
+      if (!product) {
+        throw new Error("No product selected");
       }
       if (!effectivePaymentMethod) {
         throw new Error("No payment method available");
       }
-      setCartSnapshot(cart);
+      const currentUserId = auth.currentUser?.uid;
+      if (!currentUserId) {
+        throw new Error("Not signed in");
+      }
+
       setIsPaying(true);
       setAnimationCompleted(false);
       setPendingInvoiceId(null);
 
       const orderRef = await addDoc(collection(db, "orders"), {
-        customerId: auth.currentUser.uid,
-        items: cart.map((item) => ({
-          productId: item.productId,
-          name: item.name,
-          merchantId: item.merchantId,
-          merchantName: item.merchantName,
-          quantity: Number(item.quantity),
-          price: Number(item.price),
-        })),
+        customerId: currentUserId,
+        items: [
+          {
+            productId: product.id,
+            name: product.name,
+            merchantId: product.merchantId,
+            merchantName: product.merchantName,
+            quantity: Number(quantity),
+            price: Number(product.price),
+          },
+        ],
         total: Number(total),
         paymentMethod: effectivePaymentMethod.label,
         paymentMethodId: effectivePaymentMethod.id,
         createdAt: serverTimestamp(),
       });
 
-      const merchantIds = [
-        ...new Set(cart.map((item) => item.merchantId).filter(Boolean)),
-      ];
+      if (product.merchantId && product.merchantId !== "unknown") {
+        await notifyMerchantNewOrder({
+          merchantId: product.merchantId,
+          orderId: orderRef.id,
+        });
+      }
 
-      await Promise.all(
-        merchantIds.map((merchantId) =>
-          notifyMerchantNewOrder({
-            merchantId,
-            orderId: orderRef.id,
-          }),
-        ),
-      );
-
-      clearCart();
       setPendingInvoiceId(orderRef.id);
-    } catch (err) {
-      console.error("Checkout failed:", err.message);
-      setCartSnapshot([]);
+    } catch (error) {
+      console.error("Quick checkout failed:", error.message);
       setIsPaying(false);
       setAnimationCompleted(false);
       setPendingInvoiceId(null);
     }
   };
 
+  if (loading) {
+    return (
+      <ScreenContainer>
+        <View style={styles.loadingWrap}>
+          <ActivityIndicator size="large" />
+        </View>
+      </ScreenContainer>
+    );
+  }
+
   return (
     <ScreenContainer disableBottomInset bottomPadding={0}>
-      <Text style={styles.title}>Items summary</Text>
+      <Text style={styles.title}>Quick checkout</Text>
 
       <View style={styles.contentWrap}>
         <ScrollView
@@ -220,59 +268,81 @@ export default function CheckoutPage() {
           contentContainerStyle={[
             styles.itemsScrollContent,
             {
-              paddingBottom:
-                insets.bottom +
-                CHECKOUT_FIXED_AREA_HEIGHT,
+              paddingBottom: insets.bottom + QUICK_CHECKOUT_FIXED_AREA_HEIGHT,
             },
           ]}
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.itemsCard}>
-            {visibleCart.map((item, index) => (
-              <View
-                key={item.productId}
-                style={[
-                  styles.itemRow,
-                  index !== visibleCart.length - 1 && styles.itemRowDivider,
-                ]}
-              >
+            {product ? (
+              <View style={styles.item}>
                 <View style={styles.itemLeft}>
                   <View style={styles.nameRow}>
                     <View style={styles.itemIconWrap}>
                       <AppIcon
-                        name={
-                          item.iconName ||
-                          productVisualsById[item.productId]?.iconName ||
-                          DEFAULT_PRODUCT_ICON
-                        }
+                        name={product.iconName || DEFAULT_PRODUCT_ICON}
                         variant="community"
                         size={18}
-                        color={
-                          productVisualsById[item.productId]?.iconColor ||
-                          colors.text
-                        }
+                        color={product.iconColor || colors.text}
                       />
                     </View>
-                    <Text style={styles.name}>{item.name}</Text>
-                    <View style={styles.qtyBadge}>
-                      <Text style={styles.qtyBadgeText}>{item.quantity}</Text>
+                    <Text style={styles.name}>{product.name}</Text>
+                  </View>
+                  <View style={styles.sellerStoreRow}>
+                    <Text
+                      style={[styles.sellerStoreText, styles.sellerText]}
+                      numberOfLines={1}
+                      ellipsizeMode="tail"
+                    >
+                      {product.merchantName || "Unknown seller"}
+                    </Text>
+                    <View style={styles.arrowChip}>
+                      <AppIcon
+                        name="chevron-right"
+                        variant="community"
+                        size={14}
+                        color={colors.textMuted}
+                      />
                     </View>
+                    <Text
+                      style={[styles.sellerStoreText, styles.storeText]}
+                      numberOfLines={1}
+                      ellipsizeMode="tail"
+                    >
+                      {product.storeName || "Unknown store"}
+                    </Text>
+                  </View>
+                  <View style={styles.controls}>
+                    <TouchableOpacity
+                      style={styles.controlBtn}
+                      onPress={() => setQuantity((prev) => Math.max(1, prev - 1))}
+                      disabled={isPaying}
+                    >
+                      <Text style={styles.controlText}>-</Text>
+                    </TouchableOpacity>
+                    <Text style={styles.qty}>{quantity}</Text>
+                    <TouchableOpacity
+                      style={styles.controlBtn}
+                      onPress={() => setQuantity((prev) => prev + 1)}
+                      disabled={isPaying}
+                    >
+                      <Text style={styles.controlText}>+</Text>
+                    </TouchableOpacity>
                   </View>
                 </View>
-                <Text style={styles.itemAmount}>
-                  ${(item.price * item.quantity).toFixed(2)}
-                </Text>
+                <View style={styles.itemRight}>
+                  <Text style={styles.itemTotal}>${total.toFixed(2)}</Text>
+                </View>
               </View>
-            ))}
+            ) : (
+              <View style={styles.emptyStateWrap}>
+                <Text style={styles.emptyStateText}>Product not found.</Text>
+              </View>
+            )}
           </View>
         </ScrollView>
 
-        <View
-          style={[
-            styles.bottomPanels,
-            { paddingBottom: insets.bottom },
-          ]}
-        >
+        <View style={[styles.bottomPanels, { paddingBottom: insets.bottom }]}>
           <View style={styles.paymentMethodRow}>
             <View style={styles.paymentMethodMeta}>
               <Text style={styles.paymentMethodLabel}>Paying with</Text>
@@ -306,25 +376,24 @@ export default function CheckoutPage() {
 
             {isPaying ? (
               <View style={styles.payAnimationWrap}>
-              <LottieView
-                source={require("../../assets/lottie/loading tick.json")}
-                autoPlay
-                loop={false}
-                onAnimationFinish={() => {
-                  Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-                  setAnimationCompleted(true);
-                }}
-                style={styles.payAnimation}
-              />
+                <LottieView
+                  source={require("../../../assets/lottie/loading tick.json")}
+                  autoPlay
+                  loop={false}
+                  onAnimationFinish={() => {
+                    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                    setAnimationCompleted(true);
+                  }}
+                  style={styles.payAnimation}
+                />
               </View>
             ) : (
               <TouchableOpacity
                 style={[
                   styles.payButton,
-                  (cart.length === 0 || !effectivePaymentMethod) &&
-                    styles.disabled,
+                  (!product || !effectivePaymentMethod) && styles.disabled,
                 ]}
-                disabled={cart.length === 0 || !effectivePaymentMethod}
+                disabled={!product || !effectivePaymentMethod}
                 onPress={handlePay}
               >
                 <AppIcon
@@ -412,6 +481,11 @@ const createStyles = (colors) =>
       marginBottom: 16,
       color: colors.text,
     },
+    loadingWrap: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+    },
     contentWrap: {
       flex: 1,
     },
@@ -422,22 +496,16 @@ const createStyles = (colors) =>
       paddingBottom: 12,
     },
     itemsCard: {
-      backgroundColor: colors.surface,
-      borderWidth: 1,
-      borderColor: colors.border,
-      borderRadius: 12,
-      overflow: "hidden",
+      backgroundColor: "transparent",
     },
-    itemRow: {
+    item: {
       flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "space-between",
-      paddingHorizontal: 14,
-      paddingVertical: 20,
-    },
-    itemRowDivider: {
-      borderBottomWidth: 1,
-      borderBottomColor: colors.borderSoft,
+      padding: 14,
+      borderWidth: 1,
+      borderColor: colors.borderSoft,
+      borderRadius: 8,
+      marginBottom: 12,
+      backgroundColor: colors.surface,
     },
     itemLeft: {
       flex: 1,
@@ -448,17 +516,6 @@ const createStyles = (colors) =>
       alignItems: "center",
       gap: 8,
     },
-    row: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "center",
-    },
-    name: {
-      fontSize: 15,
-      fontWeight: "600",
-      color: colors.text,
-      flex: 1,
-    },
     itemIconWrap: {
       width: 28,
       height: 28,
@@ -467,40 +524,75 @@ const createStyles = (colors) =>
       alignItems: "center",
       justifyContent: "center",
     },
-    qtyBadge: {
-      backgroundColor: colors.pill,
-      width: 24,
-      height: 24,
-      borderRadius: 12,
+    name: {
+      fontSize: 15,
+      fontWeight: "600",
+      color: colors.text,
+      flex: 1,
+    },
+    sellerStoreRow: {
+      marginTop: 8,
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 6,
+    },
+    sellerStoreText: {
+      fontSize: 12,
+      color: colors.textSubtle,
+      fontWeight: "500",
+    },
+    sellerText: {
+      maxWidth: "44%",
+    },
+    storeText: {
+      maxWidth: "44%",
+    },
+    arrowChip: {
+      width: 20,
+      height: 20,
+      borderRadius: 10,
+      backgroundColor: colors.screen,
       alignItems: "center",
       justifyContent: "center",
     },
-    qtyBadgeText: {
-      fontSize: 13,
-      fontWeight: "700",
-      color: colors.pillText,
-    },
-    itemAmount: {
-      fontSize: 17,
-      fontWeight: "700",
-      color: colors.text,
-    },
-    totalRow: {
-      marginTop: 0,
+    controls: {
+      marginTop: 10,
       flexDirection: "row",
-      justifyContent: "space-between",
       alignItems: "center",
-      marginBottom: 10,
+      gap: 8,
     },
-    totalLabel: {
-      fontSize: 18,
-      fontWeight: "600",
+    controlBtn: {
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 6,
+      paddingHorizontal: 10,
+      paddingVertical: 4,
+    },
+    controlText: {
       color: colors.text,
     },
-    totalValue: {
-      fontSize: 18,
-      fontWeight: "600",
+    qty: {
+      minWidth: 20,
+      textAlign: "center",
       color: colors.text,
+    },
+    itemRight: {
+      minWidth: 86,
+      alignItems: "flex-end",
+      justifyContent: "center",
+    },
+    itemTotal: {
+      fontSize: 18,
+      fontWeight: "700",
+      color: colors.text,
+    },
+    emptyStateWrap: {
+      paddingVertical: 28,
+      paddingHorizontal: 16,
+    },
+    emptyStateText: {
+      fontSize: 14,
+      color: colors.textSubtle,
     },
     paymentMethodRow: {
       flexDirection: "row",
@@ -523,15 +615,15 @@ const createStyles = (colors) =>
       color: colors.textSubtle,
       marginBottom: 2,
     },
-    paymentMethodValue: {
-      fontSize: 14,
-      fontWeight: "600",
-      color: colors.text,
-    },
     paymentMethodValueRow: {
       flexDirection: "row",
       alignItems: "center",
       gap: 6,
+    },
+    paymentMethodValue: {
+      fontSize: 14,
+      fontWeight: "600",
+      color: colors.text,
     },
     changeMethodBtn: {
       height: 30,
@@ -547,37 +639,6 @@ const createStyles = (colors) =>
       fontSize: 12,
       fontWeight: "600",
       color: colors.text,
-    },
-    payButton: {
-      backgroundColor: colors.text,
-      padding: 16,
-      width: "100%",
-      borderRadius: 6,
-      alignItems: "center",
-      justifyContent: "center",
-      flexDirection: "row",
-      gap: 8,
-      marginTop: 12,
-    },
-    payText: {
-      color: colors.background,
-      fontSize: 16,
-      fontWeight: "600",
-    },
-    payAnimationWrap: {
-      width: "100%",
-      alignSelf: "center",
-      marginTop: 12,
-      height: 120,
-      alignItems: "center",
-      justifyContent: "center",
-    },
-    payAnimation: {
-      width: "100%",
-      height: "100%",
-    },
-    disabled: {
-      backgroundColor: colors.textSubtle,
     },
     bottomPanels: {
       position: "absolute",
@@ -596,6 +657,53 @@ const createStyles = (colors) =>
     checkoutFooter: {
       backgroundColor: colors.background,
       paddingBottom: 2,
+    },
+    totalRow: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 10,
+    },
+    totalLabel: {
+      fontSize: 18,
+      fontWeight: "600",
+      color: colors.text,
+    },
+    totalValue: {
+      fontSize: 18,
+      fontWeight: "600",
+      color: colors.text,
+    },
+    payButton: {
+      backgroundColor: colors.text,
+      padding: 16,
+      width: "100%",
+      borderRadius: 6,
+      alignItems: "center",
+      justifyContent: "center",
+      flexDirection: "row",
+      gap: 8,
+      marginTop: 12,
+    },
+    disabled: {
+      backgroundColor: colors.textSubtle,
+    },
+    payText: {
+      color: colors.background,
+      fontSize: 16,
+      fontWeight: "600",
+    },
+    payAnimationWrap: {
+      width: "100%",
+      alignSelf: "center",
+      marginTop: 12,
+      height: 120,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    payAnimation: {
+      width: "100%",
+      height: "100%",
     },
     modalBackdrop: {
       flex: 1,
@@ -617,6 +725,13 @@ const createStyles = (colors) =>
       color: colors.text,
       marginBottom: 4,
     },
+    methodOptionsCard: {
+      borderWidth: 1,
+      borderColor: colors.borderSoft,
+      borderRadius: 10,
+      backgroundColor: colors.background,
+      overflow: "hidden",
+    },
     methodOption: {
       minHeight: 52,
       backgroundColor: "transparent",
@@ -624,13 +739,6 @@ const createStyles = (colors) =>
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "space-between",
-    },
-    methodOptionsCard: {
-      borderWidth: 1,
-      borderColor: colors.borderSoft,
-      borderRadius: 10,
-      backgroundColor: colors.background,
-      overflow: "hidden",
     },
     methodOptionDivider: {
       borderBottomWidth: 1,

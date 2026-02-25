@@ -6,11 +6,11 @@ import AppIcon from "./AppIcon";
 import { useCart } from "../context/CartContext";
 import { useAppTheme } from "../theme/useAppTheme";
 
-export default function FloatingCartButton() {
+export default function FloatingCartButton({ bottomOffset = 24 }) {
   const router = useRouter();
   const { cart } = useCart();
   const { colors } = useAppTheme();
-  const styles = useMemo(() => createStyles(colors), [colors]);
+  const styles = useMemo(() => createStyles(colors, bottomOffset), [colors, bottomOffset]);
 
   if (cart.length === 0) return null;
 
@@ -35,7 +35,7 @@ export default function FloatingCartButton() {
   );
 }
 
-const createStyles = (colors) =>
+const createStyles = (colors, bottomOffset) =>
   StyleSheet.create({
   safeArea: {
     position: "absolute",
@@ -45,7 +45,7 @@ const createStyles = (colors) =>
   },
   button: {
     marginRight: 16,
-    marginBottom: 24,
+    marginBottom: bottomOffset,
     backgroundColor: colors.text,
     width: 54,
     height: 54,
