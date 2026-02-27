@@ -21,7 +21,7 @@ import { useAppTheme } from "../../../src/theme/useAppTheme";
 const STATUS_ICONS = {
   pending: "progress-clock",
   accepted: "check-decagram",
-  completed: "check-circle",
+  completed: "truck-check",
   cancelled: "close-circle",
 };
 

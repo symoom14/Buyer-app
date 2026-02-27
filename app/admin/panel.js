@@ -3,7 +3,6 @@ import { useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import AppIcon from "../../src/components/AppIcon";
-import LogoutButton from "../../src/components/LogoutButton";
 import ScreenContainer from "../../src/components/ScreenContainer";
 import { db } from "../../src/firebase/firebaseConfig";
 import { useAppTheme } from "../../src/theme/useAppTheme";
@@ -11,6 +10,10 @@ import { useAppTheme } from "../../src/theme/useAppTheme";
 const LOW_STOCK_THRESHOLD = 10;
 
 const normalizeRole = (value) => String(value || "").trim().toLowerCase();
+const normalizeOrderStatus = (value) =>
+  String(value || "pending")
+    .trim()
+    .toLowerCase();
 
 const toDate = (value) => {
   if (value?.toDate) return value.toDate();
@@ -97,17 +100,26 @@ export default function AdminPanel() {
         { customers: 0, merchants: 0 },
       );
 
-      const pendingOrders = orders.filter((order) => order.status === "pending").length;
+      const pendingOrders = orders.filter(
+        (order) => normalizeOrderStatus(order.status) === "pending",
+      ).length;
       const completedOrders = orders.filter(
-        (order) => order.status === "completed",
+        (order) => normalizeOrderStatus(order.status) === "completed",
       ).length;
       const cancelledOrders = orders.filter(
-        (order) => order.status === "cancelled",
+        (order) => normalizeOrderStatus(order.status) === "cancelled",
       ).length;
-      const totalPaid = orders.reduce(
-        (sum, order) => sum + formatOrderTotal(order),
-        0,
-      );
+      const totalPaid = orders.reduce((sum, order) => {
+        const status = normalizeOrderStatus(order.status);
+        if (
+          status === "pending" ||
+          status === "accepted" ||
+          status === "completed"
+        ) {
+          return sum + formatOrderTotal(order);
+        }
+        return sum;
+      }, 0);
 
       setStats({
         users: nonAdminUsers.length,
@@ -206,7 +218,7 @@ export default function AdminPanel() {
   }, []);
 
   return (
-    <ScreenContainer bottomPadding={90}>
+    <ScreenContainer disableBottomInset bottomPadding={12}>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.headerCard}>
           <Text style={styles.headerTitle}>Platform Control</Text>
@@ -237,12 +249,14 @@ export default function AdminPanel() {
               value={stats.products}
               icon="package-variant"
               styles={styles}
+              onPress={() => router.push("/admin/products")}
             />
             <MetricTile
               label="Orders"
               value={stats.orders}
               icon="clipboard-list"
               styles={styles}
+              onPress={() => router.push("/admin/orders")}
             />
           </View>
         </View>
@@ -271,6 +285,7 @@ export default function AdminPanel() {
             label="Total Paid by Customers"
             value={formatMoney(stats.totalPaid)}
             styles={styles}
+            onPress={() => router.push("/admin/merchant-performance")}
           />
         </View>
 
@@ -350,7 +365,6 @@ export default function AdminPanel() {
         </View>
       </ScrollView>
 
-      <LogoutButton />
     </ScreenContainer>
   );
 }
@@ -391,7 +405,23 @@ function StatusPill({ label, value, tone, styles }) {
   );
 }
 
-function RevenueFlowTile({ label, value, styles }) {
+function RevenueFlowTile({ label, value, styles, onPress }) {
+  if (onPress) {
+    return (
+      <TouchableOpacity
+        style={styles.revenueTile}
+        onPress={onPress}
+        activeOpacity={0.85}
+      >
+        <View style={styles.revenueIconWrap}>
+          <AppIcon name="cash-multiple" variant="community" size={20} color="#B3261E" />
+        </View>
+        <Text style={styles.revenueValue}>{value}</Text>
+        <Text style={styles.revenueLabel}>{label}</Text>
+      </TouchableOpacity>
+    );
+  }
+
   return (
     <View style={styles.revenueTile}>
       <View style={styles.revenueIconWrap}>

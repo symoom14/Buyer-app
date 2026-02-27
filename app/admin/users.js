@@ -37,6 +37,7 @@ import ScreenContainer from "../../src/components/ScreenContainer";
 import { useAuth } from "../../src/context/AuthContext";
 import { db, firebaseConfig } from "../../src/firebase/firebaseConfig";
 import { useAppTheme } from "../../src/theme/useAppTheme";
+import { logAdminAction } from "../../src/utils/adminLog";
 
 const normalizeRole = (value) =>
   String(value || "")
@@ -170,6 +171,13 @@ export default function AdminUsersScreen() {
         role,
         createdAt: serverTimestamp(),
       });
+      await logAdminAction({
+        action: "user_created",
+        targetType: "user",
+        targetId: uid,
+        targetLabel: username,
+        metadata: { role },
+      });
 
       await signOutSecondary(secondaryAuth);
       setIsAddModalOpen(false);
@@ -197,6 +205,13 @@ export default function AdminUsersScreen() {
           onPress: async () => {
             try {
               await deleteDoc(doc(db, "users", targetUser.id));
+              await logAdminAction({
+                action: "user_deactivated",
+                targetType: "user",
+                targetId: targetUser.id,
+                targetLabel: targetUser.username || targetUser.name || "",
+                metadata: { role: normalizeRole(targetUser.role) || "" },
+              });
               Alert.alert(
                 "User deactivated",
                 "User profile removed from the app.",
@@ -229,6 +244,16 @@ export default function AdminUsersScreen() {
     try {
       setIsUpdatingName(true);
       await updateDoc(doc(db, "users", editingUser.id), { name: nextName });
+      await logAdminAction({
+        action: "user_display_name_updated",
+        targetType: "user",
+        targetId: editingUser.id,
+        targetLabel: editingUser.username || editingUser.name || "",
+        metadata: {
+          previousName: editingUser.name || "",
+          nextName,
+        },
+      });
       setIsEditModalOpen(false);
       setEditingUser(null);
       setEditingNameInput("");
@@ -241,7 +266,7 @@ export default function AdminUsersScreen() {
   };
 
   return (
-    <ScreenContainer bottomPadding={20}>
+    <ScreenContainer disableBottomInset bottomPadding={12}>
       <View style={styles.topBar}>
         <TextInput
           value={searchQuery}

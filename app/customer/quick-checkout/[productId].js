@@ -40,7 +40,6 @@ const ICON_COLOR_POOL = [
   "#1E88E5",
   "#FFA700",
   "#F57C00",
-  "#111111",
 ];
 
 export default function QuickCheckoutPage() {

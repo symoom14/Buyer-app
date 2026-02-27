@@ -28,7 +28,6 @@ const ICON_COLOR_POOL = [
   "#1E88E5", // blue
   "#FFA700", // chrome yellow
   "#F57C00", // orange
-  "#111111", // black
 ];
 
 export default function CustomerProducts() {

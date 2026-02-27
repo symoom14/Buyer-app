@@ -36,7 +36,6 @@ const ICON_COLOR_POOL = [
   "#1E88E5",
   "#FFA700",
   "#F57C00",
-  "#111111",
 ];
 const HEADER_COLLAPSE_DISTANCE = 90;
 
@@ -92,11 +91,13 @@ export default function CustomerHome() {
   const [buyAgainProducts, setBuyAgainProducts] = useState([]);
   const [ordersLoading, setOrdersLoading] = useState(true);
   const [globalQuery, setGlobalQuery] = useState("");
+  const [selectedSuburb, setSelectedSuburb] = useState("Home");
+  const [showAddressMenu, setShowAddressMenu] = useState(false);
   const scrollY = useRef(new Animated.Value(0)).current;
   const styles = createStyles(colors, isDark);
   const headerHeight = scrollY.interpolate({
     inputRange: [0, HEADER_COLLAPSE_DISTANCE],
-    outputRange: [insets.top + 82, insets.top + 46],
+    outputRange: [insets.top + 108, insets.top + 46],
     extrapolate: "clamp",
   });
   const titleScale = scrollY.interpolate({
@@ -107,6 +108,16 @@ export default function CustomerHome() {
   const iconScale = scrollY.interpolate({
     inputRange: [0, HEADER_COLLAPSE_DISTANCE],
     outputRange: [1, 0.88],
+    extrapolate: "clamp",
+  });
+  const addressOpacity = scrollY.interpolate({
+    inputRange: [0, HEADER_COLLAPSE_DISTANCE * 0.58],
+    outputRange: [1, 0],
+    extrapolate: "clamp",
+  });
+  const addressTranslateY = scrollY.interpolate({
+    inputRange: [0, HEADER_COLLAPSE_DISTANCE * 0.58],
+    outputRange: [0, -10],
     extrapolate: "clamp",
   });
 
@@ -528,6 +539,66 @@ export default function CustomerHome() {
             </TouchableOpacity>
           </View>
         </Animated.View>
+        <Animated.View
+          style={[
+            styles.addressRowWrap,
+            {
+              opacity: addressOpacity,
+              transform: [{ translateY: addressTranslateY }],
+            },
+          ]}
+        >
+          <TouchableOpacity
+            style={styles.addressPill}
+            onPress={() => setShowAddressMenu((prev) => !prev)}
+            activeOpacity={0.85}
+          >
+            <AppIcon
+              name="map-marker-outline"
+              variant="community"
+              size={15}
+              color={colors.customerHeaderText}
+            />
+            <Text style={styles.addressText} numberOfLines={1}>
+              Delivering to: {selectedSuburb}
+            </Text>
+            <AppIcon
+              name={showAddressMenu ? "chevron-up" : "chevron-down"}
+              variant="community"
+              size={15}
+              color={colors.customerHeaderText}
+            />
+          </TouchableOpacity>
+          {showAddressMenu ? (
+            <View style={styles.addressMenu}>
+              {["Home", "Work"].map((option, index) => (
+                <TouchableOpacity
+                  key={option}
+                  style={[
+                    styles.addressMenuItem,
+                    index === 0 && styles.addressMenuItemFirst,
+                    index === 1 && styles.addressMenuItemLast,
+                  ]}
+                  onPress={() => {
+                    setSelectedSuburb(option);
+                    setShowAddressMenu(false);
+                  }}
+                  activeOpacity={0.85}
+                >
+                  <Text style={styles.addressMenuItemText}>{option}</Text>
+                  {selectedSuburb === option ? (
+                    <AppIcon
+                      name="check"
+                      variant="community"
+                      size={14}
+                      color={colors.primary}
+                    />
+                  ) : null}
+                </TouchableOpacity>
+              ))}
+            </View>
+          ) : null}
+        </Animated.View>
       </Animated.View>
 
       {/* Dashboard content */}
@@ -547,7 +618,7 @@ export default function CustomerHome() {
               name="magnify"
               variant="community"
               size={20}
-              color={colors.textSubtle}
+              color={colors.customerHomeHeaderText}
             />
             <TextInput
               style={styles.globalSearchInput}
@@ -579,7 +650,7 @@ export default function CustomerHome() {
                 name="arrow-right"
                 variant="community"
                 size={18}
-                color={colors.background}
+                color="#FFFFFF"
               />
             </TouchableOpacity>
           </View>
@@ -878,14 +949,75 @@ export default function CustomerHome() {
 const createStyles = (colors, isDark) =>
   StyleSheet.create({
     topRowWrap: {
-      overflow: "hidden",
-      marginBottom: 10,
+      overflow: "visible",
+      marginBottom: 6,
+      zIndex: 40,
+      elevation: 40,
     },
     topRow: {
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "space-between",
       paddingBottom: 2,
+    },
+    addressRowWrap: {
+      paddingTop: 5,
+      alignItems: "flex-start",
+      zIndex: 50,
+      position: "relative",
+    },
+    addressPill: {
+      flexDirection: "row",
+      alignItems: "center",
+      borderRadius: 999,
+      borderWidth: 0,
+      backgroundColor: "transparent",
+      paddingVertical: 3,
+      paddingHorizontal: 2,
+      gap: 6,
+      maxWidth: "85%",
+    },
+    addressText: {
+      fontSize: 11,
+      fontWeight: "500",
+      color: isDark ? "rgba(255,255,255,0.75)" : "rgba(17,24,28,0.7)",
+    },
+    addressMenu: {
+      marginTop: 0,
+      position: "absolute",
+      top: 30,
+      left: 0,
+      borderRadius: 10,
+      borderWidth: 1,
+      borderColor: colors.border,
+      backgroundColor: colors.surface,
+      minWidth: 120,
+      overflow: "hidden",
+      zIndex: 60,
+      elevation: 60,
+    },
+    addressMenuItem: {
+      paddingHorizontal: 10,
+      paddingVertical: 8,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      borderBottomWidth: 1,
+      borderBottomColor: colors.borderSoft,
+    },
+    addressMenuItemFirst: {
+      borderTopLeftRadius: 10,
+      borderTopRightRadius: 10,
+    },
+    addressMenuItemLast: {
+      borderBottomWidth: 0,
+      borderBottomLeftRadius: 10,
+      borderBottomRightRadius: 10,
+    },
+    addressMenuItemText: {
+      fontSize: 12,
+      color: colors.text,
+      fontWeight: "600",
     },
     heroTitle: {
       fontSize: 42,
@@ -913,6 +1045,7 @@ const createStyles = (colors, isDark) =>
     },
     browseSection: {
       marginBottom: 24,
+      marginTop: 0,
     },
     ordersSection: {
       marginBottom: 24,
@@ -949,7 +1082,7 @@ const createStyles = (colors, isDark) =>
       width: 30,
       height: 30,
       borderRadius: 15,
-      backgroundColor: colors.text,
+      backgroundColor: colors.customerHomeHeaderText,
       alignItems: "center",
       justifyContent: "center",
     },

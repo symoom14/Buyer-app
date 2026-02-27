@@ -30,7 +30,6 @@ const ICON_COLOR_POOL = [
   "#1E88E5", // blue
   "#FFA700", // chrome yellow
   "#F57C00", // orange
-  "#111111", // black
 ];
 
 function toHexChannel(value) {
@@ -111,10 +110,12 @@ export default function CustomerProducts() {
       }));
 
       const storeMap = {};
+      const storeMerchantMap = {};
       const storeList = [];
       storeSnapshot.docs.forEach((doc) => {
         const data = doc.data();
         storeMap[doc.id] = data.name;
+        storeMerchantMap[doc.id] = data.merchantId || "";
         storeList.push({
           id: doc.id,
           name: data.name || "Unknown Store",
@@ -127,8 +128,9 @@ export default function CustomerProducts() {
       const merchantList = [];
       userSnapshot.docs.forEach((doc) => {
         const data = doc.data();
+        const sellerName = getUserDisplayName(data, "Unknown Seller");
+        merchantMap[doc.id] = sellerName;
         if (data.role === "merchant") {
-          const sellerName = getUserDisplayName(data, "Unknown Seller");
           merchantMap[doc.id] = sellerName;
           merchantList.push({
             id: doc.id,
@@ -138,12 +140,21 @@ export default function CustomerProducts() {
       });
       setSellers(merchantList);
 
-      const enrichedProducts = rawProducts.map((product) => ({
-        ...product,
-        storeName: storeMap[product.storeId] || "Unknown Store",
-        sellerName: merchantMap[product.merchantId] || "Unknown Seller",
-        iconColor: getRandomIconColor(),
-      }));
+      const enrichedProducts = rawProducts.map((product) => {
+        const ownerMerchantId = storeMerchantMap[product.storeId] || "";
+        const resolvedMerchantId = ownerMerchantId || product.merchantId || "";
+        return {
+          ...product,
+          merchantId: resolvedMerchantId,
+          storeName: storeMap[product.storeId] || "Unknown Store",
+          sellerName:
+            merchantMap[resolvedMerchantId] ||
+            product.sellerName ||
+            product.merchantName ||
+            "Unknown Seller",
+          iconColor: getRandomIconColor(),
+        };
+      });
 
       setProducts(enrichedProducts);
 
@@ -163,6 +174,7 @@ export default function CustomerProducts() {
               merchantName:
                 merchantMap[item.merchantId] ||
                 item.merchantName ||
+                item.sellerName ||
                 "Unknown Seller",
               productName: item.name || "Unknown product",
               quantity: Number(item.quantity || 0),
@@ -402,7 +414,12 @@ export default function CustomerProducts() {
         clearButtonMode="while-editing"
       />
       {!isSearching ? (
-        <View style={styles.filters}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.filtersScroll}
+          contentContainerStyle={styles.filters}
+        >
           {categoryOptions.map((category) => {
             const isSelected = category === selectedCategory;
             const isAll = category === "All";
@@ -410,6 +427,7 @@ export default function CustomerProducts() {
               <TouchableOpacity
                 key={category}
                 onPress={() => setSelectedCategory(category)}
+                activeOpacity={1}
                 style={[
                   styles.categoryPill,
                   isAll
@@ -438,7 +456,7 @@ export default function CustomerProducts() {
               </TouchableOpacity>
             );
           })}
-        </View>
+        </ScrollView>
       ) : null}
 
       {isSearching ? (
@@ -621,7 +639,7 @@ const createStyles = (colors) =>
     iconWrap: {
       width: 42,
       height: 42,
-      borderRadius: 10,
+      borderRadius: 999,
       backgroundColor: colors.surfaceMuted,
       alignItems: "center",
       justifyContent: "center",
@@ -690,29 +708,37 @@ const createStyles = (colors) =>
     },
     filters: {
       flexDirection: "row",
-      flexWrap: "wrap",
       gap: 8,
       marginBottom: 12,
+      paddingRight: 8,
+      paddingTop: 6,
+      alignItems: "center",
     },
-  categoryPill: {
-    backgroundColor: colors.pill,
-    borderWidth: 1,
-    borderColor: colors.pillBorder,
-    borderRadius: 999,
-    paddingHorizontal: 11,
-    height: 30,
-    alignItems: "center",
-    justifyContent: "center",
-  },
+    filtersScroll: {
+      marginTop: 2,
+      flexGrow: 0,
+      maxHeight: 40,
+      minHeight: 40,
+    },
+    categoryPill: {
+      backgroundColor: colors.pill,
+      borderWidth: 1,
+      borderColor: colors.pillBorder,
+      borderRadius: 999,
+      paddingHorizontal: 11,
+      height: 30,
+      alignItems: "center",
+      justifyContent: "center",
+    },
     categoryPillSelected: {
       backgroundColor: colors.pillSelected,
       borderColor: colors.pillSelectedBorder,
     },
-  categoryPillText: {
-    color: colors.pillText,
-    fontWeight: "600",
-    fontSize: 12,
-  },
+    categoryPillText: {
+      color: colors.pillText,
+      fontWeight: "600",
+      fontSize: 12,
+    },
     categoryPillTextSelected: {
       color: colors.pillTextSelected,
     },
@@ -722,13 +748,14 @@ const createStyles = (colors) =>
     },
     categoryAllPillSelected: {
       backgroundColor: colors.pillNeutralSelected,
-      borderColor: colors.pillNeutralSelectedBorder,
+      borderColor: colors.textSubtle,
     },
     categoryAllPillText: {
       color: colors.pillNeutralText,
     },
     categoryAllPillTextSelected: {
-      color: colors.pillNeutralTextSelected,
+      color: colors.text,
+      fontWeight: "700",
     },
     listContent: {
       paddingTop: 0,

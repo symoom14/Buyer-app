@@ -1,9 +1,9 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { Picker } from "@react-native-picker/picker";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
-import { useMemo, useRef, useState } from "react";
+import { useLocalSearchParams, usePathname, useRouter } from "expo-router";
+import { addDoc, collection, doc, getDoc, serverTimestamp } from "firebase/firestore";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
+  Alert,
   KeyboardAvoidingView,
   Modal,
   Platform,
@@ -21,23 +21,14 @@ import AppIcon from "../../../../src/components/AppIcon";
 import ScreenContainer from "../../../../src/components/ScreenContainer";
 import { auth, db } from "../../../../src/firebase/firebaseConfig";
 import { useAppTheme } from "../../../../src/theme/useAppTheme";
+import { logAdminAction } from "../../../../src/utils/adminLog";
 
-const CATEGORIES = [
-  "Personal",
-  "Tech",
-  "Lifestyle",
-  "Home",
-  "Pets",
-  "Vehicles",
-  "Kids",
-  "Clothing",
-  "Food",
-];
 const DEFAULT_PRODUCT_ICON = "package-variant-closed";
 const ALL_PRODUCT_ICONS = Object.keys(MaterialCommunityIcons.glyphMap || {});
 
 export default function AddProductPage() {
   const { storeId } = useLocalSearchParams();
+  const pathname = usePathname();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { colors, isDark } = useAppTheme();
@@ -49,7 +40,7 @@ export default function AddProductPage() {
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [category, setCategory] = useState(CATEGORIES[0]);
+  const [storeCategory, setStoreCategory] = useState("");
   const [price, setPrice] = useState("");
   const [quantity, setQuantity] = useState("");
   const [iconQuery, setIconQuery] = useState("");
@@ -65,20 +56,68 @@ export default function AddProductPage() {
       )
     : [];
 
+  useEffect(() => {
+    let mounted = true;
+
+    const loadStoreCategory = async () => {
+      const sid = String(storeId || "").trim();
+      if (!sid) {
+        if (mounted) setStoreCategory("");
+        return;
+      }
+
+      const storeSnap = await getDoc(doc(db, "stores", sid));
+      const nextCategory = String(storeSnap.data()?.category || "").trim();
+      if (mounted) setStoreCategory(nextCategory);
+    };
+
+    loadStoreCategory().catch((err) => {
+      console.error("Failed to fetch store category:", err);
+      if (mounted) setStoreCategory("");
+    });
+
+    return () => {
+      mounted = false;
+    };
+  }, [storeId]);
+
   const handleAddProduct = async () => {
     if (!name || !description || !price || !quantity) return;
+    if (!storeCategory) {
+      Alert.alert(
+        "Store category missing",
+        "Set a category on this store before adding products.",
+      );
+      return;
+    }
 
-    await addDoc(collection(db, "products"), {
+    const docRef = await addDoc(collection(db, "products"), {
       name,
       description,
-      category,
+      category: storeCategory,
       price: Number(price),
       quantity: Number(quantity),
       iconName,
+      storeCategory,
       storeId,
       merchantId: auth.currentUser.uid,
       createdAt: serverTimestamp(),
     });
+
+    if (pathname.startsWith("/admin/")) {
+      await logAdminAction({
+        action: "product_created",
+        targetType: "product",
+        targetId: docRef.id,
+        targetLabel: name,
+        metadata: {
+          storeId: String(storeId || ""),
+          merchantId: auth.currentUser?.uid || "",
+          price: Number(price),
+          quantity: Number(quantity),
+        },
+      });
+    }
 
     router.back();
   };
@@ -139,13 +178,13 @@ export default function AddProductPage() {
               multiline
             />
 
-            <View style={styles.pickerWrapper}>
-              <Picker selectedValue={category} onValueChange={setCategory}>
-                {CATEGORIES.map((cat) => (
-                  <Picker.Item key={cat} label={cat} value={cat} />
-                ))}
-              </Picker>
-            </View>
+            <TextInput
+              style={styles.input}
+              editable={false}
+              value={storeCategory || "No store category set"}
+              placeholder="Store category"
+              placeholderTextColor={colors.textSubtle}
+            />
 
             <View
               onLayout={(event) => {

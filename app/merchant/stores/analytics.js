@@ -54,6 +54,11 @@ function money(value) {
   return `$${Number(value || 0).toFixed(2)}`;
 }
 
+function isCancelledStatus(status) {
+  const normalized = String(status || "").toLowerCase();
+  return normalized.includes("cancel");
+}
+
 function shortLabel(value, max = 12) {
   if (!value) return "";
   return value.length > max ? `${value.slice(0, max - 1)}…` : value;
@@ -197,6 +202,7 @@ export default function MerchantStoresAnalytics() {
             createdAt,
             items: merchantItems,
             total,
+            refund: data.merchantRefunds?.[merchantId] || null,
           };
         })
         .filter(Boolean);
@@ -236,18 +242,37 @@ export default function MerchantStoresAnalytics() {
 
   const totalOrders = filteredOrders.length;
   const cancelledOrders = statusCounts.cancelled || 0;
+  const refundedOrders = filteredOrders.filter(
+    (order) => order.refund?.status === "processed",
+  );
+  const refundedOrdersCount = refundedOrders.length;
+  const totalRefunded = refundedOrders.reduce(
+    (sum, order) => sum + Number(order.refund?.amount || order.total || 0),
+    0,
+  );
+  const revenueEligibleOrders = filteredOrders.filter(
+    (order) =>
+      !isCancelledStatus(order.status) && order.refund?.status !== "processed",
+  );
   const completedRevenue = filteredOrders
-    .filter((order) => order.status === "completed")
+    .filter(
+      (order) =>
+        order.status === "completed" &&
+        !isCancelledStatus(order.status) &&
+        order.refund?.status !== "processed",
+    )
     .reduce((sum, order) => sum + order.total, 0);
-  const potentialRevenue = filteredOrders
-    .filter((order) => order.status !== "cancelled")
+  const potentialRevenue = revenueEligibleOrders
     .reduce((sum, order) => sum + order.total, 0);
+  const grossSales = filteredOrders
+    .filter((order) => !isCancelledStatus(order.status))
+    .reduce((sum, order) => sum + Number(order.total || 0), 0);
+  const refundRate = grossSales > 0 ? (totalRefunded / grossSales) * 100 : 0;
   const cancelRate = totalOrders ? (cancelledOrders / totalOrders) * 100 : 0;
 
   const topProducts = useMemo(() => {
     const byProduct = {};
-    filteredOrders.forEach((order) => {
-      if (order.status === "cancelled") return;
+    revenueEligibleOrders.forEach((order) => {
       order.items.forEach((item) => {
         const key = item.productId || item.name;
         if (!byProduct[key]) {
@@ -267,7 +292,7 @@ export default function MerchantStoresAnalytics() {
     return Object.values(byProduct)
       .sort((a, b) => b.revenue - a.revenue)
       .slice(0, 8);
-  }, [filteredOrders]);
+  }, [revenueEligibleOrders]);
 
   const productStoreById = useMemo(() => {
     const map = {};
@@ -280,8 +305,7 @@ export default function MerchantStoresAnalytics() {
 
   const storeBreakdown = useMemo(() => {
     const byStore = {};
-    filteredOrders.forEach((order) => {
-      if (order.status === "cancelled") return;
+    revenueEligibleOrders.forEach((order) => {
       order.items.forEach((item) => {
         const fallbackStoreId =
           item.storeId || productStoreById[item.productId] || "";
@@ -306,12 +330,12 @@ export default function MerchantStoresAnalytics() {
     });
 
     return Object.values(byStore).sort((a, b) => b.revenue - a.revenue);
-  }, [filteredOrders, productStoreById, storesById]);
+  }, [productStoreById, revenueEligibleOrders, storesById]);
 
   const lowStockProducts = useMemo(() => {
     const orderedByProduct = {};
     merchantOrders.forEach((order) => {
-      if (order.status === "cancelled") return;
+      if (isCancelledStatus(order.status)) return;
       order.items.forEach((item) => {
         if (!item.productId) return;
         orderedByProduct[item.productId] =
@@ -634,6 +658,18 @@ export default function MerchantStoresAnalytics() {
             </div>
           </div>
 
+          <div class="section-title">Refunds</div>
+          <table>
+            <thead>
+              <tr><th>Metric</th><th>Value</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Orders refunded</td><td>${refundedOrdersCount}</td></tr>
+              <tr><td>Total refunded</td><td>${escapeHtml(money(totalRefunded))}</td></tr>
+              <tr><td>Refund % of gross sales</td><td>${refundRate.toFixed(1)}%</td></tr>
+            </tbody>
+          </table>
+
           <div class="section-title">Order Status Breakdown</div>
           <table>
             <thead>
@@ -670,12 +706,15 @@ export default function MerchantStoresAnalytics() {
     cancelRate,
     completedRevenue,
     potentialRevenue,
+    refundedOrdersCount,
     screenTitle,
     selectedPeriodScope,
     statusCounts,
     storeBreakdown,
+    totalRefunded,
     topProducts,
     totalOrders,
+    refundRate,
   ]);
 
   const handlePreviewReport = useCallback(async () => {
@@ -796,6 +835,22 @@ export default function MerchantStoresAnalytics() {
         <View style={styles.kpiCard}>
           <Text style={styles.kpiLabel}>Cancellation Rate</Text>
           <Text style={styles.kpiValue}>{cancelRate.toFixed(1)}%</Text>
+        </View>
+      </View>
+
+      <Text style={styles.sectionTitle}>Refunds</Text>
+      <View style={styles.kpiGrid}>
+        <View style={styles.kpiCard}>
+          <Text style={styles.kpiLabel}>Orders Refunded</Text>
+          <Text style={styles.kpiValue}>{refundedOrdersCount}</Text>
+        </View>
+        <View style={styles.kpiCard}>
+          <Text style={styles.kpiLabel}>Total Refunded</Text>
+          <Text style={styles.kpiValue}>{money(totalRefunded)}</Text>
+        </View>
+        <View style={styles.kpiCard}>
+          <Text style={styles.kpiLabel}>Refund % of Sales</Text>
+          <Text style={styles.kpiValue}>{refundRate.toFixed(1)}%</Text>
         </View>
       </View>
 

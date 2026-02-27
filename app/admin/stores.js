@@ -7,6 +7,7 @@ import {
   serverTimestamp,
   updateDoc,
 } from "firebase/firestore";
+import { useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import {
   Alert,
@@ -26,6 +27,7 @@ import DeleteCircleButton from "../../src/components/DeleteCircleButton";
 import ScreenContainer from "../../src/components/ScreenContainer";
 import { db } from "../../src/firebase/firebaseConfig";
 import { useAppTheme } from "../../src/theme/useAppTheme";
+import { logAdminAction } from "../../src/utils/adminLog";
 
 const toDate = (value) => {
   if (value?.toDate) return value.toDate();
@@ -35,6 +37,7 @@ const toDate = (value) => {
 const normalizeRole = (value) => String(value || "").trim().toLowerCase();
 
 export default function AdminStoresScreen() {
+  const router = useRouter();
   const { colors } = useAppTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const [stores, setStores] = useState([]);
@@ -120,6 +123,16 @@ export default function AdminStoresScreen() {
       await updateDoc(doc(db, "stores", assignTargetStore.id), {
         merchantId: selectedMerchantId,
       });
+      await logAdminAction({
+        action: "store_assigned_merchant",
+        targetType: "store",
+        targetId: assignTargetStore.id,
+        targetLabel: assignTargetStore.name || "",
+        metadata: {
+          previousMerchantId: assignTargetStore.merchantId || "",
+          nextMerchantId: selectedMerchantId,
+        },
+      });
       setAssignTargetStore(null);
       setSelectedMerchantId("");
       Alert.alert("Updated", "Store has been assigned to the selected merchant.");
@@ -147,6 +160,16 @@ export default function AdminStoresScreen() {
       setSavingRename(true);
       await updateDoc(doc(db, "stores", renameTargetStore.id), {
         name: nextName,
+      });
+      await logAdminAction({
+        action: "store_renamed",
+        targetType: "store",
+        targetId: renameTargetStore.id,
+        targetLabel: nextName,
+        metadata: {
+          previousName: renameTargetStore.name || "",
+          nextName,
+        },
       });
       setRenameTargetStore(null);
       setRenameInput("");
@@ -177,11 +200,20 @@ export default function AdminStoresScreen() {
 
     try {
       setSavingNewStore(true);
-      await addDoc(collection(db, "stores"), {
+      const newStoreRef = await addDoc(collection(db, "stores"), {
         name,
         merchantId: newStoreMerchantId,
         category: "Other",
         createdAt: serverTimestamp(),
+      });
+      await logAdminAction({
+        action: "store_created",
+        targetType: "store",
+        targetId: newStoreRef.id,
+        targetLabel: name,
+        metadata: {
+          merchantId: newStoreMerchantId,
+        },
       });
       setIsAddStoreModalOpen(false);
       setNewStoreName("");
@@ -206,6 +238,15 @@ export default function AdminStoresScreen() {
           onPress: async () => {
             try {
               await deleteDoc(doc(db, "stores", store.id));
+              await logAdminAction({
+                action: "store_deleted",
+                targetType: "store",
+                targetId: store.id,
+                targetLabel: store.name || "",
+                metadata: {
+                  merchantId: store.merchantId || "",
+                },
+              });
               Alert.alert("Deleted", "Store deleted successfully.");
             } catch (error) {
               Alert.alert("Failed", error?.message || "Could not delete store.");
@@ -217,7 +258,7 @@ export default function AdminStoresScreen() {
   };
 
   return (
-    <ScreenContainer bottomPadding={20}>
+    <ScreenContainer disableBottomInset bottomPadding={12}>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {stores.length === 0 ? (
           <Text style={styles.emptyText}>No stores found.</Text>
@@ -226,7 +267,11 @@ export default function AdminStoresScreen() {
         {stores.map((store) => {
           const openedDate = toDate(store.createdAt);
           return (
-            <View key={store.id} style={styles.card}>
+            <Pressable
+              key={store.id}
+              style={styles.card}
+              onPress={() => router.push(`/admin/store/${store.id}`)}
+            >
               <View style={styles.iconWrap}>
                 <AppIcon name="store" variant="community" size={20} color={colors.text} />
               </View>
@@ -247,7 +292,10 @@ export default function AdminStoresScreen() {
               <View style={styles.actionCol}>
                 <TouchableOpacity
                   style={styles.assignButton}
-                  onPress={() => openAssignModal(store)}
+                  onPress={(e) => {
+                    e.stopPropagation();
+                    openAssignModal(store);
+                  }}
                   activeOpacity={0.85}
                 >
                   <AppIcon
@@ -259,7 +307,10 @@ export default function AdminStoresScreen() {
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.assignButton}
-                  onPress={() => openRenameModal(store)}
+                  onPress={(e) => {
+                    e.stopPropagation();
+                    openRenameModal(store);
+                  }}
                   activeOpacity={0.85}
                 >
                   <AppIcon
@@ -271,10 +322,13 @@ export default function AdminStoresScreen() {
                 </TouchableOpacity>
                 <DeleteCircleButton
                   size={34}
-                  onPress={() => confirmDeleteStore(store)}
+                  onPress={(e) => {
+                    e.stopPropagation();
+                    confirmDeleteStore(store);
+                  }}
                 />
               </View>
-            </View>
+            </Pressable>
           );
         })}
       </ScrollView>

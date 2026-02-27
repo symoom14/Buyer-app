@@ -53,3 +53,79 @@ export async function notifyCustomerOrderStatus({
     createdAt: serverTimestamp(),
   });
 }
+
+export async function notifyMerchantRefundRequest({
+  merchantId,
+  orderId,
+  customerId,
+}) {
+  if (!merchantId || !orderId) return;
+
+  await addDoc(collection(db, "notifications"), {
+    recipientId: merchantId,
+    recipientRole: "merchant",
+    type: "refund_request",
+    orderId,
+    customerId: customerId || null,
+    message: "You've received a refund request.",
+    read: false,
+    createdAt: serverTimestamp(),
+  });
+}
+
+export async function notifyCustomerRefundProcessed({
+  customerId,
+  orderId,
+  merchantId,
+}) {
+  if (!customerId || !orderId || !merchantId) return;
+
+  await addDoc(collection(db, "notifications"), {
+    recipientId: customerId,
+    recipientRole: "customer",
+    type: "refund_processed",
+    orderId,
+    merchantId,
+    message: "Your refund has been processed.",
+    read: false,
+    createdAt: serverTimestamp(),
+  });
+}
+
+export async function notifyMerchantOrderCancelledByCustomer({
+  merchantId,
+  orderId,
+  customerId,
+}) {
+  if (!merchantId || !orderId) return;
+
+  await addDoc(collection(db, "notifications"), {
+    recipientId: merchantId,
+    recipientRole: "merchant",
+    type: "customer_cancelled_order",
+    orderId,
+    customerId: customerId || null,
+    message: "An order was cancelled by the customer.",
+    read: false,
+    createdAt: serverTimestamp(),
+  });
+}
+
+export async function notifyCustomerOrderCancelled({
+  customerId,
+  orderId,
+  merchantId,
+}) {
+  if (!customerId || !orderId || !merchantId) return;
+
+  await addDoc(collection(db, "notifications"), {
+    recipientId: customerId,
+    recipientRole: "customer",
+    type: "order_cancelled",
+    orderId,
+    merchantId,
+    message: "Your order was cancelled.",
+    read: false,
+    createdAt: serverTimestamp(),
+  });
+}

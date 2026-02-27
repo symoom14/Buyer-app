@@ -14,7 +14,10 @@ import AppIcon from "../../../src/components/AppIcon";
 import ScreenContainer from "../../../src/components/ScreenContainer";
 import { auth, db } from "../../../src/firebase/firebaseConfig";
 import { useAppTheme } from "../../../src/theme/useAppTheme";
-import { notifyCustomerOrderStatus } from "../../../src/utils/notifications";
+import {
+  notifyCustomerOrderStatus,
+  notifyCustomerRefundProcessed,
+} from "../../../src/utils/notifications";
 import { getUserDisplayName } from "../../../src/utils/userDisplayName";
 
 const STATUS_LABELS = {
@@ -34,6 +37,7 @@ export default function MerchantOrderDetailsScreen() {
   const [customerName, setCustomerName] = useState("");
   const [loading, setLoading] = useState(true);
   const [updatingStatus, setUpdatingStatus] = useState(false);
+  const [processingRefund, setProcessingRefund] = useState(false);
   const [outOfStockItems, setOutOfStockItems] = useState([]);
   const styles = useMemo(() => createStyles(colors, isDark), [colors, isDark]);
 
@@ -271,6 +275,10 @@ export default function MerchantOrderDetailsScreen() {
   );
 
   const currentStatus = order.status || "pending";
+  const merchantCurrentStatus =
+    order.merchantStatuses?.[merchantId]?.status || currentStatus;
+  const refundState = order.merchantRefunds?.[merchantId] || null;
+  const refundStatus = refundState?.status || null;
   const currentIndex = STATUS_ORDER.indexOf(currentStatus);
   const isCancelled = currentStatus === "cancelled";
   const canCancel =
@@ -282,6 +290,65 @@ export default function MerchantOrderDetailsScreen() {
   };
   const STEP_ACTIVE_COLOR = colors.success;
   const STEP_IDLE_COLOR = colors.textSubtle;
+  const canProcessRefund =
+    refundStatus === "requested" &&
+    (merchantCurrentStatus === "accepted" ||
+      merchantCurrentStatus === "completed") &&
+    !processingRefund;
+
+  const handleProcessRefund = () => {
+    if (!canProcessRefund) return;
+    Alert.alert(
+      "Process refund",
+      "Confirm processing this refund request?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Process",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              setProcessingRefund(true);
+              const refundAmount = Number(
+                refundState?.amount || merchantTotal || 0,
+              );
+              await updateDoc(doc(db, "orders", orderId), {
+                [`merchantRefunds.${merchantId}`]: {
+                  ...(refundState || {}),
+                  status: "processed",
+                  amount: refundAmount,
+                  processedAt: new Date(),
+                },
+              });
+
+              await notifyCustomerRefundProcessed({
+                customerId: order.customerId,
+                orderId,
+                merchantId,
+              });
+
+              setOrder((prev) => ({
+                ...prev,
+                merchantRefunds: {
+                  ...(prev?.merchantRefunds || {}),
+                  [merchantId]: {
+                    ...(prev?.merchantRefunds?.[merchantId] || {}),
+                    status: "processed",
+                    amount: refundAmount,
+                    processedAt: new Date(),
+                  },
+                },
+              }));
+            } catch (error) {
+              console.error("Failed to process refund:", error);
+            } finally {
+              setProcessingRefund(false);
+            }
+          },
+        },
+      ],
+    );
+  };
 
   return (
     <ScreenContainer>
@@ -423,6 +490,46 @@ export default function MerchantOrderDetailsScreen() {
           {totalItems}
         </Text>
       </View>
+
+      {(merchantCurrentStatus === "accepted" ||
+        merchantCurrentStatus === "completed" ||
+        refundStatus) && (
+        <View style={styles.refundCard}>
+          <Text style={styles.refundTitle}>Refunds</Text>
+          {refundStatus === "processed" ? (
+            <Text style={styles.refundProcessedText}>
+              Refund processed for ${Number(refundState?.amount || 0).toFixed(2)}
+            </Text>
+          ) : refundStatus === "requested" ? (
+            <>
+              <Text style={styles.refundRequestedText}>
+                Customer requested a refund of $
+                {Number(refundState?.amount || merchantTotal || 0).toFixed(2)}.
+              </Text>
+              <Pressable
+                style={[
+                  styles.refundActionButton,
+                  !canProcessRefund && styles.refundActionButtonDisabled,
+                ]}
+                onPress={handleProcessRefund}
+                disabled={!canProcessRefund}
+              >
+                <AppIcon
+                  name="cash-refund"
+                  variant="community"
+                  size={16}
+                  color={colors.background}
+                />
+                <Text style={styles.refundActionText}>
+                  {processingRefund ? "Processing..." : "Process Refund"}
+                </Text>
+              </Pressable>
+            </>
+          ) : (
+            <Text style={styles.refundIdleText}>No refund requests yet.</Text>
+          )}
+        </View>
+      )}
 
       {/* Items table */}
       <View style={styles.table}>
@@ -612,6 +719,52 @@ const createStyles = (colors, isDark) =>
   metaLabel: {
     fontWeight: "600",
     color: colors.text,
+  },
+  refundCard: {
+    marginBottom: 18,
+    padding: 12,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 10,
+  },
+  refundTitle: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: colors.text,
+    marginBottom: 8,
+  },
+  refundRequestedText: {
+    color: colors.warning,
+    fontSize: 13,
+    fontWeight: "600",
+    marginBottom: 10,
+  },
+  refundProcessedText: {
+    color: colors.success,
+    fontSize: 13,
+    fontWeight: "700",
+  },
+  refundIdleText: {
+    color: colors.textSubtle,
+    fontSize: 13,
+  },
+  refundActionButton: {
+    backgroundColor: colors.text,
+    borderRadius: 10,
+    paddingVertical: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    flexDirection: "row",
+    gap: 6,
+  },
+  refundActionButtonDisabled: {
+    opacity: 0.7,
+  },
+  refundActionText: {
+    color: colors.background,
+    fontWeight: "700",
+    fontSize: 13,
   },
   table: {
     borderWidth: 1,
