@@ -22,6 +22,11 @@ import ScreenContainer from "../../../../src/components/ScreenContainer";
 import { auth, db } from "../../../../src/firebase/firebaseConfig";
 import { useAppTheme } from "../../../../src/theme/useAppTheme";
 import { logAdminAction } from "../../../../src/utils/adminLog";
+import {
+  buildVariantCombinations,
+  getVariantSelectionKey,
+  normalizeVariantGroups,
+} from "../../../../src/utils/productVariants";
 
 const DEFAULT_PRODUCT_ICON = "package-variant-closed";
 const ALL_PRODUCT_ICONS = Object.keys(MaterialCommunityIcons.glyphMap || {});
@@ -43,6 +48,8 @@ export default function AddProductPage() {
   const [storeCategory, setStoreCategory] = useState("");
   const [price, setPrice] = useState("");
   const [quantity, setQuantity] = useState("");
+  const [variantGroups, setVariantGroups] = useState([]);
+  const [variantPriceOverrides, setVariantPriceOverrides] = useState({});
   const [iconQuery, setIconQuery] = useState("");
   const [iconName, setIconName] = useState(DEFAULT_PRODUCT_ICON);
   const [iconModalVisible, setIconModalVisible] = useState(false);
@@ -55,6 +62,14 @@ export default function AddProductPage() {
         48,
       )
     : [];
+  const normalizedVariantGroups = useMemo(
+    () => normalizeVariantGroups(variantGroups),
+    [variantGroups],
+  );
+  const generatedVariants = useMemo(
+    () => buildVariantCombinations(normalizedVariantGroups),
+    [normalizedVariantGroups],
+  );
 
   useEffect(() => {
     let mounted = true;
@@ -91,6 +106,22 @@ export default function AddProductPage() {
       return;
     }
 
+    const variantsWithPricing = generatedVariants.map((variant) => {
+      const key = getVariantSelectionKey(variant.options);
+      const rawOverride = variantPriceOverrides[key];
+      const parsedOverride = Number(rawOverride);
+      return {
+        ...variant,
+        priceOverride:
+          rawOverride === "" ||
+          rawOverride === null ||
+          rawOverride === undefined ||
+          Number.isNaN(parsedOverride)
+            ? null
+            : parsedOverride,
+      };
+    });
+
     const docRef = await addDoc(collection(db, "products"), {
       name,
       description,
@@ -101,6 +132,9 @@ export default function AddProductPage() {
       storeCategory,
       storeId,
       merchantId: auth.currentUser.uid,
+      variantGroups: normalizedVariantGroups,
+      variants: variantsWithPricing,
+      hasVariants: normalizedVariantGroups.length > 0,
       createdAt: serverTimestamp(),
     });
 
@@ -216,6 +250,108 @@ export default function AddProductPage() {
                 onChangeText={setQuantity}
                 onFocus={() => scrollToField("quantity")}
               />
+            </View>
+
+            <View style={styles.variantSection}>
+              <View style={styles.variantSectionHeader}>
+                <Text style={styles.variantSectionTitle}>Variants (optional)</Text>
+                <TouchableOpacity
+                  style={styles.addVariantGroupButton}
+                  onPress={() =>
+                    setVariantGroups((prev) => [
+                      ...prev,
+                      { id: `group_${Date.now()}_${prev.length}`, name: "", options: "" },
+                    ])
+                  }
+                >
+                  <AppIcon
+                    name="plus"
+                    variant="community"
+                    size={16}
+                    color={colors.background}
+                  />
+                  <Text style={styles.addVariantGroupText}>Add group</Text>
+                </TouchableOpacity>
+              </View>
+
+              <Text style={styles.variantHelper}>
+                Example groups: Color, Size. Options: Red, Blue or 500mL, 1L
+              </Text>
+
+              {variantGroups.map((group, index) => (
+                <View key={group.id} style={styles.variantGroupCard}>
+                  <View style={styles.variantGroupHeader}>
+                    <Text style={styles.variantGroupTitle}>Group {index + 1}</Text>
+                    <TouchableOpacity
+                      style={styles.variantRemoveButton}
+                      onPress={() =>
+                        setVariantGroups((prev) => prev.filter((item) => item.id !== group.id))
+                      }
+                    >
+                      <AppIcon
+                        name="close"
+                        variant="community"
+                        size={14}
+                        color={colors.textMuted}
+                      />
+                    </TouchableOpacity>
+                  </View>
+
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Group name (e.g. Size)"
+                    placeholderTextColor={colors.textSubtle}
+                    value={group.name}
+                    onChangeText={(text) =>
+                      setVariantGroups((prev) =>
+                        prev.map((item) =>
+                          item.id === group.id ? { ...item, name: text } : item,
+                        ),
+                      )
+                    }
+                  />
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Options separated by commas"
+                    placeholderTextColor={colors.textSubtle}
+                    value={group.options}
+                    onChangeText={(text) =>
+                      setVariantGroups((prev) =>
+                        prev.map((item) =>
+                          item.id === group.id ? { ...item, options: text } : item,
+                        ),
+                      )
+                    }
+                  />
+                </View>
+              ))}
+
+              {generatedVariants.length > 0 ? (
+                <View style={styles.variantPreviewCard}>
+                  <Text style={styles.variantPreviewTitle}>Generated combinations</Text>
+                  {generatedVariants.map((variant) => {
+                    const key = getVariantSelectionKey(variant.options);
+                    return (
+                      <View key={variant.id} style={styles.variantPreviewPriceRow}>
+                        <Text style={styles.variantPreviewRow}>{variant.label}</Text>
+                        <TextInput
+                          style={styles.variantPriceInput}
+                          placeholder={`$${Number(price || 0).toFixed(2)}`}
+                          placeholderTextColor={colors.textSubtle}
+                          keyboardType="decimal-pad"
+                          value={variantPriceOverrides[key] ?? ""}
+                          onChangeText={(text) =>
+                            setVariantPriceOverrides((prev) => ({
+                              ...prev,
+                              [key]: text,
+                            }))
+                          }
+                        />
+                      </View>
+                    );
+                  })}
+                </View>
+              ) : null}
             </View>
 
             <TouchableOpacity style={styles.button} onPress={handleAddProduct}>
@@ -388,5 +524,106 @@ const createStyles = (colors, isDark) =>
   buttonText: {
     color: colors.background,
     fontWeight: "600",
+  },
+  variantSection: {
+    marginTop: 8,
+    marginBottom: 6,
+  },
+  variantSectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 6,
+    gap: 8,
+  },
+  variantSectionTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: colors.text,
+  },
+  addVariantGroupButton: {
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: colors.text,
+    paddingHorizontal: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+  },
+  addVariantGroupText: {
+    color: colors.background,
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  variantHelper: {
+    color: colors.textSubtle,
+    fontSize: 12,
+    marginBottom: 8,
+  },
+  variantGroupCard: {
+    backgroundColor: colors.surfaceMuted,
+    borderWidth: 1,
+    borderColor: colors.borderSoft,
+    borderRadius: 10,
+    padding: 10,
+    marginBottom: 8,
+  },
+  variantGroupHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 6,
+  },
+  variantGroupTitle: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: colors.textMuted,
+    textTransform: "uppercase",
+    letterSpacing: 0.3,
+  },
+  variantRemoveButton: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: colors.surface,
+  },
+  variantPreviewCard: {
+    marginTop: 4,
+    borderWidth: 1,
+    borderColor: colors.borderSoft,
+    borderRadius: 10,
+    padding: 10,
+    backgroundColor: colors.surface,
+  },
+  variantPreviewTitle: {
+    fontSize: 12,
+    color: colors.textSubtle,
+    marginBottom: 4,
+  },
+  variantPreviewRow: {
+    fontSize: 13,
+    color: colors.text,
+    marginBottom: 2,
+  },
+  variantPreviewPriceRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 8,
+    marginBottom: 6,
+  },
+  variantPriceInput: {
+    width: 96,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 6,
+    paddingVertical: 6,
+    paddingHorizontal: 8,
+    fontSize: 12,
+    color: colors.text,
+    backgroundColor: colors.surface,
+    textAlign: "right",
   },
 });

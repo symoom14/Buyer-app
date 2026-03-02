@@ -293,7 +293,8 @@ export default function MerchantOrderDetailsScreen() {
   const canProcessRefund =
     refundStatus === "requested" &&
     (merchantCurrentStatus === "accepted" ||
-      merchantCurrentStatus === "completed") &&
+      merchantCurrentStatus === "completed" ||
+      merchantCurrentStatus === "cancelled") &&
     !processingRefund;
 
   const handleProcessRefund = () => {
@@ -493,6 +494,7 @@ export default function MerchantOrderDetailsScreen() {
 
       {(merchantCurrentStatus === "accepted" ||
         merchantCurrentStatus === "completed" ||
+        merchantCurrentStatus === "cancelled" ||
         refundStatus) && (
         <View style={styles.refundCard}>
           <Text style={styles.refundTitle}>Refunds</Text>

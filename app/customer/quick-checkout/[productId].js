@@ -27,9 +27,17 @@ import {
   PAYMENT_METHOD_PRESETS,
   normalizePaymentMethod,
 } from "../../../src/constants/paymentMethods";
+import { getSelectedVariantIconColor } from "../../../src/constants/variantColorMap";
 import { auth, db } from "../../../src/firebase/firebaseConfig";
 import { useAppTheme } from "../../../src/theme/useAppTheme";
 import { notifyMerchantNewOrder } from "../../../src/utils/notifications";
+import {
+  findMatchingVariant,
+  formatSelectedOptionsLabel,
+  normalizeVariantGroups,
+  resolveVariantUnitPrice,
+  resolveSelectedOptions,
+} from "../../../src/utils/productVariants";
 import { getUserDisplayName } from "../../../src/utils/userDisplayName";
 
 const QUICK_CHECKOUT_FIXED_AREA_HEIGHT = 236;
@@ -45,7 +53,7 @@ const ICON_COLOR_POOL = [
 export default function QuickCheckoutPage() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { productId } = useLocalSearchParams();
+  const { productId, selectedOptions } = useLocalSearchParams();
   const { colors } = useAppTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const [product, setProduct] = useState(null);
@@ -58,6 +66,16 @@ export default function QuickCheckoutPage() {
   const [defaultPaymentMethodId, setDefaultPaymentMethodId] = useState("");
   const [selectedPaymentMethodId, setSelectedPaymentMethodId] = useState("");
   const [paymentPickerVisible, setPaymentPickerVisible] = useState(false);
+  const incomingSelectedOptions = useMemo(() => {
+    const raw = Array.isArray(selectedOptions) ? selectedOptions[0] : selectedOptions;
+    if (!raw) return {};
+    try {
+      const parsed = JSON.parse(String(raw));
+      return parsed && typeof parsed === "object" ? parsed : {};
+    } catch {
+      return {};
+    }
+  }, [selectedOptions]);
 
   const availablePaymentMethods = useMemo(() => {
     if (paymentMethods.length > 0) return paymentMethods;
@@ -77,8 +95,38 @@ export default function QuickCheckoutPage() {
     [availablePaymentMethods, effectivePaymentMethodId],
   );
 
-  const unitPrice = Number(product?.price || 0);
+  const variantGroups = useMemo(
+    () => normalizeVariantGroups(product?.variantGroups),
+    [product?.variantGroups],
+  );
+  const resolvedSelectedOptions = useMemo(
+    () => resolveSelectedOptions(incomingSelectedOptions, variantGroups),
+    [incomingSelectedOptions, variantGroups],
+  );
+  const selectedVariant = useMemo(
+    () => findMatchingVariant(product?.variants, resolvedSelectedOptions),
+    [product?.variants, resolvedSelectedOptions],
+  );
+  const unitPrice = useMemo(
+    () =>
+      Number(
+        resolveVariantUnitPrice(
+          product?.price || 0,
+          product?.variants,
+          resolvedSelectedOptions,
+        ),
+      ),
+    [product?.price, product?.variants, resolvedSelectedOptions],
+  );
   const total = unitPrice * quantity;
+  const selectedOptionsLabel = useMemo(
+    () => formatSelectedOptionsLabel(resolvedSelectedOptions, variantGroups),
+    [resolvedSelectedOptions, variantGroups],
+  );
+  const selectedVariantIconColor = useMemo(
+    () => getSelectedVariantIconColor(resolvedSelectedOptions),
+    [resolvedSelectedOptions],
+  );
 
   useEffect(() => {
     if (!animationCompleted || !pendingInvoiceId) return;
@@ -134,6 +182,8 @@ export default function QuickCheckoutPage() {
           name: productData.name || "Product",
           price: Number(productData.price || 0),
           iconName: productData.iconName || productData.icon || DEFAULT_PRODUCT_ICON,
+          variantGroups: normalizeVariantGroups(productData.variantGroups),
+          variants: Array.isArray(productData.variants) ? productData.variants : [],
           iconColor: ICON_COLOR_POOL[colorIndex],
           storeId: productData.storeId,
           storeName,
@@ -219,10 +269,16 @@ export default function QuickCheckoutPage() {
           {
             productId: product.id,
             name: product.name,
+            storeId: product.storeId || "",
+            storeName: product.storeName || "",
             merchantId: product.merchantId,
             merchantName: product.merchantName,
+            iconName: product.iconName || DEFAULT_PRODUCT_ICON,
+            selectedVariantId: selectedVariant?.id || null,
             quantity: Number(quantity),
-            price: Number(product.price),
+            price: Number(unitPrice),
+            selectedOptions: resolvedSelectedOptions,
+            selectedOptionsLabel,
           },
         ],
         total: Number(total),
@@ -282,11 +338,16 @@ export default function QuickCheckoutPage() {
                         name={product.iconName || DEFAULT_PRODUCT_ICON}
                         variant="community"
                         size={18}
-                        color={product.iconColor || colors.text}
+                        color={selectedVariantIconColor || product.iconColor || colors.text}
                       />
                     </View>
                     <Text style={styles.name}>{product.name}</Text>
                   </View>
+                  {selectedOptionsLabel ? (
+                    <Text style={styles.variantText} numberOfLines={1}>
+                      {selectedOptionsLabel}
+                    </Text>
+                  ) : null}
                   <View style={styles.sellerStoreRow}>
                     <Text
                       style={[styles.sellerStoreText, styles.sellerText]}
@@ -534,6 +595,11 @@ const createStyles = (colors) =>
       flexDirection: "row",
       alignItems: "center",
       gap: 6,
+    },
+    variantText: {
+      marginTop: 4,
+      fontSize: 12,
+      color: colors.textSubtle,
     },
     sellerStoreText: {
       fontSize: 12,

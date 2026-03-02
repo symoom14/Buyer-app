@@ -20,6 +20,7 @@ const STORE_CATEGORIES = [
   "Fashion",
   "Sports",
   "Groceries",
+  "Appliances",
   "Other",
 ];
 

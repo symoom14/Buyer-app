@@ -14,6 +14,7 @@ import AppIcon from "../../../src/components/AppIcon";
 import { useFavorites } from "../../../src/context/FavoritesContext";
 import { db } from "../../../src/firebase/firebaseConfig";
 import { useAppTheme } from "../../../src/theme/useAppTheme";
+import { fetchMerchantRatingSummary } from "../../../src/utils/reviews";
 import { getUserDisplayName } from "../../../src/utils/userDisplayName";
 
 export default function CustomerSellerStoresPage() {
@@ -24,6 +25,7 @@ export default function CustomerSellerStoresPage() {
   const styles = useMemo(() => createStyles(colors), [colors]);
   const [stores, setStores] = useState([]);
   const [sellerName, setSellerName] = useState("Seller");
+  const [sellerRating, setSellerRating] = useState({ average: 0, count: 0 });
   const [loading, setLoading] = useState(true);
 
   const fetchSellerStores = useCallback(async () => {
@@ -38,6 +40,8 @@ export default function CustomerSellerStoresPage() {
       if (sellerSnapshot.exists()) {
         setSellerName(getUserDisplayName(sellerSnapshot.data(), "Seller"));
       }
+      const ratingSummary = await fetchMerchantRatingSummary(db, sellerId);
+      setSellerRating(ratingSummary);
 
       const list = storesSnapshot.docs.map((docSnap) => {
         const data = docSnap.data();
@@ -68,7 +72,22 @@ export default function CustomerSellerStoresPage() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>{sellerName}</Text>
-      <Text style={styles.subtitle}>Stores by this seller</Text>
+      <View style={styles.subtitleRow}>
+        <Text style={styles.subtitle}>Stores by this seller</Text>
+        <View style={styles.ratingChip}>
+          <AppIcon
+            name={sellerRating.count > 0 ? "star" : "star-settings-outline"}
+            variant="community"
+            size={13}
+            color="#F4B400"
+          />
+          <Text style={styles.ratingChipText}>
+            {sellerRating.count > 0
+              ? `${sellerRating.average.toFixed(1)} (${sellerRating.count})`
+              : "0"}
+          </Text>
+        </View>
+      </View>
 
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -137,9 +156,33 @@ const createStyles = (colors) =>
     },
     subtitle: {
       marginTop: 4,
-      marginBottom: 16,
+      marginBottom: 0,
       color: colors.textMuted,
       fontSize: 14,
+    },
+    subtitleRow: {
+      marginTop: 4,
+      marginBottom: 16,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      gap: 8,
+    },
+    ratingChip: {
+      height: 28,
+      borderRadius: 14,
+      borderWidth: 1,
+      borderColor: colors.border,
+      backgroundColor: colors.surface,
+      paddingHorizontal: 9,
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 5,
+    },
+    ratingChipText: {
+      fontSize: 12,
+      color: colors.textMuted,
+      fontWeight: "600",
     },
     listContent: {
       paddingBottom: 8,

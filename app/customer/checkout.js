@@ -22,6 +22,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import AppIcon from "../../src/components/AppIcon";
 import ScreenContainer from "../../src/components/ScreenContainer";
+import { getSelectedVariantIconColor } from "../../src/constants/variantColorMap";
 import {
   DEFAULT_PAYMENT_METHOD_ID,
   PAYMENT_METHOD_PRESETS,
@@ -31,6 +32,7 @@ import { useCart } from "../../src/context/CartContext";
 import { auth, db } from "../../src/firebase/firebaseConfig";
 import { useAppTheme } from "../../src/theme/useAppTheme";
 import { notifyMerchantNewOrder } from "../../src/utils/notifications";
+import { resolveVariantUnitPrice } from "../../src/utils/productVariants";
 
 const CHECKOUT_FIXED_AREA_HEIGHT = 250;
 const DEFAULT_PRODUCT_ICON = "package-variant-closed";
@@ -59,8 +61,27 @@ export default function CheckoutPage() {
   const [paymentPickerVisible, setPaymentPickerVisible] = useState(false);
 
   const visibleCart = isPaying ? cartSnapshot : cart;
-  const total = visibleCart.reduce(
-    (sum, item) => sum + item.price * item.quantity,
+  const resolveCheckoutUnitPrice = useCallback(
+    (item) => {
+      const productData = productVisualsById[item.productId] || {};
+      const basePrice =
+        Number(productData.basePrice ?? item.price ?? 0) || 0;
+      return Number(
+        resolveVariantUnitPrice(basePrice, productData.variants, item.selectedOptions),
+      );
+    },
+    [productVisualsById],
+  );
+  const pricedVisibleCart = useMemo(
+    () =>
+      visibleCart.map((item) => ({
+        ...item,
+        resolvedUnitPrice: resolveCheckoutUnitPrice(item),
+      })),
+    [resolveCheckoutUnitPrice, visibleCart],
+  );
+  const total = pricedVisibleCart.reduce(
+    (sum, item) => sum + item.resolvedUnitPrice * item.quantity,
     0,
   );
   const getRandomIconColor = useCallback(() => {
@@ -95,6 +116,8 @@ export default function CheckoutPage() {
           visuals[docSnap.id] = {
             iconName: data?.iconName || data?.icon || DEFAULT_PRODUCT_ICON,
             iconColor: getRandomIconColor(),
+            basePrice: Number(data?.price || 0),
+            variants: Array.isArray(data?.variants) ? data.variants : [],
           };
         });
         setProductVisualsById(visuals);
@@ -172,12 +195,19 @@ export default function CheckoutPage() {
       const orderRef = await addDoc(collection(db, "orders"), {
         customerId: auth.currentUser.uid,
         items: cart.map((item) => ({
+          cartItemKey: item.cartItemKey || null,
           productId: item.productId,
           name: item.name,
+          storeId: item.storeId || "",
+          storeName: item.storeName || "",
           merchantId: item.merchantId,
           merchantName: item.merchantName,
+          iconName: item.iconName || null,
+          selectedVariantId: item.selectedVariantId || null,
           quantity: Number(item.quantity),
-          price: Number(item.price),
+          price: Number(resolveCheckoutUnitPrice(item)),
+          selectedOptions: item.selectedOptions || {},
+          selectedOptionsLabel: item.selectedOptionsLabel || "",
         })),
         total: Number(total),
         paymentMethod: effectivePaymentMethod.label,
@@ -227,39 +257,47 @@ export default function CheckoutPage() {
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.itemsCard}>
-            {visibleCart.map((item, index) => (
+            {pricedVisibleCart.map((item, index) => (
               <View
-                key={item.productId}
+                key={item.cartItemKey || `${item.productId}-${index}`}
                 style={[
                   styles.itemRow,
-                  index !== visibleCart.length - 1 && styles.itemRowDivider,
+                  index !== pricedVisibleCart.length - 1 && styles.itemRowDivider,
                 ]}
               >
                 <View style={styles.itemLeft}>
-                  <View style={styles.nameRow}>
-                    <View style={styles.itemIconWrap}>
-                      <AppIcon
-                        name={
-                          item.iconName ||
-                          productVisualsById[item.productId]?.iconName ||
-                          DEFAULT_PRODUCT_ICON
-                        }
-                        variant="community"
-                        size={18}
-                        color={
-                          productVisualsById[item.productId]?.iconColor ||
-                          colors.text
-                        }
-                      />
+                  <View style={styles.itemIconWrap}>
+                    <AppIcon
+                      name={
+                        item.iconName ||
+                        productVisualsById[item.productId]?.iconName ||
+                        DEFAULT_PRODUCT_ICON
+                      }
+                      variant="community"
+                      size={18}
+                      color={
+                        getSelectedVariantIconColor(item.selectedOptions) ||
+                        productVisualsById[item.productId]?.iconColor ||
+                        colors.text
+                      }
+                    />
+                  </View>
+                  <View style={styles.itemContent}>
+                    <View style={styles.nameRow}>
+                      <Text style={styles.name}>{item.name}</Text>
+                      <View style={styles.qtyBadge}>
+                        <Text style={styles.qtyBadgeText}>{item.quantity}</Text>
+                      </View>
                     </View>
-                    <Text style={styles.name}>{item.name}</Text>
-                    <View style={styles.qtyBadge}>
-                      <Text style={styles.qtyBadgeText}>{item.quantity}</Text>
-                    </View>
+                    {item.selectedOptionsLabel ? (
+                      <Text style={styles.variantText} numberOfLines={1}>
+                        {item.selectedOptionsLabel}
+                      </Text>
+                    ) : null}
                   </View>
                 </View>
                 <Text style={styles.itemAmount}>
-                  ${(item.price * item.quantity).toFixed(2)}
+                  ${(item.resolvedUnitPrice * item.quantity).toFixed(2)}
                 </Text>
               </View>
             ))}
@@ -441,6 +479,11 @@ const createStyles = (colors) =>
     itemLeft: {
       flex: 1,
       paddingRight: 10,
+      flexDirection: "row",
+      alignItems: "center",
+    },
+    itemContent: {
+      flex: 1,
     },
     nameRow: {
       flexDirection: "row",
@@ -456,7 +499,7 @@ const createStyles = (colors) =>
       fontSize: 15,
       fontWeight: "600",
       color: colors.text,
-      flex: 1,
+      flexShrink: 1,
     },
     itemIconWrap: {
       width: 28,
@@ -465,6 +508,7 @@ const createStyles = (colors) =>
       backgroundColor: colors.surfaceMuted,
       alignItems: "center",
       justifyContent: "center",
+      marginRight: 8,
     },
     qtyBadge: {
       backgroundColor: colors.pill,
@@ -483,6 +527,11 @@ const createStyles = (colors) =>
       fontSize: 17,
       fontWeight: "700",
       color: colors.text,
+    },
+    variantText: {
+      marginTop: 4,
+      fontSize: 12,
+      color: colors.textSubtle,
     },
     totalRow: {
       marginTop: 0,

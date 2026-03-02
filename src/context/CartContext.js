@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createContext, useContext, useEffect, useState } from "react";
+import { getCartItemKey } from "../utils/productVariants";
 
 const CartContext = createContext();
 
@@ -18,38 +19,60 @@ export function CartProvider({ children }) {
 
   const addToCart = (product) => {
     setCart((prev) => {
-      const existing = prev.find((p) => p.productId === product.productId);
+      const cartItemKey =
+        product.cartItemKey ||
+        getCartItemKey(product.productId, product.selectedOptions);
+      const existing = prev.find(
+        (p) =>
+          (p.cartItemKey && p.cartItemKey === cartItemKey) ||
+          (!p.cartItemKey && p.productId === product.productId),
+      );
       if (existing) {
         return prev.map((p) =>
-          p.productId === product.productId
+          ((p.cartItemKey && p.cartItemKey === cartItemKey) ||
+            (!p.cartItemKey && p.productId === product.productId))
             ? { ...p, quantity: p.quantity + 1 }
             : p,
         );
       }
-      return [...prev, { ...product, quantity: 1 }];
+      return [...prev, { ...product, cartItemKey, quantity: 1 }];
     });
   };
 
-  const increment = (productId) => {
+  const increment = (cartItemKey) => {
     setCart((prev) =>
       prev.map((p) =>
-        p.productId === productId ? { ...p, quantity: p.quantity + 1 } : p,
+        ((p.cartItemKey && p.cartItemKey === cartItemKey) ||
+          (!p.cartItemKey && p.productId === cartItemKey))
+          ? { ...p, quantity: p.quantity + 1 }
+          : p,
       ),
     );
   };
 
-  const decrement = (productId) => {
+  const decrement = (cartItemKey) => {
     setCart((prev) =>
       prev
         .map((p) =>
-          p.productId === productId ? { ...p, quantity: p.quantity - 1 } : p,
+          ((p.cartItemKey && p.cartItemKey === cartItemKey) ||
+            (!p.cartItemKey && p.productId === cartItemKey))
+            ? { ...p, quantity: p.quantity - 1 }
+            : p,
         )
         .filter((p) => p.quantity > 0),
     );
   };
 
-  const removeFromCart = (productId) => {
-    setCart((prev) => prev.filter((p) => p.productId !== productId));
+  const removeFromCart = (cartItemKey) => {
+    setCart((prev) =>
+      prev.filter(
+        (p) =>
+          !(
+            (p.cartItemKey && p.cartItemKey === cartItemKey) ||
+            (!p.cartItemKey && p.productId === cartItemKey)
+          ),
+      ),
+    );
   };
 
   const clearCart = () => setCart([]);

@@ -102,7 +102,11 @@ export default function CustomerFullOrderDetails() {
       .map(
         (item) => `
           <tr>
-            <td>${item.name || "Item"}</td>
+            <td>${item.name || "Item"}${
+              item.selectedOptionsLabel
+                ? `<div style="font-size:12px;color:#555;margin-top:2px;">${item.selectedOptionsLabel}</div>`
+                : ""
+            }</td>
             <td>${item.merchantName || "—"}</td>
             <td style="text-align:center;">${Number(item.quantity || 0)}</td>
             <td style="text-align:right;">$${Number(item.price || 0).toFixed(2)}</td>
@@ -269,6 +273,11 @@ export default function CustomerFullOrderDetails() {
                   Qty {Number(item.quantity || 0)} · $
                   {(Number(item.price || 0) * Number(item.quantity || 0)).toFixed(2)}
                 </Text>
+                {item.selectedOptionsLabel ? (
+                  <Text style={styles.itemVariant} numberOfLines={1}>
+                    {item.selectedOptionsLabel}
+                  </Text>
+                ) : null}
               </View>
             </View>
 
@@ -411,6 +420,11 @@ const createStyles = (colors) =>
     itemSub: {
       fontSize: 12,
       color: colors.textSubtle,
+    },
+    itemVariant: {
+      marginTop: 2,
+      fontSize: 11,
+      color: colors.textMuted,
     },
     itemRight: {
       minWidth: 94,

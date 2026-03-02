@@ -1,0 +1,7 @@
+Beauty
+Electronics
+Fashion
+Groceries
+Home
+Other
+Pets

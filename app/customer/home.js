@@ -12,6 +12,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Animated,
+  RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
@@ -27,6 +28,7 @@ import ScreenContainer from "../../src/components/ScreenContainer";
 import { useCart } from "../../src/context/CartContext";
 import { auth, db } from "../../src/firebase/firebaseConfig";
 import { useAppTheme } from "../../src/theme/useAppTheme";
+import { fetchProductRatingSummaryMap } from "../../src/utils/reviews";
 import { getUserDisplayName } from "../../src/utils/userDisplayName";
 
 const DEFAULT_PRODUCT_ICON = "package-variant-closed";
@@ -77,6 +79,31 @@ function getLightIconBackground(iconColor, fallbackColor) {
   return `#${toHexChannel(bgR)}${toHexChannel(bgG)}${toHexChannel(bgB)}`;
 }
 
+function hasKeywordMatch(searchKeywords, query) {
+  if (!query) return false;
+  if (Array.isArray(searchKeywords)) {
+    return searchKeywords.some((keyword) =>
+      String(keyword || "")
+        .toLowerCase()
+        .includes(query),
+    );
+  }
+  return String(searchKeywords || "")
+    .toLowerCase()
+    .includes(query);
+}
+
+function getProductSearchPriority(product, query) {
+  if (!query) return -1;
+  const name = String(product?.name || "").toLowerCase();
+  const category = String(product?.category || "").toLowerCase();
+
+  if (name.includes(query)) return 0;
+  if (category.includes(query)) return 1;
+  if (hasKeywordMatch(product?.searchKeywords, query)) return 2;
+  return -1;
+}
+
 export default function CustomerHome() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -87,9 +114,11 @@ export default function CustomerHome() {
   const [browseStores, setBrowseStores] = useState([]);
   const [browseSellers, setBrowseSellers] = useState([]);
   const [productsLoading, setProductsLoading] = useState(true);
+  const [popularProducts, setPopularProducts] = useState([]);
   const [recentOrders, setRecentOrders] = useState([]);
   const [buyAgainProducts, setBuyAgainProducts] = useState([]);
   const [ordersLoading, setOrdersLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [globalQuery, setGlobalQuery] = useState("");
   const [selectedSuburb, setSelectedSuburb] = useState("Home");
   const [showAddressMenu, setShowAddressMenu] = useState(false);
@@ -123,6 +152,7 @@ export default function CustomerHome() {
 
   const loadRecentOrders = useCallback(async (customerId) => {
     if (!customerId) {
+      setPopularProducts([]);
       setRecentOrders([]);
       setBuyAgainProducts([]);
       setOrdersLoading(false);
@@ -144,6 +174,10 @@ export default function CustomerHome() {
         productIconById[String(docSnap.id)] =
           data?.iconName || data?.icon || DEFAULT_PRODUCT_ICON;
       });
+      const productRatingsMap = await fetchProductRatingSummaryMap(
+        db,
+        Object.keys(productDataById),
+      );
 
       const customerOrders = ordersSnapshot.docs
         .map((docSnap) => ({
@@ -187,7 +221,8 @@ export default function CustomerHome() {
             topByProduct[productId] = {
               id: productId,
               name: item.name || productData?.name || "Product",
-              price: Number(item.price ?? productData?.price ?? 0),
+              // Keep historical order pricing immutable; never fallback to current catalog price.
+              price: Number(item.price ?? 0),
               iconName:
                 item.iconName ||
                 productData?.iconName ||
@@ -204,6 +239,10 @@ export default function CustomerHome() {
               lastOrderedAt: 0,
               merchantId: item.merchantId || "unknown",
               merchantName: item.merchantName || "Unknown Seller",
+              ratingAverage: Number(
+                productRatingsMap[productId]?.average || 0,
+              ),
+              ratingCount: Number(productRatingsMap[productId]?.count || 0),
             };
           }
           topByProduct[productId].quantity += Number(item.quantity || 0);
@@ -221,14 +260,145 @@ export default function CustomerHome() {
         })
         .slice(0, 4);
 
+      const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+      const globalPopularityByProduct = {};
+      ordersSnapshot.docs.forEach((docSnap) => {
+        const orderData = docSnap.data() || {};
+        const orderTime = orderData.createdAt?.toDate?.()?.getTime?.() || 0;
+        if (orderTime < weekAgo) return;
+        const productIdsInOrder = new Set();
+        (orderData.items || []).forEach((item) => {
+          const productId = String(item.productId || "");
+          if (!productId) return;
+          const merchantId = item.merchantId || "";
+          const merchantStatus =
+            orderData.merchantStatuses?.[merchantId]?.status ||
+            orderData.status ||
+            "pending";
+          if (merchantStatus === "cancelled") return;
+          productIdsInOrder.add(productId);
+        });
+
+        productIdsInOrder.forEach((productId) => {
+          const current = globalPopularityByProduct[productId] || {
+            id: productId,
+            orderCount: 0,
+            lastOrderedAt: 0,
+            fallbackName: "Product",
+          };
+          current.orderCount += 1;
+          current.lastOrderedAt = Math.max(current.lastOrderedAt, orderTime);
+          globalPopularityByProduct[productId] = current;
+        });
+      });
+
+      const popularThisWeekProducts = Object.values(globalPopularityByProduct)
+        .map((entry) => {
+          const productData = productDataById[entry.id] || {};
+          const colorIndex =
+            entry.id
+              .split("")
+              .reduce((sum, char) => sum + char.charCodeAt(0), 0) %
+            ICON_COLOR_POOL.length;
+          return {
+            id: entry.id,
+            name: productData?.name || entry.fallbackName || "Product",
+            price: Number(productData?.price || 0),
+            iconName:
+              productData?.iconName || productData?.icon || DEFAULT_PRODUCT_ICON,
+            iconColor: ICON_COLOR_POOL[colorIndex],
+            orderCount: entry.orderCount,
+            lastOrderedAt: entry.lastOrderedAt,
+            ratingAverage: Number(productRatingsMap[entry.id]?.average || 0),
+            ratingCount: Number(productRatingsMap[entry.id]?.count || 0),
+          };
+        })
+        .sort((a, b) => {
+          if (b.orderCount !== a.orderCount) return b.orderCount - a.orderCount;
+          return b.lastOrderedAt - a.lastOrderedAt;
+        });
+
+      setPopularProducts(popularThisWeekProducts);
       setRecentOrders(orders);
       setBuyAgainProducts(topProducts);
     } catch (error) {
       console.error("Failed to load recent orders:", error);
+      setPopularProducts([]);
       setRecentOrders([]);
       setBuyAgainProducts([]);
     } finally {
       setOrdersLoading(false);
+    }
+  }, []);
+
+  const loadBrowseData = useCallback(async () => {
+    setProductsLoading(true);
+    try {
+      const [productsSnap, storesSnap, usersSnap] = await Promise.all([
+        getDocs(collection(db, "products")),
+        getDocs(collection(db, "stores")),
+        getDocs(collection(db, "users")),
+      ]);
+
+      const productItems = productsSnap.docs.map((docSnap) => {
+        const data = docSnap.data();
+        const colorIdx = Math.floor(Math.random() * ICON_COLOR_POOL.length);
+        return {
+          id: docSnap.id,
+          name: data?.name || "Unnamed product",
+          category: String(data?.category || "").trim(),
+          searchKeywords: data?.searchKeywords || [],
+          price: Number(data?.price || 0),
+          iconName: data?.iconName || DEFAULT_PRODUCT_ICON,
+          iconColor: ICON_COLOR_POOL[colorIdx],
+          createdAt: data?.createdAt?.toDate?.() || new Date(0),
+        };
+      });
+      const productRatingsMap = await fetchProductRatingSummaryMap(
+        db,
+        productItems.map((product) => product.id),
+      );
+      const ratedProductItems = productItems.map((product) => {
+        const ratingSummary = productRatingsMap[product.id] || {
+          average: 0,
+          count: 0,
+        };
+        return {
+          ...product,
+          ratingAverage: Number(ratingSummary.average || 0),
+          ratingCount: Number(ratingSummary.count || 0),
+        };
+      });
+
+      const storeItems = storesSnap.docs.map((docSnap) => {
+        const data = docSnap.data();
+        return {
+          id: docSnap.id,
+          name: data?.name || "Unknown store",
+        };
+      });
+
+      const sellerItems = usersSnap.docs
+        .map((docSnap) => ({
+          id: docSnap.id,
+          ...docSnap.data(),
+        }))
+        .filter((user) => user.role === "merchant")
+        .map((user) => ({
+          id: user.id,
+          name: getUserDisplayName(user, "Unknown seller"),
+        }));
+
+      setBrowseProducts(ratedProductItems);
+      setBrowseStores(storeItems);
+      setBrowseSellers(sellerItems);
+    } catch (error) {
+      console.error("Failed to load home products:", error);
+      setBrowseProducts([]);
+      setBrowseStores([]);
+      setBrowseSellers([]);
+    } finally {
+      setProductsLoading(false);
     }
   }, []);
 
@@ -268,62 +438,8 @@ export default function CustomerHome() {
   }, []);
 
   useEffect(() => {
-    const loadBrowseData = async () => {
-      setProductsLoading(true);
-      try {
-        const [productsSnap, storesSnap, usersSnap] = await Promise.all([
-          getDocs(collection(db, "products")),
-          getDocs(collection(db, "stores")),
-          getDocs(collection(db, "users")),
-        ]);
-
-        const productItems = productsSnap.docs.map((docSnap) => {
-          const data = docSnap.data();
-          const colorIdx = Math.floor(Math.random() * ICON_COLOR_POOL.length);
-          return {
-            id: docSnap.id,
-            name: data?.name || "Unnamed product",
-            price: Number(data?.price || 0),
-            iconName: data?.iconName || DEFAULT_PRODUCT_ICON,
-            iconColor: ICON_COLOR_POOL[colorIdx],
-            createdAt: data?.createdAt?.toDate?.() || new Date(0),
-          };
-        });
-
-        const storeItems = storesSnap.docs.map((docSnap) => {
-          const data = docSnap.data();
-          return {
-            id: docSnap.id,
-            name: data?.name || "Unknown store",
-          };
-        });
-
-        const sellerItems = usersSnap.docs
-          .map((docSnap) => ({
-            id: docSnap.id,
-            ...docSnap.data(),
-          }))
-          .filter((user) => user.role === "merchant")
-          .map((user) => ({
-            id: user.id,
-            name: getUserDisplayName(user, "Unknown seller"),
-          }));
-
-        setBrowseProducts(productItems);
-        setBrowseStores(storeItems);
-        setBrowseSellers(sellerItems);
-      } catch (error) {
-        console.error("Failed to load home products:", error);
-        setBrowseProducts([]);
-        setBrowseStores([]);
-        setBrowseSellers([]);
-      } finally {
-        setProductsLoading(false);
-      }
-    };
-
     loadBrowseData();
-  }, []);
+  }, [loadBrowseData]);
 
   useEffect(() => {
     let active = true;
@@ -346,11 +462,6 @@ export default function CustomerHome() {
     }, [loadRecentOrders]),
   );
 
-  const popularThisWeek = useMemo(() => {
-    const shuffled = [...browseProducts].sort(() => Math.random() - 0.5);
-    return shuffled;
-  }, [browseProducts]);
-
   const newArrivals = useMemo(
     () =>
       [...browseProducts].sort(
@@ -364,16 +475,27 @@ export default function CustomerHome() {
     [browseProducts],
   );
   const trimmedGlobalQuery = globalQuery.trim().toLowerCase();
-  const liveProductResults = useMemo(() => {
+  const liveProductMatches = useMemo(() => {
     if (!trimmedGlobalQuery) return [];
     return browseProducts
-      .filter((product) =>
-        String(product.name || "")
-          .toLowerCase()
-          .includes(trimmedGlobalQuery),
-      )
-      .slice(0, 8);
+      .map((product) => ({
+        product,
+        priority: getProductSearchPriority(product, trimmedGlobalQuery),
+      }))
+      .filter((entry) => entry.priority >= 0)
+      .sort((a, b) => {
+        if (a.priority !== b.priority) return a.priority - b.priority;
+        return String(a.product.name || "").localeCompare(
+          String(b.product.name || ""),
+        );
+      })
+      .map((entry) => entry.product);
   }, [browseProducts, trimmedGlobalQuery]);
+  const liveProductResults = useMemo(
+    () => liveProductMatches.slice(0, 5),
+    [liveProductMatches],
+  );
+  const liveProductMoreCount = Math.max(liveProductMatches.length - 5, 0);
   const liveStoreResults = useMemo(() => {
     if (!trimmedGlobalQuery) return [];
     return browseStores
@@ -399,6 +521,7 @@ export default function CustomerHome() {
     title,
     products,
     seeMorePath = "/customer/product",
+    showRatingBadge = false,
   ) => {
     const visibleProducts = products.slice(0, 6);
     return (
@@ -431,9 +554,32 @@ export default function CustomerHome() {
                     <Text numberOfLines={1} style={styles.productName}>
                       {product.name}
                     </Text>
-                    <Text style={styles.productPrice}>
-                      ${product.price.toFixed(2)}
-                    </Text>
+                    <View style={styles.productPriceRow}>
+                      <Text style={styles.productPrice}>
+                        ${Number(product.price || 0).toFixed(2)}
+                      </Text>
+                      {showRatingBadge ? (
+                        <View style={styles.productRatingPill}>
+                          <AppIcon
+                            name={
+                              Number(product.ratingCount || 0) > 0
+                                ? "star"
+                                : "star-settings-outline"
+                            }
+                            variant="community"
+                            size={11}
+                            color="#F4B400"
+                          />
+                          <Text style={styles.productRatingPillText}>
+                            {Number(product.ratingCount || 0) > 0
+                              ? `${Number(product.ratingAverage || 0).toFixed(1)} (${Number(
+                                  product.ratingCount || 0,
+                                )})`
+                              : "0"}
+                          </Text>
+                        </View>
+                      ) : null}
+                    </View>
                   </View>
                 </View>
               </TouchableOpacity>
@@ -477,6 +623,19 @@ export default function CustomerHome() {
     },
     [router],
   );
+  const handlePullToRefresh = useCallback(async () => {
+    if (refreshing) return;
+    setRefreshing(true);
+    setShowAddressMenu(false);
+    try {
+      await Promise.all([
+        loadBrowseData(),
+        loadRecentOrders(auth.currentUser?.uid),
+      ]);
+    } finally {
+      setRefreshing(false);
+    }
+  }, [loadBrowseData, loadRecentOrders, refreshing]);
 
   return (
     <ScreenContainer disableBottomInset bottomPadding={0}>
@@ -606,6 +765,14 @@ export default function CustomerHome() {
         style={styles.scroll}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.content}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handlePullToRefresh}
+            tintColor={colors.customerHeaderText}
+            colors={[colors.customerHeaderText]}
+          />
+        }
         scrollEventThrottle={16}
         onScroll={Animated.event(
           [{ nativeEvent: { contentOffset: { y: scrollY } } }],
@@ -717,6 +884,11 @@ export default function CustomerHome() {
                           />
                         </TouchableOpacity>
                       ))}
+                      {liveProductMoreCount > 0 ? (
+                        <Text style={styles.liveSearchMoreText}>
+                          +{liveProductMoreCount} more
+                        </Text>
+                      ) : null}
                     </View>
                   ) : null}
 
@@ -809,12 +981,18 @@ export default function CustomerHome() {
               )}
             </View>
           ) : null}
-          {renderProductCarousel("Popular this week", popularThisWeek)}
+          {renderProductCarousel(
+            "Popular this week",
+            popularProducts,
+            "/customer/product",
+            true,
+          )}
           {renderProductCarousel("New arrivals", newArrivals)}
           {renderProductCarousel(
             "Under $100",
             underHundred,
             "/customer/budget/100",
+            true,
           )}
         </View>
 
@@ -1128,7 +1306,7 @@ const createStyles = (colors, isDark) =>
     liveSearchIconWrap: {
       width: 34,
       height: 34,
-      borderRadius: 10,
+      borderRadius: 999,
       backgroundColor: colors.surfaceMuted,
       alignItems: "center",
       justifyContent: "center",
@@ -1152,6 +1330,14 @@ const createStyles = (colors, isDark) =>
       color: colors.textSubtle,
       paddingHorizontal: 12,
       paddingVertical: 12,
+    },
+    liveSearchMoreText: {
+      fontSize: 12,
+      color: colors.customerHomeHeaderText,
+      fontWeight: "600",
+      paddingHorizontal: 12,
+      paddingTop: 4,
+      paddingBottom: 10,
     },
     carouselSection: {
       marginBottom: 16,
@@ -1191,7 +1377,7 @@ const createStyles = (colors, isDark) =>
     productIconWrap: {
       width: 48,
       height: 48,
-      borderRadius: 10,
+      borderRadius: 999,
       backgroundColor: colors.surfaceMuted,
       alignItems: "center",
       justifyContent: "center",
@@ -1210,6 +1396,28 @@ const createStyles = (colors, isDark) =>
       fontSize: 14,
       fontWeight: "700",
       color: colors.text,
+    },
+    productPriceRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 6,
+      flexWrap: "wrap",
+    },
+    productRatingPill: {
+      height: 20,
+      borderRadius: 10,
+      borderWidth: 1,
+      borderColor: colors.border,
+      backgroundColor: colors.surfaceMuted,
+      paddingHorizontal: 6,
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 3,
+    },
+    productRatingPillText: {
+      fontSize: 10,
+      color: colors.textMuted,
+      fontWeight: "600",
     },
     seeMoreCard: {
       width: 120,
@@ -1265,7 +1473,7 @@ const createStyles = (colors, isDark) =>
     buyAgainIconWrap: {
       width: 30,
       height: 30,
-      borderRadius: 8,
+      borderRadius: 999,
       backgroundColor: colors.surfaceMuted,
       alignItems: "center",
       justifyContent: "center",
@@ -1356,7 +1564,7 @@ const createStyles = (colors, isDark) =>
     },
     recentOrderMoreText: {
       fontSize: 12,
-      color: colors.textSubtle,
+      color: colors.customerHomeHeaderText,
       marginTop: 1,
     },
     recentOrderRight: {

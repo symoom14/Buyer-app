@@ -39,7 +39,69 @@ function hashToUnit(value) {
   return Math.abs(hash % 1000) / 1000;
 }
 
-export function getRecommendedScore(product, nowMs = Date.now()) {
+function normalizeQuery(value) {
+  return String(value || "")
+    .trim()
+    .toLowerCase();
+}
+
+function getNameMatchBoost(name, searchQuery) {
+  const normalizedName = String(name || "")
+    .trim()
+    .toLowerCase();
+  const query = normalizeQuery(searchQuery);
+  if (!normalizedName || !query) return 0;
+
+  let boost = 0;
+  if (normalizedName === query) {
+    boost += 260;
+  } else if (normalizedName.startsWith(query)) {
+    boost += 190;
+  } else if (normalizedName.includes(query)) {
+    boost += 120;
+  }
+
+  const queryTokens = query.split(/\s+/).filter(Boolean);
+  if (queryTokens.length) {
+    const matchedTokens = queryTokens.filter((token) =>
+      normalizedName.includes(token),
+    ).length;
+    const coverageRatio = matchedTokens / queryTokens.length;
+    boost += coverageRatio * 90;
+  }
+
+  return boost;
+}
+
+function getRatingsBoost(product) {
+  const averageRating = Math.max(0, Math.min(5, toNumber(product?.ratingAverage)));
+  const ratingCount = Math.max(0, toNumber(product?.ratingCount));
+  if (ratingCount <= 0 || averageRating <= 0) return 0;
+
+  const qualityBoost = (averageRating / 5) * 140;
+  const confidenceBoost = Math.min(Math.log10(ratingCount + 1) * 36, 60);
+  return qualityBoost + confidenceBoost;
+}
+
+function getOrderInstancesBoost(product) {
+  const orderedInstances = Math.max(
+    0,
+    toNumber(
+      product?.orderInstancesCount ??
+        product?.orderedInstances ??
+        product?.orderCount,
+    ),
+  );
+  if (orderedInstances <= 0) return 0;
+
+  return Math.min(Math.log10(orderedInstances + 1) * 75, 120);
+}
+
+export function getRecommendedScore(
+  product,
+  nowMs = Date.now(),
+  searchQuery = "",
+) {
   const quantity = toNumber(product.quantity);
   const createdMs = toMillis(product.createdAt);
   const price = toNumber(product.price);
@@ -51,13 +113,30 @@ export function getRecommendedScore(product, nowMs = Date.now()) {
   const freshnessBoost = Math.max(0, 120 - ageDays);
 
   const midPrice = price > 0 && price <= 500 ? 20 : 0;
+  const nameMatchBoost = getNameMatchBoost(product?.name, searchQuery);
+  const ratingsBoost = getRatingsBoost(product);
+  const orderInstancesBoost = getOrderInstancesBoost(product);
   const diversityJitter = hashToUnit(product.id || product.name) * 5;
 
-  return inStockBoost + stockBoost + freshnessBoost + midPrice + diversityJitter;
+  return (
+    inStockBoost +
+    stockBoost +
+    freshnessBoost +
+    midPrice +
+    nameMatchBoost +
+    ratingsBoost +
+    orderInstancesBoost +
+    diversityJitter
+  );
 }
 
-export function sortProducts(products, mode = PRODUCT_SORT_MODES.RECOMMENDED) {
+export function sortProducts(
+  products,
+  mode = PRODUCT_SORT_MODES.RECOMMENDED,
+  options = {},
+) {
   const list = [...products];
+  const searchQuery = normalizeQuery(options?.searchQuery);
 
   if (mode === PRODUCT_SORT_MODES.NEWEST) {
     return list.sort((a, b) => toMillis(b.createdAt) - toMillis(a.createdAt));
@@ -73,7 +152,8 @@ export function sortProducts(products, mode = PRODUCT_SORT_MODES.RECOMMENDED) {
 
   const nowMs = Date.now();
   return list.sort(
-    (a, b) => getRecommendedScore(b, nowMs) - getRecommendedScore(a, nowMs),
+    (a, b) =>
+      getRecommendedScore(b, nowMs, searchQuery) -
+      getRecommendedScore(a, nowMs, searchQuery),
   );
 }
-

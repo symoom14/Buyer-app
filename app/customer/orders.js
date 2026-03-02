@@ -417,6 +417,9 @@ export default function CustomerOrders() {
             merchantName: item.merchantName || order.merchantName || "Unknown Seller",
             iconName: item.iconName || DEFAULT_PRODUCT_ICON,
             iconColor: item.iconColor || null,
+            selectedVariantId: item.selectedVariantId || null,
+            selectedOptions: item.selectedOptions || {},
+            selectedOptionsLabel: item.selectedOptionsLabel || "",
           });
         }
       });

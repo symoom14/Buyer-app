@@ -21,6 +21,12 @@ import {
   PRODUCT_SORT_MODES,
   sortProducts,
 } from "../../src/utils/productSorting";
+import {
+  formatSelectedOptionsLabel,
+  getDefaultSelectedOptions,
+  resolveVariantUnitPrice,
+} from "../../src/utils/productVariants";
+import { fetchProductRatingSummaryMap } from "../../src/utils/reviews";
 import { getUserDisplayName } from "../../src/utils/userDisplayName";
 
 const DEFAULT_PRODUCT_ICON = "package-variant-closed";
@@ -30,6 +36,12 @@ const ICON_COLOR_POOL = [
   "#1E88E5", // blue
   "#FFA700", // chrome yellow
   "#F57C00", // orange
+];
+const SORT_OPTIONS = [
+  { key: PRODUCT_SORT_MODES.RECOMMENDED, label: "Recommended" },
+  { key: PRODUCT_SORT_MODES.NEWEST, label: "Newest first" },
+  { key: PRODUCT_SORT_MODES.PRICE_LOW_HIGH, label: "Price: low to high" },
+  { key: PRODUCT_SORT_MODES.PRICE_HIGH_LOW, label: "Price: high to low" },
 ];
 
 function toHexChannel(value) {
@@ -70,6 +82,31 @@ function getLightIconBackground(iconColor, fallbackColor) {
   return `#${toHexChannel(bgR)}${toHexChannel(bgG)}${toHexChannel(bgB)}`;
 }
 
+function hasKeywordMatch(searchKeywords, query) {
+  if (!query) return false;
+  if (Array.isArray(searchKeywords)) {
+    return searchKeywords.some((keyword) =>
+      String(keyword || "")
+        .toLowerCase()
+        .includes(query),
+    );
+  }
+  return String(searchKeywords || "")
+    .toLowerCase()
+    .includes(query);
+}
+
+function getProductSearchPriority(product, query) {
+  if (!query) return -1;
+  const name = String(product?.name || "").toLowerCase();
+  const category = String(product?.category || "").toLowerCase();
+
+  if (name.includes(query)) return 0;
+  if (category.includes(query)) return 1;
+  if (hasKeywordMatch(product?.searchKeywords, query)) return 2;
+  return -1;
+}
+
 export default function CustomerProducts() {
   const router = useRouter();
   const params = useLocalSearchParams();
@@ -83,6 +120,10 @@ export default function CustomerProducts() {
   const [pastOrderProducts, setPastOrderProducts] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [selectedSortMode, setSelectedSortMode] = useState(
+    PRODUCT_SORT_MODES.RECOMMENDED,
+  );
+  const [openSortMenu, setOpenSortMenu] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const getRandomIconColor = useCallback(() => {
@@ -108,6 +149,10 @@ export default function CustomerProducts() {
         id: doc.id,
         ...doc.data(),
       }));
+      const productRatingsMap = await fetchProductRatingSummaryMap(
+        db,
+        rawProducts.map((product) => product.id),
+      );
 
       const storeMap = {};
       const storeMerchantMap = {};
@@ -140,9 +185,32 @@ export default function CustomerProducts() {
       });
       setSellers(merchantList);
 
+      const productOrderInstancesMap = {};
+      orderSnapshot.docs.forEach((docSnap) => {
+        const orderData = docSnap.data() || {};
+        (orderData.items || []).forEach((item) => {
+          const productId = String(item.productId || "").trim();
+          if (!productId) return;
+          const merchantId = String(item.merchantId || "").trim();
+          const merchantStatus =
+            orderData.merchantStatuses?.[merchantId]?.status ||
+            orderData.status ||
+            "pending";
+          if (merchantStatus === "cancelled") return;
+
+          const quantity = Math.max(1, Number(item.quantity || 1));
+          productOrderInstancesMap[productId] =
+            Number(productOrderInstancesMap[productId] || 0) + quantity;
+        });
+      });
+
       const enrichedProducts = rawProducts.map((product) => {
         const ownerMerchantId = storeMerchantMap[product.storeId] || "";
         const resolvedMerchantId = ownerMerchantId || product.merchantId || "";
+        const ratingSummary = productRatingsMap[product.id] || {
+          average: 0,
+          count: 0,
+        };
         return {
           ...product,
           merchantId: resolvedMerchantId,
@@ -153,6 +221,9 @@ export default function CustomerProducts() {
             product.merchantName ||
             "Unknown Seller",
           iconColor: getRandomIconColor(),
+          ratingAverage: Number(ratingSummary.average || 0),
+          ratingCount: Number(ratingSummary.count || 0),
+          orderInstancesCount: Number(productOrderInstancesMap[product.id] || 0),
         };
       });
 
@@ -244,25 +315,52 @@ export default function CustomerProducts() {
 
   const productResults = useMemo(() => {
     if (!isSearching) return [];
-    return sortProducts(
-      categoryFilteredProducts.filter((product) => {
-        const productName = (product.name || "").toLowerCase();
-        return productName.includes(trimmedQuery);
-      }),
-      PRODUCT_SORT_MODES.RECOMMENDED,
+    const recommended = sortProducts(
+      categoryFilteredProducts.filter(
+        (product) => getProductSearchPriority(product, trimmedQuery) >= 0,
+      ),
+      selectedSortMode,
+      { searchQuery: trimmedQuery },
     );
-  }, [categoryFilteredProducts, isSearching, trimmedQuery]);
+    if (selectedSortMode !== PRODUCT_SORT_MODES.RECOMMENDED) {
+      return recommended;
+    }
+    return recommended.sort((a, b) => {
+      const aPriority = getProductSearchPriority(a, trimmedQuery);
+      const bPriority = getProductSearchPriority(b, trimmedQuery);
+      if (aPriority !== bPriority) return aPriority - bPriority;
+      return 0;
+    });
+  }, [categoryFilteredProducts, isSearching, selectedSortMode, trimmedQuery]);
   const overBudgetProductResults = useMemo(() => {
     if (!isSearching || masterMaxPrice == null) return [];
-    return sortProducts(
+    const recommended = sortProducts(
       products.filter((product) => {
-        const productName = (product.name || "").toLowerCase();
         const price = Number(product.price || 0);
-        return productName.includes(trimmedQuery) && price > masterMaxPrice;
+        return (
+          getProductSearchPriority(product, trimmedQuery) >= 0 &&
+          price > masterMaxPrice
+        );
       }),
-      PRODUCT_SORT_MODES.RECOMMENDED,
+      selectedSortMode,
+      { searchQuery: trimmedQuery },
     );
-  }, [isSearching, masterMaxPrice, products, trimmedQuery]);
+    if (selectedSortMode !== PRODUCT_SORT_MODES.RECOMMENDED) {
+      return recommended;
+    }
+    return recommended.sort((a, b) => {
+      const aPriority = getProductSearchPriority(a, trimmedQuery);
+      const bPriority = getProductSearchPriority(b, trimmedQuery);
+      if (aPriority !== bPriority) return aPriority - bPriority;
+      return 0;
+    });
+  }, [isSearching, masterMaxPrice, products, selectedSortMode, trimmedQuery]);
+  const selectedSortLabel = useMemo(
+    () =>
+      SORT_OPTIONS.find((option) => option.key === selectedSortMode)?.label ||
+      "Recommended",
+    [selectedSortMode],
+  );
 
   const storeResults = useMemo(() => {
     if (!isSearching) return [];
@@ -322,15 +420,27 @@ export default function CustomerProducts() {
   const styles = useMemo(() => createStyles(colors), [colors]);
 
   const handleQuickAddToCart = (product) => {
+    const selectedOptions = getDefaultSelectedOptions(product.variantGroups);
+    const resolvedPrice = resolveVariantUnitPrice(
+      Number(product.price) || 0,
+      product.variants,
+      selectedOptions,
+    );
     addToCart({
       productId: product.id,
       name: product.name,
-      price: Number(product.price) || 0,
+      price: Number(resolvedPrice) || 0,
       quantity: 1,
       storeId: product.storeId,
       storeName: product.storeName || "Unknown Store",
       merchantId: product.merchantId || "unknown",
       merchantName: product.sellerName || "Unknown Seller",
+      iconName: product.iconName || DEFAULT_PRODUCT_ICON,
+      selectedOptions,
+      selectedOptionsLabel: formatSelectedOptionsLabel(
+        selectedOptions,
+        product.variantGroups,
+      ),
     });
   };
 
@@ -363,22 +473,42 @@ export default function CustomerProducts() {
             />
           </View>
 
-          <View style={styles.contentWrap}>
-            <View style={styles.metaWrap}>
-              <Text style={styles.sellerStoreText}>{product.sellerName}</Text>
-            </View>
-            <Text style={styles.productName}>{product.name}</Text>
+            <View style={styles.contentWrap}>
+              <View style={styles.metaWrap}>
+                <Text style={styles.sellerStoreText}>{product.sellerName}</Text>
+              </View>
+              <Text style={styles.productName}>{product.name}</Text>
             {showCategoryBadge ? (
               <View style={styles.resultCategoryBadge}>
                 <Text style={styles.resultCategoryBadgeText}>
                   {categoryLabel}
                 </Text>
               </View>
-            ) : null}
-
-            <Text style={styles.price}>${product.price}</Text>
-          </View>
-        </TouchableOpacity>
+              ) : null}
+              <View style={styles.priceRow}>
+                <Text style={styles.price}>${Number(product.price || 0).toFixed(2)}</Text>
+                <View style={styles.ratingPill}>
+                  <AppIcon
+                    name={
+                      Number(product.ratingCount || 0) > 0
+                        ? "star"
+                        : "star-settings-outline"
+                    }
+                    variant="community"
+                    size={12}
+                    color="#F4B400"
+                  />
+                  <Text style={styles.ratingPillText}>
+                    {Number(product.ratingCount || 0) > 0
+                      ? `${Number(product.ratingAverage || 0).toFixed(1)} (${Number(
+                          product.ratingCount || 0,
+                        )})`
+                      : "0"}
+                  </Text>
+                </View>
+              </View>
+            </View>
+          </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.quickAddButton}
@@ -405,14 +535,70 @@ export default function CustomerProducts() {
 
   return (
     <View style={styles.container}>
-      <TextInput
-        style={styles.search}
-        placeholder="Search products, stores, sellers"
-        placeholderTextColor={colors.textSubtle}
-        value={searchQuery}
-        onChangeText={setSearchQuery}
-        clearButtonMode="while-editing"
-      />
+      <View style={styles.searchWrap}>
+        <AppIcon
+          name="magnify"
+          variant="community"
+          size={20}
+          color={colors.textSubtle}
+        />
+        <TextInput
+          style={styles.search}
+          placeholder="Search products, stores, sellers"
+          placeholderTextColor={colors.textSubtle}
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          onFocus={() => setOpenSortMenu(false)}
+          clearButtonMode="while-editing"
+        />
+      </View>
+      {isSearching ? (
+        <View style={styles.sortRow}>
+          <View style={styles.sortDropdownWrap}>
+            <TouchableOpacity
+              style={styles.sortTrigger}
+              activeOpacity={0.85}
+              onPress={() => setOpenSortMenu((prev) => !prev)}
+            >
+              <Text style={styles.sortTriggerText} numberOfLines={1}>
+                Sort: {selectedSortLabel}
+              </Text>
+              <AppIcon
+                name={openSortMenu ? "chevron-up" : "chevron-down"}
+                variant="community"
+                size={16}
+                color={colors.textSubtle}
+              />
+            </TouchableOpacity>
+            {openSortMenu ? (
+              <View style={styles.sortMenu}>
+                {SORT_OPTIONS.map((option) => (
+                  <TouchableOpacity
+                    key={option.key}
+                    style={styles.sortMenuItem}
+                    activeOpacity={0.85}
+                    onPress={() => {
+                      setSelectedSortMode(option.key);
+                      setOpenSortMenu(false);
+                    }}
+                  >
+                    <Text
+                      style={[
+                        styles.sortMenuItemText,
+                        option.key === selectedSortMode &&
+                          styles.sortMenuItemTextSelected,
+                      ]}
+                      numberOfLines={1}
+                    >
+                      {option.label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            ) : null}
+          </View>
+        </View>
+      ) : null}
       {!isSearching ? (
         <ScrollView
           horizontal
@@ -467,6 +653,7 @@ export default function CustomerProducts() {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.listContent}
           ListFooterComponent={<View style={{ height: 8 }} />}
+          onScrollBeginDrag={() => setOpenSortMenu(false)}
           renderItem={({ item: section }) => (
             <View style={styles.sectionWrap}>
               <Text style={styles.sectionTitle}>{section.title}</Text>
@@ -605,6 +792,7 @@ export default function CustomerProducts() {
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.listContent}
+          onScrollBeginDrag={() => setOpenSortMenu(false)}
         >
           {sortedCategoryProducts.length === 0 ? (
             <Text style={styles.empty}>No products available</Text>
@@ -697,13 +885,80 @@ const createStyles = (colors) =>
       marginBottom: 12,
       color: colors.text,
     },
-    search: {
-      backgroundColor: colors.input,
-      borderRadius: 10,
-      paddingHorizontal: 12,
-      paddingVertical: 10,
-      fontSize: 16,
+    searchWrap: {
+      height: 52,
+      borderRadius: 14,
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
       marginBottom: 14,
+      paddingLeft: 12,
+      paddingRight: 10,
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
+    },
+    sortRow: {
+      flexDirection: "row",
+      gap: 6,
+      marginBottom: 8,
+      zIndex: 20,
+    },
+    sortDropdownWrap: {
+      flex: 1,
+      position: "relative",
+      zIndex: 30,
+    },
+    sortTrigger: {
+      height: 42,
+      borderRadius: 10,
+      borderWidth: 1,
+      borderColor: colors.border,
+      backgroundColor: colors.input,
+      paddingHorizontal: 10,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      gap: 8,
+    },
+    sortTriggerText: {
+      flex: 1,
+      fontSize: 12,
+      lineHeight: 16,
+      color: colors.text,
+      alignSelf: "center",
+    },
+    sortMenu: {
+      position: "absolute",
+      top: 46,
+      left: 0,
+      right: 0,
+      borderRadius: 10,
+      borderWidth: 1,
+      borderColor: colors.border,
+      backgroundColor: colors.surface,
+      zIndex: 40,
+      elevation: 4,
+      overflow: "hidden",
+    },
+    sortMenuItem: {
+      paddingHorizontal: 10,
+      paddingVertical: 9,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.borderSoft,
+    },
+    sortMenuItemText: {
+      fontSize: 12,
+      color: colors.text,
+    },
+    sortMenuItemTextSelected: {
+      color: colors.success,
+      fontWeight: "700",
+    },
+    search: {
+      flex: 1,
+      fontSize: 15,
+      paddingVertical: 0,
       color: colors.text,
     },
     filters: {
@@ -802,10 +1057,32 @@ const createStyles = (colors) =>
       fontWeight: "500",
     },
     price: {
-      marginTop: 8,
       fontSize: 16,
       fontWeight: "700",
       color: colors.text,
+    },
+    priceRow: {
+      marginTop: 8,
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
+      flexWrap: "wrap",
+    },
+    ratingPill: {
+      height: 22,
+      borderRadius: 11,
+      borderWidth: 1,
+      borderColor: colors.border,
+      backgroundColor: colors.surfaceMuted,
+      paddingHorizontal: 7,
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 4,
+    },
+    ratingPillText: {
+      fontSize: 11,
+      color: colors.textMuted,
+      fontWeight: "600",
     },
     empty: {
       color: colors.textSubtle,

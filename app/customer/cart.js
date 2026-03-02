@@ -12,6 +12,7 @@ import { Swipeable } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import AppIcon from "../../src/components/AppIcon";
 import ScreenContainer from "../../src/components/ScreenContainer";
+import { getSelectedVariantIconColor } from "../../src/constants/variantColorMap";
 import { useCart } from "../../src/context/CartContext";
 import { db } from "../../src/firebase/firebaseConfig";
 import { useAppTheme } from "../../src/theme/useAppTheme";
@@ -61,11 +62,11 @@ export default function CartPage() {
     loadProductVisuals();
   }, [getRandomIconColor]);
 
-  const renderRightActions = (productId) => (
+  const renderRightActions = (cartItemKey) => (
     <View style={styles.deleteActionWrap}>
       <TouchableOpacity
         style={styles.deleteActionButton}
-        onPress={() => removeFromCart(productId)}
+        onPress={() => removeFromCart(cartItemKey)}
       >
         <AppIcon
           name="basket-remove-outline"
@@ -84,13 +85,17 @@ export default function CartPage() {
       <View style={styles.contentWrap}>
         <FlatList
           data={cart}
-          keyExtractor={(item) => item.productId}
+          keyExtractor={(item) => item.cartItemKey || item.productId}
           ListEmptyComponent={<Text style={styles.empty}>Your cart is empty</Text>}
           contentContainerStyle={{
             paddingBottom: insets.bottom + 170,
           }}
           renderItem={({ item }) => (
-            <Swipeable renderRightActions={() => renderRightActions(item.productId)}>
+            <Swipeable
+              renderRightActions={() =>
+                renderRightActions(item.cartItemKey || item.productId)
+              }
+            >
               <View style={styles.item}>
                 <View style={styles.itemLeft}>
                   <View style={styles.nameRow}>
@@ -103,11 +108,20 @@ export default function CartPage() {
                         }
                         variant="community"
                         size={18}
-                        color={productVisualsById[item.productId]?.iconColor || colors.text}
+                        color={
+                          getSelectedVariantIconColor(item.selectedOptions) ||
+                          productVisualsById[item.productId]?.iconColor ||
+                          colors.text
+                        }
                       />
                     </View>
                     <Text style={styles.name}>{item.name}</Text>
                   </View>
+                  {item.selectedOptionsLabel ? (
+                    <Text style={styles.variantMeta} numberOfLines={1}>
+                      {item.selectedOptionsLabel}
+                    </Text>
+                  ) : null}
                   <View style={styles.sellerStoreRow}>
                     <Text
                       style={[styles.sellerStoreText, styles.sellerText]}
@@ -136,7 +150,7 @@ export default function CartPage() {
                   <View style={styles.controls}>
                     <TouchableOpacity
                       style={styles.controlBtn}
-                      onPress={() => decrement(item.productId)}
+                      onPress={() => decrement(item.cartItemKey || item.productId)}
                     >
                       <Text style={styles.controlText}>-</Text>
                     </TouchableOpacity>
@@ -145,7 +159,7 @@ export default function CartPage() {
 
                     <TouchableOpacity
                       style={styles.controlBtn}
-                      onPress={() => increment(item.productId)}
+                      onPress={() => increment(item.cartItemKey || item.productId)}
                     >
                       <Text style={styles.controlText}>+</Text>
                     </TouchableOpacity>
@@ -242,10 +256,15 @@ const createStyles = (colors) =>
       flex: 1,
     },
     sellerStoreRow: {
-      marginTop: 8,
+      marginTop: 6,
       flexDirection: "row",
       alignItems: "center",
       gap: 6,
+    },
+    variantMeta: {
+      marginTop: 4,
+      fontSize: 12,
+      color: colors.textSubtle,
     },
     sellerStoreText: {
       fontSize: 12,

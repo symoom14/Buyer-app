@@ -1,0 +1,230 @@
+{
+  "generatedAt": "2026-02-27T07:50:47.338Z",
+  "totalProducts": 31,
+  "fields": [
+    "productName",
+    "productCategory",
+    "productDescription",
+    "storeName",
+    "storeCategory"
+  ],
+  "products": [
+    {
+      "productName": "Nordic Planter Pot",
+      "productCategory": "Home",
+      "productDescription": "Nordic Planter Pot is designed for dependable daily use in home needs. It combines practical quality with comfort so customers can rely on it long term.",
+      "storeName": "Cozy Nest Home",
+      "storeCategory": "Home"
+    },
+    {
+      "productName": "Chew Toy",
+      "productCategory": "Pets",
+      "productDescription": "Durable chew toy to support active play and engagement.",
+      "storeName": "Happy Paws Care",
+      "storeCategory": "Pets"
+    },
+    {
+      "productName": "Workshop Safety Gloves",
+      "productCategory": "Tools",
+      "productDescription": "Workshop Safety Gloves is designed for dependable daily use in hardware needs. It combines practical quality with comfort so customers can rely on it long term.",
+      "storeName": "Tool & Fix Depot",
+      "storeCategory": "Electronics"
+    },
+    {
+      "productName": "Art Supply Kit",
+      "productCategory": "Kids",
+      "productDescription": "Comprehensive art kit with pencils, paints, and brushes.",
+      "storeName": "Merchant One’s Tech Store",
+      "storeCategory": "Groceries"
+    },
+    {
+      "productName": "BlazeCore Portable SSD",
+      "productCategory": "Tech",
+      "productDescription": "BlazeCore Portable SSD is designed for dependable daily use in electronics needs. It combines practical quality with comfort so customers can rely on it long term.",
+      "storeName": "BlazeTech Accessories",
+      "storeCategory": "Electronics"
+    },
+    {
+      "productName": "Cat treats",
+      "productCategory": "Pets",
+      "productDescription": "Chicken-tuna flavoured cat treats",
+      "storeName": "Merchant One’s Pets",
+      "storeCategory": "Pets"
+    },
+    {
+      "productName": "Screwdriver Set",
+      "productCategory": "Tools",
+      "productDescription": "Multi-head screwdriver set for precision and standard screws.",
+      "storeName": "BuildRight Supplies",
+      "storeCategory": "Electronics"
+    },
+    {
+      "productName": "Wireless Earbuds",
+      "productCategory": "Tech",
+      "productDescription": "True wireless earbuds with clear audio and stable connectivity.",
+      "storeName": "BlazeTech Smart Gear",
+      "storeCategory": "Electronics"
+    },
+    {
+      "productName": "Plush Toy",
+      "productCategory": "Kids",
+      "productDescription": "Soft plush toy with premium stitching.",
+      "storeName": "General Supplies Outlet",
+      "storeCategory": "Home"
+    },
+    {
+      "productName": "FairGlow Makeup Brush Kit",
+      "productCategory": "Beauty",
+      "productDescription": "FairGlow Makeup Brush Kit is designed for dependable daily use in beauty needs. It combines practical quality with comfort so customers can rely on it long term.",
+      "storeName": "Fair Beauty Essentials",
+      "storeCategory": "Beauty"
+    },
+    {
+      "productName": "Skipping Rope",
+      "productCategory": "Kids",
+      "productDescription": "Adjustable speed rope for cardio workouts.",
+      "storeName": "General Supplies Outlet",
+      "storeCategory": "Home"
+    },
+    {
+      "productName": "Hair Repair Mask",
+      "productCategory": "Beauty",
+      "productDescription": "Deep conditioning mask for dry and damaged hair.",
+      "storeName": "Fair Beauty Essentials",
+      "storeCategory": "Beauty"
+    },
+    {
+      "productName": "Phone",
+      "productCategory": "Tech",
+      "productDescription": "256GB phone with a 6.5 inch display and running iOS 27.",
+      "storeName": "General Supplies Outlet",
+      "storeCategory": "Home"
+    },
+    {
+      "productName": "Keyboard",
+      "productCategory": "Tech",
+      "productDescription": "A black RGB keyboard.",
+      "storeName": "General Supplies Outlet",
+      "storeCategory": "Home"
+    },
+    {
+      "productName": "Monitor",
+      "productCategory": "Tech",
+      "productDescription": "OLED 34 inch ultra wide monitor.",
+      "storeName": "General Supplies Outlet",
+      "storeCategory": "Home"
+    },
+    {
+      "productName": "Wall Clock",
+      "productCategory": "Electronics",
+      "productDescription": "Minimal wall clock with silent sweep movement.",
+      "storeName": "Merchant One’s Pets",
+      "storeCategory": "Pets"
+    },
+    {
+      "productName": "Microwave Oven",
+      "productCategory": "Home",
+      "productDescription": "2500W Microwave oven with fan bake and grill functionalities.",
+      "storeName": "General Supplies Outlet",
+      "storeCategory": "Home"
+    },
+    {
+      "productName": "Desk Organizer",
+      "productCategory": "Home",
+      "productDescription": "Compact organizer for pens, notes, and accessories.",
+      "storeName": "General Store",
+      "storeCategory": "Fashion"
+    },
+    {
+      "productName": "Portable Tire Inflator",
+      "productCategory": "Home",
+      "productDescription": "Compact air inflator with digital pressure readout.",
+      "storeName": "General Supplies Outlet",
+      "storeCategory": "Home"
+    },
+    {
+      "productName": "Accent Cushion",
+      "productCategory": "Home",
+      "productDescription": "Soft accent cushion with textured cover for cozy interiors.",
+      "storeName": "Everyday Home Finds",
+      "storeCategory": "Home"
+    },
+    {
+      "productName": "POS machine",
+      "productCategory": "Electronics",
+      "productDescription": "EFTPOS machine running android inside.",
+      "storeName": "Merchant One’s Tech Store",
+      "storeCategory": "Groceries"
+    },
+    {
+      "productName": "Pet Grooming Brush",
+      "productCategory": "Pets",
+      "productDescription": "Gentle grooming brush for shedding control.",
+      "storeName": "General Supplies Outlet",
+      "storeCategory": "Home"
+    },
+    {
+      "productName": "Cotton T-Shirt",
+      "productCategory": "Fashion",
+      "productDescription": "Breathable cotton t-shirt in everyday colors.",
+      "storeName": "General Supplies Outlet",
+      "storeCategory": "Home"
+    },
+    {
+      "productName": "ForgeLine Drill Kit",
+      "productCategory": "Tools",
+      "productDescription": "ForgeLine Drill Kit is designed for dependable daily use in hardware needs. It combines practical quality with comfort so customers can rely on it long term.",
+      "storeName": "Tool & Fix Depot",
+      "storeCategory": "Electronics"
+    },
+    {
+      "productName": "Pet water fountain",
+      "productCategory": "Pets",
+      "productDescription": "A simple motorised water fountain for cats and dogs alike.",
+      "storeName": "General Supplies Outlet",
+      "storeCategory": "Home"
+    },
+    {
+      "productName": "Cat toy",
+      "productCategory": "Pets",
+      "productDescription": "A fun sized spring toy for cats to enjoy!",
+      "storeName": "General Supplies Outlet",
+      "storeCategory": "Home"
+    },
+    {
+      "productName": "French Oven 6L",
+      "productCategory": "Home",
+      "productDescription": "Round cast-iron French oven with 6 litres capacity.",
+      "storeName": "General Supplies Mart",
+      "storeCategory": "Groceries"
+    },
+    {
+      "productName": "Cat harness",
+      "productCategory": "Pets",
+      "productDescription": "Fine mesh woven cat harness with added safety locks.",
+      "storeName": "Merchant One’s Pets",
+      "storeCategory": "Pets"
+    },
+    {
+      "productName": "Premium Olive Oil",
+      "productCategory": "Groceries",
+      "productDescription": "Cold-pressed extra virgin olive oil for everyday cooking.",
+      "storeName": "General Supplies Outlet",
+      "storeCategory": "Home"
+    },
+    {
+      "productName": "Pet Bowl Set",
+      "productCategory": "Pets",
+      "productDescription": "Double stainless steel bowl set with anti-slip base.",
+      "storeName": "Happy Paws Care",
+      "storeCategory": "Pets"
+    },
+    {
+      "productName": "OLED TV",
+      "productCategory": "Home",
+      "productDescription": "65 inch OLED TV.",
+      "storeName": "General Supplies Outlet",
+      "storeCategory": "Home"
+    }
+  ]
+}

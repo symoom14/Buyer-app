@@ -19,6 +19,11 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import AppIcon from "../../src/components/AppIcon";
 import { auth, db } from "../../src/firebase/firebaseConfig";
 import { useAppTheme } from "../../src/theme/useAppTheme";
+import {
+  buildBuyerEmailFromUsername,
+  validatePasswordInput,
+  validateUsernameInput,
+} from "../../src/utils/authInput";
 
 export default function Login() {
   const DEACTIVATED_MESSAGE =
@@ -46,8 +51,15 @@ export default function Login() {
   const handleLogin = async () => {
     setError("");
 
-    if (!usernameRef.current || !passwordRef.current) {
-      setError("All fields are required");
+    const usernameValidation = validateUsernameInput(usernameRef.current);
+    if (!usernameValidation.ok) {
+      setError(usernameValidation.error);
+      return;
+    }
+
+    const passwordValidation = validatePasswordInput(passwordRef.current);
+    if (!passwordValidation.ok) {
+      setError(passwordValidation.error);
       return;
     }
 
@@ -59,12 +71,12 @@ export default function Login() {
         useNativeDriver: false,
       }).start();
 
-      const email = `${usernameRef.current}@buyer.app`;
+      const email = buildBuyerEmailFromUsername(usernameValidation.value);
 
       const userCredential = await signInWithEmailAndPassword(
         auth,
         email,
-        passwordRef.current,
+        passwordValidation.value,
       );
 
       const uid = userCredential.user.uid;
@@ -134,6 +146,8 @@ export default function Login() {
               placeholder="Username"
               placeholderTextColor={colors.textSubtle}
               autoCapitalize="none"
+              autoCorrect={false}
+              maxLength={30}
               onChangeText={(text) => {
                 usernameRef.current = text;
               }}
@@ -144,6 +158,7 @@ export default function Login() {
               placeholder="Password"
               placeholderTextColor={colors.textSubtle}
               secureTextEntry
+              maxLength={128}
               onChangeText={(text) => {
                 passwordRef.current = text;
               }}

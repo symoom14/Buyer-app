@@ -1,0 +1,1445 @@
+{
+  "batchId": "seed_2026_02_27_v1",
+  "products": [
+    {
+      "name": "HydraGlow Daily Face Moisturizer",
+      "description": "This lightweight moisturizer hydrates dry and combination skin without feeling greasy. Hyaluronic acid and glycerin help pull moisture into the skin throughout the day. It layers smoothly under sunscreen and makeup with no pilling. The formula is fragrance-free to reduce irritation for sensitive skin. Use morning and night for a softer, plumper-looking complexion.",
+      "category": "Beauty",
+      "price": 19.99,
+      "quantity": 180,
+      "iconName": "lotion"
+    },
+    {
+      "name": "Vitamin C Brightening Serum 15%",
+      "description": "This serum uses a stabilized vitamin C blend to help improve dullness and uneven tone. It absorbs quickly and leaves a smooth finish instead of a sticky layer. Antioxidants support the skin barrier against daily environmental stress. With consistent use, it can help reduce the look of dark spots over time. Apply a few drops after cleansing and before moisturizer.",
+      "category": "Beauty",
+      "price": 24.95,
+      "quantity": 140,
+      "iconName": "bottle-tonic"
+    },
+    {
+      "name": "Gentle Foaming Facial Cleanser",
+      "description": "This cleanser creates a soft foam that lifts oil, sunscreen, and daily grime without stripping. Amino acid-based surfactants help keep skin comfortable after rinsing. It works well as a second cleanse after an oil cleanser or makeup remover. The pH-balanced formula supports a healthy skin barrier. Use morning and night for a clean, fresh feel.",
+      "category": "Beauty",
+      "price": 14.5,
+      "quantity": 220,
+      "iconName": "water"
+    },
+    {
+      "name": "Repairing Hair Mask with Argan Oil",
+      "description": "This rich mask helps smooth frizz and improve the feel of damaged hair. Argan oil and proteins coat strands to reduce breakage from heat styling. It detangles quickly, making combing easier after showers. The scent is light and salon-like, not overpowering. Leave it on for five minutes for noticeably softer hair.",
+      "category": "Beauty",
+      "price": 17.75,
+      "quantity": 130,
+      "iconName": "hair-dryer"
+    },
+    {
+      "name": "Volumizing Shampoo for Fine Hair",
+      "description": "This shampoo cleanses gently while adding lift at the roots for fine or flat hair. It removes oil buildup so hair looks fresher for longer. The formula is silicone-free to avoid weighing hair down. It rinses clean and helps reduce scalp itch from excess product residue. Pair it with a lightweight conditioner for best results.",
+      "category": "Beauty",
+      "price": 12.99,
+      "quantity": 210,
+      "iconName": "shower"
+    },
+    {
+      "name": "Nourishing Conditioner with Keratin",
+      "description": "This conditioner helps soften hair while improving manageability after washing. Keratin supports the feel of strength in hair that is color-treated or heat-styled. It smooths flyaways without making hair limp. The creamy texture spreads easily, so a small amount goes far. Apply from mid-lengths to ends and rinse thoroughly.",
+      "category": "Beauty",
+      "price": 13.49,
+      "quantity": 190,
+      "iconName": "shower-head"
+    },
+    {
+      "name": "SPF 50 Mineral Sunscreen Lotion",
+      "description": "This mineral sunscreen provides broad-spectrum protection for daily outdoor exposure. Zinc oxide helps shield skin while being gentle for sensitive faces. The lotion blends in with minimal white cast when applied in thin layers. It wears well under makeup and does not sting around the eyes. Reapply every two hours during extended sun time.",
+      "category": "Beauty",
+      "price": 21.9,
+      "quantity": 160,
+      "iconName": "white-balance-sunny"
+    },
+    {
+      "name": "Waterproof Lengthening Mascara",
+      "description": "This mascara coats lashes evenly to add length without heavy clumps. The waterproof formula resists smudging during workouts or humid days. A tapered brush reaches corner lashes for a wide-eyed look. It stays put through the day yet removes with an oil-based cleanser. Apply two thin coats for best separation.",
+      "category": "Beauty",
+      "price": 15.25,
+      "quantity": 175,
+      "iconName": "eye"
+    },
+    {
+      "name": "Satin Finish Lipstick - Rose Nude",
+      "description": "This lipstick delivers rich color with a comfortable satin finish. It glides on smoothly and helps lips look softer, not dry. The shade is designed to suit everyday wear with warm and cool undertones. The bullet shape makes lining and filling easy without a separate lip liner. Reapply after meals for consistent coverage.",
+      "category": "Beauty",
+      "price": 11.99,
+      "quantity": 240,
+      "iconName": "lipstick"
+    },
+    {
+      "name": "Hydrating Lip Balm with Shea Butter",
+      "description": "This balm melts into lips to relieve dryness and cracking quickly. Shea butter and oils create a protective layer without feeling waxy. It is great under matte lipstick to prevent flaking. The twist-up tube is easy to use on the go with clean application. Apply as often as needed, especially in cold weather.",
+      "category": "Beauty",
+      "price": 4.99,
+      "quantity": 400,
+      "iconName": "emoticon-kiss"
+    },
+    {
+      "name": "Aloe Soothing Gel for Face & Body",
+      "description": "This aloe gel cools skin after sun exposure and helps calm redness. The lightweight texture absorbs fast and does not leave a sticky film. It can be used on face, body, and even on dry hands. Keep it in the fridge for extra cooling comfort in summer. Use a thin layer whenever skin feels irritated or overheated.",
+      "category": "Beauty",
+      "price": 9.5,
+      "quantity": 260,
+      "iconName": "leaf"
+    },
+    {
+      "name": "Micellar Makeup Remover Water",
+      "description": "This micellar water lifts makeup, sunscreen, and dirt without harsh rubbing. It works well on eye makeup while being gentle on lashes. The formula leaves skin feeling clean rather than tight. It is convenient for travel or quick end-of-day cleansing. Soak a cotton pad and wipe until the pad comes away clean.",
+      "category": "Beauty",
+      "price": 10.75,
+      "quantity": 230,
+      "iconName": "water-outline"
+    },
+    {
+      "name": "Reusable Makeup Remover Pads (8 Pack)",
+      "description": "These soft reusable pads help remove makeup while reducing disposable waste. The microfiber side lifts product, and the smooth side is gentle for sensitive areas. They can be washed in a laundry bag and reused many times. The stitching is reinforced to prevent fraying after repeated washes. Use with cleanser or micellar water for best results.",
+      "category": "Beauty",
+      "price": 8.99,
+      "quantity": 300,
+      "iconName": "recycle"
+    },
+    {
+      "name": "Exfoliating Body Scrub - Coconut",
+      "description": "This body scrub uses fine sugar crystals to gently buff rough, flaky skin. Coconut oil helps leave skin feeling moisturized after rinsing. It is especially helpful for elbows, knees, and heels. The texture is gritty enough to exfoliate but not sharp or scratchy. Use one to two times per week for smoother skin.",
+      "category": "Beauty",
+      "price": 13.25,
+      "quantity": 150,
+      "iconName": "spa"
+    },
+    {
+      "name": "Antiperspirant Deodorant Roll-On",
+      "description": "This roll-on helps control sweat and odor for all-day confidence. It dries quickly and does not leave a sticky residue on skin. The formula is designed to reduce white marks on dark clothing. It has a clean, subtle scent suitable for everyday wear. Apply to clean, dry underarms and let it dry before dressing.",
+      "category": "Beauty",
+      "price": 6.5,
+      "quantity": 320,
+      "iconName": "tshirt-crew"
+    },
+    {
+      "name": "Nail Polish - Classic Cherry Red",
+      "description": "This nail polish delivers an opaque cherry-red finish in two thin coats. The brush is shaped to help apply smoothly along the cuticle line. It dries to a glossy look that resists chips with a top coat. The formula spreads evenly without streaks or patches. Use a base coat first to help protect nails from staining.",
+      "category": "Beauty",
+      "price": 7.99,
+      "quantity": 210,
+      "iconName": "nail"
+    },
+    {
+      "name": "Cuticle Oil Pen",
+      "description": "This cuticle oil pen moisturizes dry cuticles and helps improve the look of brittle nails. The brush tip makes it easy to target the cuticle area without mess. Jojoba and vitamin E help soften hardened skin around nails. It is small enough to keep in a purse or desk drawer. Apply daily for best results, especially after washing hands.",
+      "category": "Beauty",
+      "price": 6.25,
+      "quantity": 260,
+      "iconName": "pen"
+    },
+    {
+      "name": "Clay Purifying Face Mask",
+      "description": "This clay mask helps absorb excess oil and reduce the look of clogged pores. It dries down comfortably without an overly tight feeling. Minerals help lift impurities from congested areas like the nose and chin. It rinses off easily with warm water and leaves skin feeling refreshed. Use once or twice a week to maintain clarity.",
+      "category": "Beauty",
+      "price": 16.0,
+      "quantity": 145,
+      "iconName": "face-woman"
+    },
+    {
+      "name": "Under-Eye Cooling Gel Patches (30 Pairs)",
+      "description": "These gel patches cool the under-eye area to help reduce the look of puffiness. They are soaked in a hydrating essence that feels refreshing on tired skin. The shape fits snugly without slipping when you relax. Store them in the fridge for an extra cooling boost before use. Apply for 10 to 15 minutes, then gently pat in remaining serum.",
+      "category": "Beauty",
+      "price": 18.99,
+      "quantity": 110,
+      "iconName": "eye-outline"
+    },
+    {
+      "name": "Soft Touch Makeup Sponge Duo",
+      "description": "These sponges help blend foundation, concealer, and cream blush into a smooth finish. The pointed tip reaches around the nose and under the eyes with precision. When damp, they expand slightly and give a natural, skin-like application. The material is designed to be soft while still holding up to washing. Clean after use to maintain performance and hygiene.",
+      "category": "Beauty",
+      "price": 9.99,
+      "quantity": 280,
+      "iconName": "shape"
+    },
+    {
+      "name": "Bluetooth Earbuds Pro S1",
+      "description": "These true wireless earbuds provide clear audio with deep bass for daily listening. Active noise reduction helps reduce background chatter on commutes. The charging case adds extra battery so you can go longer between plugs. Touch controls make it easy to pause, skip tracks, and answer calls. They include multiple ear tips for a secure fit and better isolation.",
+      "category": "Electronics",
+      "price": 59.99,
+      "quantity": 160,
+      "iconName": "headphones"
+    },
+    {
+      "name": "Portable Power Bank 10000mAh",
+      "description": "This power bank keeps your phone topped up during travel or long workdays. The 10000mAh capacity can recharge most phones one to two times. Dual ports let you charge two devices at once without slowing to a crawl. The LED indicator shows remaining power so you can plan recharges. Built-in protection helps prevent overheating and overcharging.",
+      "category": "Electronics",
+      "price": 24.99,
+      "quantity": 220,
+      "iconName": "battery-charging"
+    },
+    {
+      "name": "Smart LED Light Bulb A19 (Wi-Fi)",
+      "description": "This smart bulb lets you control brightness and schedules from your phone. It supports warm to cool white tones for different moods and tasks. Set timers to turn on at sunset or wake you gently in the morning. The bulb installs like a normal A19 and connects to standard Wi-Fi. Energy-efficient LEDs help reduce power usage compared with incandescent bulbs.",
+      "category": "Electronics",
+      "price": 14.99,
+      "quantity": 300,
+      "iconName": "lightbulb-on"
+    },
+    {
+      "name": "Wireless Charging Pad 15W",
+      "description": "This charging pad delivers fast wireless charging for compatible phones and earbuds. The non-slip surface helps keep your device aligned on the coil. It runs cooler with a ventilated design to protect battery health. A status LED confirms charging without being overly bright at night. Use with a QC/PD adapter to reach full 15W speeds.",
+      "category": "Electronics",
+      "price": 19.5,
+      "quantity": 190,
+      "iconName": "wireless-charging"
+    },
+    {
+      "name": "USB-C to USB-C Cable 2m (60W)",
+      "description": "This cable supports up to 60W USB Power Delivery for charging laptops and phones. The braided jacket helps resist fraying and daily bending damage. It also supports stable data transfer for file sync and accessories. The connectors fit snugly and are reinforced to reduce stress at the ends. Keep a spare in your bag for reliable charging anywhere.",
+      "category": "Electronics",
+      "price": 9.99,
+      "quantity": 420,
+      "iconName": "usb"
+    },
+    {
+      "name": "Compact Bluetooth Speaker Mini",
+      "description": "This compact speaker fills a small room with surprisingly loud sound. Bluetooth pairing is quick and reconnects automatically after the first setup. The built-in mic supports hands-free calls with clear voice pickup. Its rubberized shell helps protect against bumps during outdoor use. A single charge lasts for hours, making it great for picnics and study sessions.",
+      "category": "Electronics",
+      "price": 34.99,
+      "quantity": 150,
+      "iconName": "speaker"
+    },
+    {
+      "name": "1080p Webcam with Auto Focus",
+      "description": "This webcam provides crisp 1080p video for meetings, classes, and streaming. Auto focus keeps your face sharp even if you lean in or move slightly. The built-in dual microphones help reduce room noise for clearer speech. A privacy shutter lets you cover the lens when not in use. It mounts easily on laptops or monitors and works via plug-and-play USB.",
+      "category": "Electronics",
+      "price": 39.99,
+      "quantity": 130,
+      "iconName": "webcam"
+    },
+    {
+      "name": "Ergonomic Wireless Mouse M340",
+      "description": "This mouse is shaped to support the hand and reduce strain during long sessions. Silent clicks keep noise down in shared spaces like libraries and offices. The sensor tracks smoothly on most surfaces for reliable cursor control. Battery life is designed to last months, so you do not constantly swap batteries. It connects via Bluetooth for a clean, dongle-free setup.",
+      "category": "Electronics",
+      "price": 27.99,
+      "quantity": 210,
+      "iconName": "mouse"
+    },
+    {
+      "name": "Mechanical Keyboard TKL (Brown Switch)",
+      "description": "This tenkeyless keyboard saves desk space while keeping a comfortable layout. Tactile switches give a satisfying feel without an overly loud click. The keycaps are durable and resist shine from heavy use. Anti-ghosting helps ensure your inputs register correctly during fast typing. It connects via USB and is compatible with Windows and macOS.",
+      "category": "Electronics",
+      "price": 79.0,
+      "quantity": 95,
+      "iconName": "keyboard"
+    },
+    {
+      "name": "Noise-Isolating Over-Ear Headphones",
+      "description": "These over-ear headphones provide immersive sound with a comfortable padded headband. The closed-back design helps reduce outside noise while commuting or studying. Adjustable ear cups fit a wide range of head sizes without pinching. The inline controls make it easy to manage calls and volume. Foldable hinges improve portability for backpacks and travel cases.",
+      "category": "Electronics",
+      "price": 49.5,
+      "quantity": 120,
+      "iconName": "headphones"
+    },
+    {
+      "name": "4K HDMI Cable 2m",
+      "description": "This HDMI cable supports 4K video for TVs, monitors, and streaming devices. The shielding helps reduce signal interference for stable playback. Gold-plated connectors resist corrosion and maintain a firm connection. It is flexible enough to route behind a TV without kinking easily. Use it for consoles, laptops, and set-top boxes that need reliable display output.",
+      "category": "Electronics",
+      "price": 11.99,
+      "quantity": 260,
+      "iconName": "cable-data"
+    },
+    {
+      "name": "Smart Plug with Energy Monitoring",
+      "description": "This smart plug lets you turn appliances on and off remotely using an app. Energy monitoring shows estimated power usage so you can identify high-draw devices. Scheduling helps automate lamps, fans, and coffee machines for daily routines. The compact design avoids blocking the second outlet on many power points. Setup is guided and works over standard home Wi-Fi.",
+      "category": "Electronics",
+      "price": 18.99,
+      "quantity": 210,
+      "iconName": "power-plug"
+    },
+    {
+      "name": "Digital Alarm Clock with Temperature",
+      "description": "This alarm clock shows time, date, and room temperature on a clear display. Adjustable brightness helps keep it readable without lighting up the whole room. Dual alarms are useful for different wake-up schedules on weekdays and weekends. A snooze button is easy to find without turning on the lights. It includes a backup battery option to preserve settings during outages.",
+      "category": "Electronics",
+      "price": 22.5,
+      "quantity": 175,
+      "iconName": "clock-outline"
+    },
+    {
+      "name": "Rechargeable LED Desk Lamp",
+      "description": "This desk lamp provides flicker-free light to reduce eye fatigue during study. Multiple brightness levels support reading, drawing, and late-night work. A flexible neck lets you aim light exactly where you need it. The rechargeable battery makes it portable for dorms or power-point-limited setups. A touch control panel keeps the design clean and easy to use.",
+      "category": "Electronics",
+      "price": 29.99,
+      "quantity": 140,
+      "iconName": "lamp"
+    },
+    {
+      "name": "USB-C Hub 6-in-1",
+      "description": "This hub expands a single USB-C port into multiple connections for work and travel. It includes HDMI output, USB-A ports, and an SD card reader for creators. Pass-through charging keeps your laptop powered while using accessories. The aluminum body helps dissipate heat during long sessions. It is ideal for thin laptops that have limited ports.",
+      "category": "Electronics",
+      "price": 39.0,
+      "quantity": 110,
+      "iconName": "dock-window"
+    },
+    {
+      "name": "Handheld Steam Iron Mini",
+      "description": "This mini steamer helps remove wrinkles from shirts, dresses, and curtains quickly. It heats up fast so you can refresh clothing before heading out. The steam output is strong enough for everyday fabrics without soaking them. A compact size makes it convenient for travel and small apartments. Use distilled water to reduce mineral buildup and extend its lifespan.",
+      "category": "Electronics",
+      "price": 33.99,
+      "quantity": 90,
+      "iconName": "iron"
+    },
+    {
+      "name": "Air Purifier HEPA Compact",
+      "description": "This compact air purifier helps filter dust, pollen, and pet dander in smaller rooms. A true HEPA-style filter improves air quality for sleeping and study spaces. Quiet modes are designed for nighttime use without constant fan noise. The indicator reminds you when it is time to change the filter. It is easy to move between rooms thanks to its lightweight design.",
+      "category": "Electronics",
+      "price": 89.99,
+      "quantity": 70,
+      "iconName": "air-filter"
+    },
+    {
+      "name": "Digital Kitchen Scale",
+      "description": "This kitchen scale measures ingredients accurately for baking and meal prep. The tare function lets you weigh multiple ingredients in one bowl. A clear display makes it easy to read measurements in grams or ounces. The slim design stores neatly in a drawer or on a shelf. It helps improve consistency when following recipes that require precision.",
+      "category": "Electronics",
+      "price": 16.99,
+      "quantity": 200,
+      "iconName": "scale"
+    },
+    {
+      "name": "AA/AAA Battery Charger Kit",
+      "description": "This charger supports rechargeable AA and AAA batteries for everyday devices. Individual charging channels help charge batteries evenly and safely. LED indicators show charging status so you know when cells are ready. It helps reduce waste compared with disposable batteries over time. Use it for remotes, cameras, toys, and wireless accessories.",
+      "category": "Electronics",
+      "price": 21.49,
+      "quantity": 150,
+      "iconName": "battery"
+    },
+    {
+      "name": "Wi-Fi Range Extender N300",
+      "description": "This range extender helps improve Wi-Fi coverage in rooms with weak signal. It plugs into a wall outlet and extends your existing network name. Setup is guided through a simple app and usually takes only a few minutes. Ethernet port support lets you connect a device by cable for stability. It is useful for streaming, video calls, and smart devices at the edge of your home.",
+      "category": "Electronics",
+      "price": 29.99,
+      "quantity": 105,
+      "iconName": "wifi"
+    },
+    {
+      "name": "Classic Crew Neck T-Shirt (Cotton)",
+      "description": "This crew neck tee is made from breathable cotton for everyday comfort. The fabric is soft yet durable, so it holds up to frequent washing. A relaxed fit makes it easy to layer under jackets and hoodies. The neckline is reinforced to reduce stretching over time. It works well for casual outfits, gym sessions, or lounging at home.",
+      "category": "Fashion",
+      "price": 14.99,
+      "quantity": 260,
+      "iconName": "tshirt-crew"
+    },
+    {
+      "name": "Slim Fit Denim Jeans - Dark Wash",
+      "description": "These jeans offer a slim fit that looks clean without feeling restrictive. The dark wash pairs easily with dress shirts or casual tees. Stretch denim adds comfort for walking and sitting all day. The stitching is reinforced in high-stress areas for better durability. They are a reliable staple for work, weekends, and nights out.",
+      "category": "Fashion",
+      "price": 49.99,
+      "quantity": 140,
+      "iconName": "hanger"
+    },
+    {
+      "name": "Oversized Hoodie - Fleece Lined",
+      "description": "This hoodie is fleece lined for warmth during cool mornings and evenings. The oversized cut gives a relaxed streetwear look and easy layering. Ribbed cuffs help keep sleeves in place and block drafts. The kangaroo pocket is roomy for hands, phone, and small essentials. It is ideal for campus days, travel, and casual outings.",
+      "category": "Fashion",
+      "price": 39.5,
+      "quantity": 120,
+      "iconName": "hoodie"
+    },
+    {
+      "name": "Running Sneakers - Lightweight Mesh",
+      "description": "These sneakers use breathable mesh to keep feet cooler on long walks and runs. A cushioned midsole reduces impact and supports daily training. The rubber outsole offers reliable grip on pavement and gym floors. The heel counter adds stability for a more secure step. They are a versatile option for workouts and casual wear.",
+      "category": "Fashion",
+      "price": 69.99,
+      "quantity": 95,
+      "iconName": "shoe-sneaker"
+    },
+    {
+      "name": "Casual Canvas Tote Bag",
+      "description": "This canvas tote is sturdy enough for groceries, books, and daily errands. The straps are reinforced to handle heavier loads comfortably. An inner pocket helps keep keys and small items easy to find. The simple design works with most outfits and styles. It is a reusable alternative to single-use shopping bags.",
+      "category": "Fashion",
+      "price": 18.99,
+      "quantity": 220,
+      "iconName": "bag-checked"
+    },
+    {
+      "name": "Baseball Cap - Adjustable Fit",
+      "description": "This cap provides shade and a casual finish to everyday outfits. The adjustable strap helps fit a wide range of head sizes securely. Breathable eyelets improve airflow on warmer days. The curved brim helps reduce glare while walking or driving. It is easy to pack and works well for sport and travel.",
+      "category": "Fashion",
+      "price": 12.5,
+      "quantity": 240,
+      "iconName": "hat-fedora"
+    },
+    {
+      "name": "Leather Belt - Classic Buckle",
+      "description": "This belt is designed to pair cleanly with jeans, chinos, and dress pants. The buckle has a simple finish that looks professional without being flashy. The leather is firm yet flexible, so it feels comfortable once broken in. Multiple holes make it easy to get a precise fit. It is a practical staple for everyday wardrobes.",
+      "category": "Fashion",
+      "price": 24.99,
+      "quantity": 160,
+      "iconName": "belt"
+    },
+    {
+      "name": "Everyday Ankle Socks (6 Pack)",
+      "description": "These ankle socks are cushioned for comfort during workdays and workouts. Breathable fabric helps keep feet drier and reduces odor buildup. The elastic cuff holds in place without digging into the ankle. Reinforced toes and heels improve durability over time. They are an easy essential for sneakers and casual shoes.",
+      "category": "Fashion",
+      "price": 11.99,
+      "quantity": 300,
+      "iconName": "sock"
+    },
+    {
+      "name": "Puffer Jacket - Water Resistant",
+      "description": "This puffer jacket offers warmth with lightweight insulation for cold weather. A water-resistant shell helps handle light rain and wind. The high collar adds extra coverage around the neck. Zippered pockets keep hands warm and secure valuables. It packs down easily for travel and daily commuting.",
+      "category": "Fashion",
+      "price": 89.0,
+      "quantity": 70,
+      "iconName": "weather-snowy"
+    },
+    {
+      "name": "Summer Dress - Floral Midi",
+      "description": "This midi dress is made from a breathable fabric that feels comfortable in warm weather. The floral print is designed for casual outings and weekend plans. A defined waist creates a flattering shape without feeling tight. The skirt has movement that works well for walking and daily wear. Pair it with sandals or sneakers for an easy outfit.",
+      "category": "Fashion",
+      "price": 44.99,
+      "quantity": 85,
+      "iconName": "dress"
+    },
+    {
+      "name": "Formal Button-Up Shirt - White",
+      "description": "This button-up shirt is tailored for a clean look at work or events. The fabric is crisp and designed to resist wrinkling during the day. A structured collar helps it sit neatly under a blazer. The buttons are securely stitched for better durability. It works well with dress pants or chinos for a polished outfit.",
+      "category": "Fashion",
+      "price": 34.99,
+      "quantity": 130,
+      "iconName": "hanger"
+    },
+    {
+      "name": "Athletic Joggers - Tapered Fit",
+      "description": "These joggers are made for comfort during training and relaxed days. The tapered fit reduces bulk while still allowing easy movement. A drawstring waistband helps you adjust for a secure feel. Zippered pockets keep your phone and keys from bouncing out. The fabric is breathable and suitable for year-round wear.",
+      "category": "Fashion",
+      "price": 32.5,
+      "quantity": 150,
+      "iconName": "run"
+    },
+    {
+      "name": "Wool Blend Beanie",
+      "description": "This beanie helps keep your head warm on cold mornings and winter nights. The wool blend provides insulation while still feeling soft on skin. A stretchy knit design fits comfortably without slipping off. It pairs easily with jackets and hoodies for a casual look. Fold the cuff to adjust the depth and style.",
+      "category": "Fashion",
+      "price": 9.99,
+      "quantity": 210,
+      "iconName": "hat-winter"
+    },
+    {
+      "name": "Sunglasses - UV400 Protection",
+      "description": "These sunglasses provide UV400 protection to help shield eyes from harsh sunlight. Polarized lenses reduce glare from roads, water, and bright surfaces. The lightweight frame is comfortable for long wear without pressure points. A durable hinge design helps prevent loosening over time. They are ideal for driving, outdoor walks, and travel.",
+      "category": "Fashion",
+      "price": 19.99,
+      "quantity": 170,
+      "iconName": "sunglasses"
+    },
+    {
+      "name": "Crossbody Bag - Minimalist",
+      "description": "This crossbody bag keeps essentials close without adding bulk. The main compartment fits a phone, wallet, keys, and small accessories. An adjustable strap lets you wear it high or low depending on comfort. The zipper closure helps keep items secure while moving around. It is a practical choice for festivals, errands, and commuting.",
+      "category": "Fashion",
+      "price": 27.99,
+      "quantity": 140,
+      "iconName": "bag-personal"
+    },
+    {
+      "name": "Lightweight Scarf - Soft Knit",
+      "description": "This scarf adds warmth without feeling heavy or itchy on the neck. The soft knit drapes well and complements casual and smart outfits. It is long enough to wrap multiple ways for style and insulation. The fabric resists pilling with normal wear and care. Use it for chilly evenings, travel, and office air conditioning.",
+      "category": "Fashion",
+      "price": 16.99,
+      "quantity": 150,
+      "iconName": "weather-windy"
+    },
+    {
+      "name": "Sports Bra - Medium Support",
+      "description": "This sports bra offers medium support for training, walking, and studio workouts. Moisture-wicking fabric helps keep you comfortable during sweatier sessions. The band is designed to stay in place without rolling up. A smooth inner lining reduces chafing during movement. It pairs well with leggings and high-waisted shorts.",
+      "category": "Fashion",
+      "price": 24.5,
+      "quantity": 120,
+      "iconName": "heart-pulse"
+    },
+    {
+      "name": "Everyday Leggings - High Waist",
+      "description": "These high-waist leggings provide a supportive feel and a clean silhouette. Stretch fabric moves easily during workouts and daily errands. The waistband sits comfortably without digging in or slipping down. A hidden pocket helps store small items like a key or card. They are suitable for gym sessions, travel, and lounging.",
+      "category": "Fashion",
+      "price": 28.99,
+      "quantity": 180,
+      "iconName": "yoga"
+    },
+    {
+      "name": "Dress Socks - Patterned (3 Pack)",
+      "description": "These dress socks add a subtle pattern for a polished, modern look. The fabric blend is breathable to keep feet comfortable during long days. The cuff is designed to stay up without excessive tightness. Reinforced areas help prevent holes at toes and heels. They pair well with dress shoes, loafers, and office outfits.",
+      "category": "Fashion",
+      "price": 13.99,
+      "quantity": 200,
+      "iconName": "sock"
+    },
+    {
+      "name": "Classic Wristwatch - Minimal Dial",
+      "description": "This wristwatch features a clean dial design that works for casual and formal outfits. The strap is comfortable and adjusts easily for a secure fit. A quartz movement provides reliable timekeeping with minimal maintenance. The glass face is designed to resist minor scratches from daily wear. It makes a practical accessory for work, meetings, and events.",
+      "category": "Fashion",
+      "price": 54.99,
+      "quantity": 75,
+      "iconName": "watch"
+    },
+    {
+      "name": "Long Grain Rice 5kg",
+      "description": "This long grain rice cooks up fluffy and separate for everyday meals. It is versatile for stir-fries, curries, and simple rice bowls. The grains hold their shape well and do not turn mushy with proper ratios. It stores easily in a sealed container to maintain freshness. Rinse before cooking for a cleaner taste and better texture.",
+      "category": "Groceries",
+      "price": 12.99,
+      "quantity": 160,
+      "iconName": "rice"
+    },
+    {
+      "name": "Extra Virgin Olive Oil 1L",
+      "description": "This olive oil has a smooth flavor that suits salads, roasting, and light sautéing. It is cold-pressed to preserve aroma and natural antioxidants. The bottle includes a pour spout for easier control while cooking. Use it to finish vegetables, pasta, and grilled proteins with a rich taste. Store it in a cool, dark place to maintain quality.",
+      "category": "Groceries",
+      "price": 15.49,
+      "quantity": 140,
+      "iconName": "bottle-soda-classic-outline"
+    },
+    {
+      "name": "Organic Rolled Oats 1kg",
+      "description": "These rolled oats are hearty and cook into a creamy breakfast. They work well for overnight oats, porridge, and baking. The texture provides a satisfying bite without being too coarse. Oats are a convenient pantry staple for quick meals. Store sealed to keep them fresh and free from moisture.",
+      "category": "Groceries",
+      "price": 6.99,
+      "quantity": 220,
+      "iconName": "grain"
+    },
+    {
+      "name": "Crunchy Peanut Butter 500g",
+      "description": "This peanut butter has a roasted flavor with crunchy peanut pieces. It spreads smoothly on toast and works well in sandwiches. The thick texture also makes it great for smoothies and baking. Stir before use if natural oils separate at the top. Keep the lid tightly closed to preserve freshness.",
+      "category": "Groceries",
+      "price": 5.49,
+      "quantity": 240,
+      "iconName": "peanut"
+    },
+    {
+      "name": "Honey 500g",
+      "description": "This honey adds natural sweetness to tea, yogurt, and baking recipes. It has a balanced flavor that is not overly strong or floral. The squeeze bottle makes it easy to drizzle without mess. Honey can crystallize over time, which is normal and safe. Warm the bottle gently in water to return it to a smooth pour.",
+      "category": "Groceries",
+      "price": 7.25,
+      "quantity": 190,
+      "iconName": "bee"
+    },
+    {
+      "name": "Pasta Spaghetti 1kg",
+      "description": "This spaghetti cooks evenly and holds sauce well for classic pasta dishes. It is a reliable pantry option for quick dinners. The strands stay firm when cooked al dente and do not break easily. Pair it with tomato sauce, pesto, or creamy sauces for variety. Store in a dry place to keep the pasta fresh and intact.",
+      "category": "Groceries",
+      "price": 4.2,
+      "quantity": 260,
+      "iconName": "noodles"
+    },
+    {
+      "name": "Tomato Passata 700g",
+      "description": "This passata is made from strained tomatoes for a smooth, rich base. It is ideal for pasta sauces, soups, and slow-cooked stews. The flavor is balanced and easy to season with herbs and garlic. It saves time compared with blending canned tomatoes yourself. Refrigerate after opening and use within a few days for best taste.",
+      "category": "Groceries",
+      "price": 2.99,
+      "quantity": 280,
+      "iconName": "food-apple"
+    },
+    {
+      "name": "Canned Chickpeas 400g",
+      "description": "These chickpeas are ready to use for salads, curries, and hummus. They have a firm texture that holds up well in cooking. Rinse before use to reduce excess salt and improve flavor. They are a convenient source of plant protein for quick meals. Keep a few cans stocked for easy pantry dinners.",
+      "category": "Groceries",
+      "price": 1.49,
+      "quantity": 360,
+      "iconName": "food-variant"
+    },
+    {
+      "name": "Canned Tuna in Springwater 4 Pack",
+      "description": "This tuna is packed in springwater for a clean, light taste. It is easy to add to salads, sandwiches, and pasta bakes. The texture flakes well and mixes smoothly with sauces. The multipack is convenient for meal prep and quick lunches. Drain before use to get the best flavor and consistency.",
+      "category": "Groceries",
+      "price": 6.99,
+      "quantity": 210,
+      "iconName": "fish"
+    },
+    {
+      "name": "Black Tea Bags 100 Pack",
+      "description": "These black tea bags brew a strong cup with a smooth finish. They steep quickly, making them convenient for busy mornings. The flavor pairs well with milk, lemon, or honey. Each bag is individually consistent for reliable taste day to day. Store in a dry cupboard to keep the tea fresh and aromatic.",
+      "category": "Groceries",
+      "price": 4.99,
+      "quantity": 240,
+      "iconName": "tea"
+    },
+    {
+      "name": "Ground Coffee Medium Roast 500g",
+      "description": "This medium roast coffee delivers a balanced flavor with mild acidity. It works well for drip machines, plungers, and moka pots. The grind is consistent to help improve extraction and taste. The aroma is rich and satisfying without being too bitter. Seal the bag after opening to preserve freshness longer.",
+      "category": "Groceries",
+      "price": 10.99,
+      "quantity": 160,
+      "iconName": "coffee"
+    },
+    {
+      "name": "Sea Salt Grinder",
+      "description": "This sea salt grinder provides fresh seasoning with adjustable coarseness. It is convenient for finishing dishes at the table or while cooking. The grinder mechanism is designed to produce a consistent grind. Freshly ground salt can enhance flavor more than pre-ground salt. Store it away from steam to keep it flowing smoothly.",
+      "category": "Groceries",
+      "price": 3.99,
+      "quantity": 230,
+      "iconName": "shaker"
+    },
+    {
+      "name": "Black Pepper Grinder",
+      "description": "This black pepper grinder adds aromatic heat to everyday meals. Grinding fresh helps release oils for stronger flavor and fragrance. The bottle is easy to grip and refills when you run low. It works well on eggs, pasta, soups, and grilled meats. Keep it sealed and dry to prevent clumping and maintain freshness.",
+      "category": "Groceries",
+      "price": 4.49,
+      "quantity": 210,
+      "iconName": "shaker-outline"
+    },
+    {
+      "name": "Soy Sauce 500ml",
+      "description": "This soy sauce adds savory umami to stir-fries, marinades, and dipping sauces. It has a balanced salt level that is easy to adjust with other seasonings. Use it to deepen flavor in noodles, rice dishes, and soups. The bottle pours cleanly to reduce drips and mess. Refrigerate after opening for best taste retention.",
+      "category": "Groceries",
+      "price": 3.25,
+      "quantity": 240,
+      "iconName": "bottle-tonic-outline"
+    },
+    {
+      "name": "All-Purpose Flour 2kg",
+      "description": "This all-purpose flour is suitable for baking cakes, cookies, and breads. It blends smoothly into batters with minimal lumps when sifted. The texture supports reliable results for everyday recipes. Store it in an airtight container to protect it from moisture and pests. Measure accurately for consistent baking outcomes.",
+      "category": "Groceries",
+      "price": 4.99,
+      "quantity": 180,
+      "iconName": "sack"
+    },
+    {
+      "name": "Granulated Sugar 2kg",
+      "description": "This granulated sugar dissolves evenly for baking and sweetening drinks. It is a pantry essential for cakes, biscuits, and homemade desserts. The crystals are consistent, helping recipes behave predictably. It stores well long term when kept sealed and dry. Use it for jams and syrups where controlled sweetness matters.",
+      "category": "Groceries",
+      "price": 3.89,
+      "quantity": 210,
+      "iconName": "cube-outline"
+    },
+    {
+      "name": "Basmati Rice 2kg",
+      "description": "This basmati rice has a fragrant aroma and long, slender grains. It cooks up light and fluffy, perfect for curries and biryani-style dishes. The grains separate nicely when you rinse and soak before cooking. It pairs well with spiced dishes without becoming sticky. Store it sealed to keep the aroma and texture fresh.",
+      "category": "Groceries",
+      "price": 9.99,
+      "quantity": 140,
+      "iconName": "rice"
+    },
+    {
+      "name": "Cereal - Honey Oat Crunch",
+      "description": "This cereal combines crunchy oat clusters with a light honey sweetness. It stays crisp in milk longer than many sugary cereals. The flavor works well as a quick breakfast or snack. It can also be sprinkled on yogurt for added texture. Reseal the bag to keep the cereal fresh and crunchy.",
+      "category": "Groceries",
+      "price": 5.99,
+      "quantity": 170,
+      "iconName": "food"
+    },
+    {
+      "name": "UHT Full Cream Milk 1L",
+      "description": "This UHT milk is shelf-stable until opened, making it convenient for storage. It has a creamy taste for coffee, cereal, and cooking. The carton is easy to pour and fits neatly in the pantry. Once opened, it should be refrigerated and used within a few days. It is useful for households that want backup milk on hand.",
+      "category": "Groceries",
+      "price": 2.2,
+      "quantity": 260,
+      "iconName": "cup"
+    },
+    {
+      "name": "Dishwashing Liquid - Lemon 1L",
+      "description": "This dishwashing liquid cuts through grease on plates, pots, and pans. The lemon scent leaves dishes smelling fresh after rinsing. It produces long-lasting suds, so you use less per wash. The formula is designed to rinse clean without leaving residue. Dilute a small amount in warm water for efficient washing.",
+      "category": "Groceries",
+      "price": 4.75,
+      "quantity": 230,
+      "iconName": "bottle-soda-outline"
+    },
+    {
+      "name": "Airtight Food Storage Containers (10 Set)",
+      "description": "These containers keep pantry items fresh by sealing out air and moisture. The stackable shape saves space in cabinets and drawers. Clear sides make it easy to see what you have at a glance. Lids snap on securely to reduce spills and stale food. Use them for cereal, pasta, snacks, and meal prep.",
+      "category": "Home",
+      "price": 29.99,
+      "quantity": 120,
+      "iconName": "food-variant"
+    },
+    {
+      "name": "Microfiber Cleaning Cloths (12 Pack)",
+      "description": "These microfiber cloths lift dust and grime without scratching surfaces. They work well on glass, benches, stainless steel, and car interiors. The fibers trap particles so you wipe less and clean faster. They are machine washable and designed for repeated use. Use them damp for deep cleaning or dry for quick dusting.",
+      "category": "Home",
+      "price": 11.99,
+      "quantity": 260,
+      "iconName": "broom"
+    },
+    {
+      "name": "Non-Slip Bathroom Mat",
+      "description": "This bathroom mat helps prevent slips when stepping out of the shower. The absorbent surface soaks up water and dries reasonably quickly. A grippy backing keeps it from sliding on tile floors. The soft pile feels comfortable underfoot, especially in cooler months. It can be machine washed for easy maintenance.",
+      "category": "Home",
+      "price": 16.99,
+      "quantity": 150,
+      "iconName": "shower"
+    },
+    {
+      "name": "Bamboo Cutting Board",
+      "description": "This cutting board provides a sturdy surface for chopping vegetables and meats. Bamboo is naturally durable and resists deep knife marks with normal use. The board is lightweight and easy to move around the kitchen. A smooth finish makes it easy to rinse and dry after cooking. Oil it occasionally to help maintain the surface and prevent drying.",
+      "category": "Home",
+      "price": 18.5,
+      "quantity": 140,
+      "iconName": "knife"
+    },
+    {
+      "name": "Stainless Steel Water Bottle 750ml",
+      "description": "This insulated bottle helps keep drinks cold for hours during daily activities. The stainless steel build is durable and resists dents better than plastic. A leak-resistant lid reduces spills in backpacks and car cup holders. The wide mouth makes it easy to add ice and clean inside. It is a practical choice for work, gym, and travel.",
+      "category": "Home",
+      "price": 22.99,
+      "quantity": 180,
+      "iconName": "bottle-wine-outline"
+    },
+    {
+      "name": "LED String Lights Warm White (10m)",
+      "description": "These string lights add warm ambience to bedrooms, balconies, and living spaces. The LEDs use low power while still providing a cozy glow. Flexible wire makes it easy to shape around shelves and frames. Multiple lighting modes help you choose steady light or gentle twinkle. Use the included adapter and keep connections dry for safe operation.",
+      "category": "Home",
+      "price": 17.99,
+      "quantity": 130,
+      "iconName": "string-lights"
+    },
+    {
+      "name": "Scented Candle - Vanilla Linen",
+      "description": "This candle fills a room with a soft vanilla scent that is not overpowering. The wax burns evenly when you trim the wick before lighting. A glass jar helps contain melted wax and looks neat on shelves. It creates a relaxing atmosphere for evenings and self-care routines. Let the top layer melt fully to reduce tunneling over time.",
+      "category": "Home",
+      "price": 12.99,
+      "quantity": 170,
+      "iconName": "candle"
+    },
+    {
+      "name": "Over-Sink Dish Drying Rack",
+      "description": "This drying rack helps save bench space by using the area over your sink. It holds plates, bowls, and utensils while water drips directly into the sink. The metal frame is coated to resist rust in wet environments. Adjustable parts help fit different sink widths and layouts. It is useful for small kitchens and apartments with limited counter space.",
+      "category": "Home",
+      "price": 34.99,
+      "quantity": 85,
+      "iconName": "dishwasher"
+    },
+    {
+      "name": "Memory Foam Pillow",
+      "description": "This pillow supports the neck and head to improve sleeping comfort. Memory foam contours to your shape and reduces pressure points. The cover is removable so it can be washed for hygiene. It suits back and side sleepers who want a medium-support feel. Airflow channels help reduce heat buildup during the night.",
+      "category": "Home",
+      "price": 39.99,
+      "quantity": 90,
+      "iconName": "bed"
+    },
+    {
+      "name": "Cotton Bath Towel Set (2 Pack)",
+      "description": "These towels are made from soft cotton to feel comfortable on skin. They absorb water well and dry at a reasonable speed after use. The edges are stitched to reduce fraying through repeated washes. A classic design suits most bathroom styles and colors. Wash before first use to improve absorbency and remove loose fibers.",
+      "category": "Home",
+      "price": 24.5,
+      "quantity": 120,
+      "iconName": "towel"
+    },
+    {
+      "name": "Drawer Organizer Tray (4 Piece)",
+      "description": "These organizer trays help separate small items like cutlery, tools, and accessories. Modular sizes let you mix and match to fit different drawers. The non-slip base keeps trays from sliding when opening and closing. A smooth finish makes them easy to wipe clean. They reduce clutter and make it faster to find what you need.",
+      "category": "Home",
+      "price": 19.99,
+      "quantity": 140,
+      "iconName": "view-grid-outline"
+    },
+    {
+      "name": "Laundry Hamper with Lid",
+      "description": "This hamper keeps laundry contained and helps reduce clutter in bedrooms or bathrooms. A lid helps hide clothes and reduce odors escaping into the room. Side handles make it easier to carry to the laundry area. The interior is roomy enough for multiple days of clothing. It is a simple way to keep spaces tidy and organized.",
+      "category": "Home",
+      "price": 27.99,
+      "quantity": 110,
+      "iconName": "basket-outline"
+    },
+    {
+      "name": "Non-Stick Frying Pan 28cm",
+      "description": "This frying pan provides even heating for eggs, vegetables, and quick dinners. A non-stick surface helps reduce the need for excess oil during cooking. The handle stays comfortable to hold while moving food around the pan. It cleans easily with gentle sponges to protect the coating. Use medium heat to maintain the non-stick performance longer.",
+      "category": "Home",
+      "price": 29.0,
+      "quantity": 100,
+      "iconName": "pan"
+    },
+    {
+      "name": "Electric Kettle 1.7L",
+      "description": "This kettle boils water quickly for tea, coffee, and instant meals. Automatic shut-off helps improve safety when water reaches boiling point. A water window makes it easy to measure the right amount. The spout is shaped to pour smoothly without splashing. It is a convenient everyday appliance for kitchens and office break rooms.",
+      "category": "Home",
+      "price": 35.99,
+      "quantity": 80,
+      "iconName": "kettle"
+    },
+    {
+      "name": "Reusable Vacuum Storage Bags (6 Pack)",
+      "description": "These storage bags compress bulky items like blankets and jackets to save space. The valve works with most vacuum hoses for quick air removal. Strong plastic helps resist tearing while being moved and stored. Clear material makes it easy to identify contents without opening. They are great for seasonal storage and moving homes.",
+      "category": "Home",
+      "price": 21.99,
+      "quantity": 120,
+      "iconName": "vacuum"
+    },
+    {
+      "name": "Indoor Plant Pot with Drainage",
+      "description": "This plant pot includes a drainage hole to reduce the risk of root rot. A matching saucer helps protect surfaces from water spills. The size suits common indoor plants like pothos and peace lilies. A clean shape fits modern shelves and desks without looking bulky. Use potting mix appropriate for your plant to support healthy growth.",
+      "category": "Home",
+      "price": 14.99,
+      "quantity": 160,
+      "iconName": "flower-pot"
+    },
+    {
+      "name": "Door Draft Stopper",
+      "description": "This draft stopper helps block cold air from sneaking under doors. It can improve comfort and reduce heating or cooling loss. The fabric tube sits neatly along the door edge without needing tools. It also helps reduce dust and noise coming through gaps. Move it between rooms for an easy, low-cost insulation boost.",
+      "category": "Home",
+      "price": 12.99,
+      "quantity": 180,
+      "iconName": "door"
+    },
+    {
+      "name": "Wall Hooks (8 Pack) - Adhesive",
+      "description": "These adhesive hooks help hang towels, keys, and light accessories without drilling. The adhesive backing sticks best on clean, smooth surfaces like tile and glass. Hooks are shaped to hold items securely without slipping off. Removal is designed to be clean when you pull the strip correctly. They are ideal for rentals where you want minimal wall damage.",
+      "category": "Home",
+      "price": 9.49,
+      "quantity": 240,
+      "iconName": "hook"
+    },
+    {
+      "name": "Ceramic Mug Set (4 Pack)",
+      "description": "These ceramic mugs are sturdy and comfortable to hold for hot drinks. The glazed finish helps resist stains from coffee and tea. They are microwave safe for reheating and dishwasher safe for easy cleaning. A balanced weight makes them feel premium without being heavy. Use them for daily tea, lattes, or hot chocolate at home.",
+      "category": "Home",
+      "price": 22.0,
+      "quantity": 150,
+      "iconName": "cup"
+    },
+    {
+      "name": "Bed Sheet Set - Queen (Cotton Blend)",
+      "description": "This sheet set is designed to feel soft and breathable across seasons. The fitted sheet has elastic edges to stay in place on the mattress. A cotton blend helps reduce wrinkles and makes care easier. The set includes matching pillowcases for a coordinated look. Wash in cold water to help maintain the fabric feel and color.",
+      "category": "Home",
+      "price": 49.99,
+      "quantity": 85,
+      "iconName": "bed-queen"
+    },
+    {
+      "name": "Pet Dry Food - Adult Cat Chicken 2kg",
+      "description": "This dry cat food provides balanced nutrition for adult cats with a chicken-based recipe. Crunchy kibble helps support dental health by reducing plaque buildup. Added vitamins and minerals support skin, coat, and immune health. The formula is designed to be easy to digest for everyday feeding. Serve with fresh water available at all times and follow the feeding guide by weight.",
+      "category": "Pets",
+      "price": 24.99,
+      "quantity": 140,
+      "iconName": "cat"
+    },
+    {
+      "name": "Pet Dry Food - Adult Dog Beef 3kg",
+      "description": "This dog food is formulated for adult dogs with a beef-rich taste. Protein supports muscle maintenance and daily energy needs. Kibble size is designed for easy chewing and consistent feeding. Omega oils help maintain a healthy coat and reduce dryness. Introduce gradually over several days to avoid stomach upset.",
+      "category": "Pets",
+      "price": 29.99,
+      "quantity": 120,
+      "iconName": "dog"
+    },
+    {
+      "name": "Cat Litter - Clumping 10L",
+      "description": "This clumping litter forms firm clumps to make cleaning the tray easier. It helps control odors by locking moisture and waste in place. Low-dust granules reduce tracking and keep the surrounding area cleaner. The texture is designed to be comfortable for paws during daily use. Scoop daily and top up regularly to maintain freshness.",
+      "category": "Pets",
+      "price": 18.99,
+      "quantity": 160,
+      "iconName": "box-shadow"
+    },
+    {
+      "name": "Interactive Cat Wand Toy",
+      "description": "This wand toy encourages active play and helps keep cats engaged indoors. The flexible rod creates unpredictable movement that triggers hunting instincts. A comfortable handle makes longer play sessions easier on your wrist. Replaceable attachments help keep the toy interesting over time. Supervise play and store it away to prevent chewing damage.",
+      "category": "Pets",
+      "price": 9.99,
+      "quantity": 220,
+      "iconName": "cat"
+    },
+    {
+      "name": "Squeaky Dog Chew Toy",
+      "description": "This chew toy is designed to keep dogs entertained and reduce boredom. The squeaker adds stimulation and encourages interactive play. Durable rubber helps withstand chewing while still being gentle on teeth. It can also be used for fetch sessions in the backyard or park. Choose the right size for your dog to ensure safe play.",
+      "category": "Pets",
+      "price": 12.5,
+      "quantity": 180,
+      "iconName": "dog"
+    },
+    {
+      "name": "Pet Grooming Brush - Slicker",
+      "description": "This slicker brush helps remove loose fur and reduce shedding around the home. Fine bristles reach the undercoat without pulling when used gently. Regular brushing can help prevent tangles and mats, especially in longer coats. The handle is shaped for a comfortable grip during longer grooming sessions. Clean the brush after use to keep it hygienic and effective.",
+      "category": "Pets",
+      "price": 14.99,
+      "quantity": 160,
+      "iconName": "brush"
+    },
+    {
+      "name": "Nail Clippers for Cats & Small Dogs",
+      "description": "These nail clippers are sized for smaller paws and provide controlled trimming. A sharp blade helps cut cleanly to reduce splitting and cracking. The grip is designed to feel stable and reduce slipping in your hand. Trimming regularly can help prevent overgrowth and scratching damage. Clip slowly and avoid the quick to keep your pet comfortable.",
+      "category": "Pets",
+      "price": 11.99,
+      "quantity": 150,
+      "iconName": "content-cut"
+    },
+    {
+      "name": "Adjustable Pet Collar - Reflective",
+      "description": "This collar adjusts easily to fit comfortably without being too tight. Reflective stitching improves visibility during early morning or evening walks. The buckle is designed to be secure while still opening quickly when needed. A D-ring attachment supports tags and leash clips. Measure your pet’s neck and leave two fingers of space for comfort.",
+      "category": "Pets",
+      "price": 8.99,
+      "quantity": 240,
+      "iconName": "collar"
+    },
+    {
+      "name": "Pet Leash 1.5m - Nylon",
+      "description": "This nylon leash provides a dependable length for daily walks and training. The clip attaches securely to collars and harnesses with a smooth action. The handle loop is padded to reduce discomfort on longer walks. Nylon material resists fraying and holds up to everyday use. Rinse and air-dry if it gets muddy to keep it in good condition.",
+      "category": "Pets",
+      "price": 10.99,
+      "quantity": 200,
+      "iconName": "leash"
+    },
+    {
+      "name": "Dog Harness - No Pull",
+      "description": "This harness is designed to reduce pulling by distributing pressure across the chest. Adjustable straps help achieve a secure fit for comfort and control. A front clip option supports training for dogs that pull on walks. Breathable padding reduces rubbing during longer outings. Check fit regularly and adjust as your dog’s coat changes through seasons.",
+      "category": "Pets",
+      "price": 24.5,
+      "quantity": 130,
+      "iconName": "dog"
+    },
+    {
+      "name": "Stainless Steel Pet Bowl Set (2 Pack)",
+      "description": "These stainless steel bowls are durable and resist odors compared with plastic. The smooth surface makes them easy to wash and sanitize. A stable base helps reduce tipping during meals. They are suitable for both food and water in daily routines. Choose a size appropriate for your pet’s breed and feeding habits.",
+      "category": "Pets",
+      "price": 15.99,
+      "quantity": 170,
+      "iconName": "bowl"
+    },
+    {
+      "name": "Automatic Pet Water Fountain 2L",
+      "description": "This water fountain keeps water moving to encourage pets to drink more. Flowing water can taste fresher and reduce stagnation compared with still bowls. A filter helps reduce hair and debris in the water reservoir. The pump is designed to run quietly for home environments. Clean and replace filters regularly to maintain water quality.",
+      "category": "Pets",
+      "price": 39.99,
+      "quantity": 80,
+      "iconName": "water-pump"
+    },
+    {
+      "name": "Cat Treats - Salmon Bites 80g",
+      "description": "These salmon bites are a tasty reward for training and bonding with cats. Small pieces make portion control easy during treat time. A high-protein recipe supports active play and daily energy. Treats are intended as a supplement and should not replace meals. Reseal the pouch to keep the bites fresh and appealing.",
+      "category": "Pets",
+      "price": 5.49,
+      "quantity": 260,
+      "iconName": "fish"
+    },
+    {
+      "name": "Dog Treats - Dental Chews 7 Pack",
+      "description": "These dental chews are designed to help reduce plaque through chewing action. The texture supports longer chew time for better cleaning benefits. They can be a useful addition to a regular tooth-brushing routine. Each chew is portioned for daily use depending on dog size. Always supervise chewing and provide fresh water nearby.",
+      "category": "Pets",
+      "price": 12.99,
+      "quantity": 190,
+      "iconName": "tooth-outline"
+    },
+    {
+      "name": "Pet Poop Bags (120 Count)",
+      "description": "These poop bags make cleanup quick and hygienic during walks. The bags are thick enough to reduce leaks and tearing. A compact roll fits easily into leash dispensers and pockets. Perforated edges help you tear one bag cleanly each time. Keep a spare roll in your bag so you are never caught without one.",
+      "category": "Pets",
+      "price": 6.99,
+      "quantity": 320,
+      "iconName": "bag-carry-on"
+    },
+    {
+      "name": "Pet Shampoo - Oatmeal Sensitive 500ml",
+      "description": "This oatmeal shampoo is formulated to be gentle for pets with sensitive skin. It helps clean the coat while supporting moisture and comfort. A mild scent keeps your pet smelling fresh without heavy fragrance. The formula rinses out easily to avoid residue that can cause itchiness. Avoid eyes and ears, and towel-dry thoroughly after bathing.",
+      "category": "Pets",
+      "price": 13.99,
+      "quantity": 140,
+      "iconName": "shower"
+    },
+    {
+      "name": "Pet Travel Carrier - Small",
+      "description": "This travel carrier provides a secure space for small pets during trips and vet visits. Ventilated panels improve airflow to keep your pet comfortable. The door latch is designed to stay closed while still opening smoothly for access. A sturdy handle supports carrying without flexing or wobbling. Place a soft towel inside to reduce stress and add comfort.",
+      "category": "Pets",
+      "price": 34.99,
+      "quantity": 90,
+      "iconName": "car"
+    },
+    {
+      "name": "Cat Scratching Post - Sisal",
+      "description": "This scratching post helps protect furniture by giving cats a dedicated scratching surface. Sisal rope provides a satisfying texture that encourages regular use. A stable base reduces wobble so cats feel confident while scratching. It supports healthy claw maintenance and natural stretching behavior. Sprinkle catnip near the base to help introduce it to your cat.",
+      "category": "Pets",
+      "price": 29.99,
+      "quantity": 95,
+      "iconName": "cat"
+    },
+    {
+      "name": "Pet Bed - Plush Round",
+      "description": "This plush bed provides a cozy sleeping spot for cats and small dogs. Raised edges create a sense of security and support for curled-up naps. The soft fill helps cushion joints on harder floors. The cover is designed to be easy to clean with regular washing. Place it in a quiet area to encourage restful sleep.",
+      "category": "Pets",
+      "price": 27.5,
+      "quantity": 110,
+      "iconName": "bed"
+    },
+    {
+      "name": "Pet Training Clicker",
+      "description": "This clicker helps mark desired behaviors clearly during training sessions. A consistent sound makes it easier for pets to understand timing and rewards. The wrist strap helps prevent dropping during walks or practice. It is lightweight and easy to carry in a pocket or treat pouch. Pair clicks with small treats to build reliable positive reinforcement.",
+      "category": "Pets",
+      "price": 4.99,
+      "quantity": 280,
+      "iconName": "gesture-tap-button"
+    },
+    {
+      "name": "Reusable Lunch Box - Leak Resistant",
+      "description": "This lunch box helps keep meals separated and fresh for school or work. A tight seal reduces leaks when carrying sauces and dressed salads. The compartments make portioning simple for meal prep. It is easy to clean and designed for regular daily use. Pack it with an ice pack for better food safety during warm days.",
+      "category": "Other",
+      "price": 14.99,
+      "quantity": 180,
+      "iconName": "lunchbox"
+    },
+    {
+      "name": "Notebook A5 - Dotted Pages",
+      "description": "This dotted notebook is useful for journaling, planning, and note-taking. Dots provide guidance for neat writing and simple drawings without heavy lines. The cover is firm enough to write on when you do not have a desk. Pages are designed to reduce bleed-through from most pens. It is a practical everyday item for students and professionals.",
+      "category": "Other",
+      "price": 7.99,
+      "quantity": 260,
+      "iconName": "notebook"
+    },
+    {
+      "name": "Gel Pen Set (12 Colors)",
+      "description": "These gel pens provide smooth ink flow for notes and creative writing. Multiple colors help highlight key points and organize study materials. The tips are designed to write consistently without skipping. Ink dries reasonably quickly to reduce smudges on most paper. Store them capped to keep ink from drying out between uses.",
+      "category": "Other",
+      "price": 9.99,
+      "quantity": 220,
+      "iconName": "pen"
+    },
+    {
+      "name": "Insulated Cooler Bag 12L",
+      "description": "This cooler bag helps keep food and drinks cold for outings and errands. Insulated lining supports better temperature retention with ice packs. A zipper top helps keep contents secure during travel. The handles are reinforced for heavier loads like bottles and meal containers. It is useful for picnics, work lunches, and grocery runs.",
+      "category": "Other",
+      "price": 21.99,
+      "quantity": 140,
+      "iconName": "bag-suitcase"
+    },
+    {
+      "name": "Stainless Steel Travel Cutlery Set",
+      "description": "This cutlery set includes a fork, spoon, and knife for meals on the go. Stainless steel construction is durable and easy to sanitize. A compact case keeps pieces together and prevents scratching other items in your bag. It is a reusable alternative to disposable utensils. Wash after use and dry fully before storing in the case.",
+      "category": "Other",
+      "price": 12.5,
+      "quantity": 170,
+      "iconName": "silverware-fork-knife"
+    },
+    {
+      "name": "Car Phone Mount - Vent Clip",
+      "description": "This phone mount keeps your phone visible for navigation while driving. The vent clip attaches securely and reduces wobble on bumpy roads. Adjustable arms fit a range of phone sizes with or without cases. The swivel head lets you set portrait or landscape orientation easily. Always position it so it does not block airflow or important controls.",
+      "category": "Other",
+      "price": 10.99,
+      "quantity": 230,
+      "iconName": "cellphone"
+    },
+    {
+      "name": "Reusable Shopping Bags (4 Pack)",
+      "description": "These reusable bags help reduce single-use plastic during shopping trips. The fabric is sturdy enough for groceries and everyday items. Wide handles make carrying more comfortable, even with heavier loads. They fold down to a compact size for car or handbag storage. Wipe clean or wash lightly to keep them fresh for repeated use.",
+      "category": "Other",
+      "price": 13.99,
+      "quantity": 240,
+      "iconName": "shopping"
+    },
+    {
+      "name": "Portable Umbrella - Wind Resistant",
+      "description": "This compact umbrella is designed to handle windy conditions better than basic models. The canopy opens smoothly and locks into place securely. It fits easily in backpacks and handbags for sudden weather changes. A comfortable handle improves grip when rain is heavy. Let it dry fully open after use to prevent mildew and odor.",
+      "category": "Other",
+      "price": 16.99,
+      "quantity": 160,
+      "iconName": "umbrella"
+    },
+    {
+      "name": "Yoga Mat 6mm - Non Slip",
+      "description": "This yoga mat provides cushioning for joints during floor exercises. A non-slip surface helps maintain stability in poses and stretches. The thickness supports comfort without feeling too soft under balance work. It rolls up easily for storage and transport to classes. Wipe it down after sessions to keep it clean and grippy.",
+      "category": "Other",
+      "price": 24.99,
+      "quantity": 130,
+      "iconName": "yoga"
+    },
+    {
+      "name": "Resistance Bands Set (5 Levels)",
+      "description": "These resistance bands support home workouts and strength training. Multiple resistance levels help you progress as you get stronger. They are useful for warm-ups, glute work, and rehab-style exercises. The bands are lightweight and easy to pack for travel. Use controlled movements to reduce snapping risk and improve form.",
+      "category": "Other",
+      "price": 14.5,
+      "quantity": 190,
+      "iconName": "dumbbell"
+    },
+    {
+      "name": "Bluetooth Tile Tracker Keyring",
+      "description": "This tracker helps you locate keys and small items using a phone app. It can ring loudly to help you find items inside bags or around the house. Last-seen location history can help narrow down where you left something. The keyring design attaches easily without extra accessories. Replace the battery as recommended to keep tracking reliable.",
+      "category": "Other",
+      "price": 19.99,
+      "quantity": 110,
+      "iconName": "key"
+    },
+    {
+      "name": "Desk Organizer - Pen & Paper",
+      "description": "This organizer keeps pens, notes, and small accessories in one place. Separate compartments help reduce clutter and improve daily workflow. The compact footprint suits smaller desks and study spaces. A stable base prevents tipping when you grab items quickly. Use it to keep your workspace tidy and more productive.",
+      "category": "Other",
+      "price": 17.5,
+      "quantity": 150,
+      "iconName": "folder-outline"
+    },
+    {
+      "name": "Stainless Steel Thermos 1L",
+      "description": "This thermos helps keep drinks hot for long periods during work or travel. Double-wall insulation reduces heat loss and prevents burning hands. A secure lid helps prevent leaks in bags and car seats. The wide opening makes filling and cleaning easier. Pre-warm with hot water to improve heat retention for tea and coffee.",
+      "category": "Other",
+      "price": 29.99,
+      "quantity": 120,
+      "iconName": "thermometer"
+    },
+    {
+      "name": "Pack of AA Batteries (12 Count)",
+      "description": "These AA batteries power everyday devices like remotes and toys reliably. They provide steady output for consistent performance in electronics. The pack size is convenient for stocking up at home. Store batteries in a cool, dry place to help maintain shelf life. Dispose responsibly and avoid mixing old and new batteries in the same device.",
+      "category": "Other",
+      "price": 8.99,
+      "quantity": 260,
+      "iconName": "battery"
+    },
+    {
+      "name": "First Aid Kit - Compact",
+      "description": "This compact kit includes basic supplies for small cuts and minor injuries. It is useful for cars, backpacks, and home cupboards. The case is organized so items are easy to find quickly. Supplies should be checked periodically to replace used items. Keep it accessible so you can respond fast when accidents happen.",
+      "category": "Other",
+      "price": 15.99,
+      "quantity": 140,
+      "iconName": "medical-bag"
+    },
+    {
+      "name": "Reusable Ice Pack Set (3 Pack)",
+      "description": "These ice packs help keep lunch boxes and cooler bags cold longer. They freeze quickly and stay cold for a useful period during the day. The slim shape fits around containers without taking up too much space. They can also help soothe minor bumps by providing cold compression. Do not microwave them, and replace if the seal is damaged.",
+      "category": "Other",
+      "price": 9.49,
+      "quantity": 210,
+      "iconName": "snowflake"
+    },
+    {
+      "name": "Laptop Sleeve 13-inch - Padded",
+      "description": "This sleeve protects your laptop from scratches and minor impacts. Padded lining helps cushion the device in backpacks and tote bags. A zipper closure keeps the laptop secure during travel. The outer material resists light splashes and everyday scuffs. Choose the right size so the fit is snug without forcing the zipper.",
+      "category": "Other",
+      "price": 18.99,
+      "quantity": 160,
+      "iconName": "laptop"
+    },
+    {
+      "name": "Reusable Metal Straw Set",
+      "description": "These metal straws offer a reusable option for iced coffee and smoothies. The set includes a cleaning brush to help maintain hygiene. Stainless steel resists rust and holds up to frequent washing. A travel pouch keeps straws clean in bags and car compartments. Use them at home or on the go to reduce plastic waste.",
+      "category": "Other",
+      "price": 6.99,
+      "quantity": 280,
+      "iconName": "cup-outline"
+    },
+    {
+      "name": "Handheld Lint Roller",
+      "description": "This lint roller removes pet hair and lint from clothing quickly. Sticky sheets tear cleanly to expose a fresh layer when needed. It is convenient to keep in a car or near the front door for last-minute touch-ups. The handle provides good grip without flexing while rolling. Use it on fabrics like coats, sweaters, and upholstery.",
+      "category": "Other",
+      "price": 4.99,
+      "quantity": 320,
+      "iconName": "roller-skate"
+    },
+    {
+      "name": "Cable Organizer Clips (10 Pack)",
+      "description": "These clips help keep charging cables and desk wires neatly in place. Adhesive backing sticks best on clean, dry surfaces. They prevent cables from slipping behind desks and beds. The flexible slots fit common cable thicknesses without pinching. Use them to reduce clutter and protect cables from bending stress.",
+      "category": "Other",
+      "price": 7.49,
+      "quantity": 240,
+      "iconName": "cable-data"
+    },
+    {
+      "name": "Heavy-Duty Claw Hammer 16oz",
+      "description": "This 16oz claw hammer is balanced for comfortable swings when driving nails into timber. The claw end is shaped to pull nails cleanly without chewing up the surface. A shock-absorbing handle helps reduce vibration and hand fatigue during longer jobs. The textured grip improves control even if your hands are dusty or sweaty. It is a dependable choice for framing, general repairs, and weekend DIY projects.",
+      "category": "Tools",
+      "price": 18.99,
+      "quantity": 140,
+      "iconName": "hammer"
+    },
+    {
+      "name": "Precision Screwdriver Set (24-Piece)",
+      "description": "This precision set includes common bits for electronics, glasses, and small hardware. The driver handle has a comfortable grip to improve control on delicate screws. Magnetic bit seating helps hold tiny screws and reduces drops during work. The case is labeled so you can quickly find the right size. It is ideal for home repairs, controller fixes, and small appliances.",
+      "category": "Tools",
+      "price": 22.5,
+      "quantity": 170,
+      "iconName": "screwdriver"
+    },
+    {
+      "name": "Cordless Drill Driver 18V Kit",
+      "description": "This cordless drill provides strong torque for drilling into wood and driving screws efficiently. A variable-speed trigger lets you start slowly and increase power as needed. The clutch settings help prevent stripping screws and overdriving into soft materials. The kit includes a battery and charger so you can get started right away. It is suitable for furniture assembly, shelving installs, and general trade work.",
+      "category": "Tools",
+      "price": 129.99,
+      "quantity": 60,
+      "iconName": "drill"
+    },
+    {
+      "name": "Impact Driver 18V (Bare Tool)",
+      "description": "This impact driver delivers high torque for driving long screws and bolts quickly. The impact action reduces cam-out so bits stay engaged in tough fasteners. A compact body helps you work in tighter spaces like cabinets and framing corners. Built-in LED lighting improves visibility in dim work areas. Pair it with the correct battery system and impact-rated bits for best performance.",
+      "category": "Tools",
+      "price": 109.0,
+      "quantity": 55,
+      "iconName": "drill"
+    },
+    {
+      "name": "Adjustable Wrench 10-inch",
+      "description": "This adjustable wrench provides a wide jaw range for nuts and bolts of varying sizes. The thumbwheel adjusts smoothly and holds settings firmly to reduce slipping. A solid steel body helps handle higher torque without flexing. The jaw markings can help you estimate sizes quickly during maintenance work. It is a practical tool for plumbing fittings, bikes, and general hardware tasks.",
+      "category": "Tools",
+      "price": 16.49,
+      "quantity": 120,
+      "iconName": "wrench"
+    },
+    {
+      "name": "Combination Spanner Set (8-Piece)",
+      "description": "This spanner set includes common metric sizes for everyday mechanical and home repairs. The ring end grips fasteners securely to reduce rounding under load. The open end is useful for quick turns in tight spaces where a socket will not fit. A polished finish helps resist rust and makes cleanup easier after oily jobs. Store them in the included holder to keep sizes organized and easy to grab.",
+      "category": "Tools",
+      "price": 34.99,
+      "quantity": 90,
+      "iconName": "wrench-outline"
+    },
+    {
+      "name": "Socket Set 1/4-inch Drive (46-Piece)",
+      "description": "This socket set covers a wide range of small fasteners for automotive and household work. The ratchet mechanism is designed for smooth operation with a comfortable handle. Extensions help reach recessed bolts and awkward angles more easily. Each socket is labeled so you can identify sizes quickly while working. It is a great starter kit for bikes, furniture, and basic car maintenance.",
+      "category": "Tools",
+      "price": 39.99,
+      "quantity": 110,
+      "iconName": "tools"
+    },
+    {
+      "name": "Tape Measure 5m with Magnetic Hook",
+      "description": "This 5m tape measure is built for accurate measurements on job sites and DIY projects. The magnetic hook helps it stick to metal edges when measuring alone. A sturdy blade reduces sag for longer reach without collapsing. The lock button holds measurements steady so you can mark cuts accurately. The compact body fits easily in pockets and tool belts.",
+      "category": "Tools",
+      "price": 12.99,
+      "quantity": 220,
+      "iconName": "tape-measure"
+    },
+    {
+      "name": "Spirit Level 60cm",
+      "description": "This 60cm spirit level helps you align shelves, frames, and fixtures accurately. The vials are clear and easy to read, even under workshop lighting. A rigid frame reduces bending so readings stay reliable on longer spans. It is useful for cabinetry, wall mounting, and basic construction work. Store it flat to help maintain accuracy over time.",
+      "category": "Tools",
+      "price": 19.99,
+      "quantity": 140,
+      "iconName": "ruler"
+    },
+    {
+      "name": "Utility Knife with Retractable Blade",
+      "description": "This utility knife provides clean cuts for cardboard, plasterboard, and packaging. The retractable blade improves safety when carrying it in pockets or tool bags. A comfortable grip helps maintain control when making long cuts. Quick blade changes reduce downtime when a blade becomes dull. Use sharp blades and cut away from your body for safer operation.",
+      "category": "Tools",
+      "price": 9.49,
+      "quantity": 260,
+      "iconName": "knife"
+    },
+    {
+      "name": "Needle Nose Pliers 6-inch",
+      "description": "These needle nose pliers help grip, bend, and position wires in tight spaces. The long tapered jaws are useful for electronics, automotive clips, and small fasteners. A spring-loaded handle can reduce hand fatigue during repetitive tasks. The cutting edge is suitable for light wire trimming and small cable ties. Keep them clean and dry to prevent rust and maintain smooth action.",
+      "category": "Tools",
+      "price": 13.99,
+      "quantity": 160,
+      "iconName": "pliers"
+    },
+    {
+      "name": "Locking Pliers 10-inch (Vise Grip)",
+      "description": "These locking pliers clamp firmly onto bolts, pipes, and metal parts when you need extra holding power. The adjustment screw lets you set jaw pressure for different materials and sizes. A release lever opens the grip quickly when the job is done. They are useful for stripped fasteners where a standard wrench slips. Use them carefully to avoid marring soft surfaces and finishes.",
+      "category": "Tools",
+      "price": 21.99,
+      "quantity": 110,
+      "iconName": "tools"
+    },
+    {
+      "name": "Hand Saw 20-inch Wood Cutting",
+      "description": "This hand saw is designed for fast, clean cuts through timber and boards. Hardened teeth help maintain sharpness longer with regular use. The handle is shaped to fit comfortably and improve control on long strokes. It is handy for job sites where power tools are not practical. Use a straight guide line and steady strokes for more accurate cuts.",
+      "category": "Tools",
+      "price": 17.5,
+      "quantity": 120,
+      "iconName": "saw-blade"
+    },
+    {
+      "name": "Angle Grinder 900W 115mm",
+      "description": "This angle grinder is suitable for cutting, grinding, and removing rust on metal surfaces. The 115mm size helps you work in tighter areas while still providing solid cutting capability. A side handle improves stability and control when applying pressure. The guard helps reduce debris exposure and improves safety during use. Always wear eye protection and use the correct disc type for the material.",
+      "category": "Tools",
+      "price": 79.99,
+      "quantity": 70,
+      "iconName": "saw-blade"
+    },
+    {
+      "name": "Safety Glasses Anti-Fog",
+      "description": "These safety glasses protect your eyes from dust, chips, and splashes during workshop tasks. An anti-fog coating helps maintain visibility when working in humid conditions. The wraparound shape improves side coverage without feeling bulky. They are lightweight enough for extended wear on job sites. Keep the lenses clean and store them in a case to reduce scratches.",
+      "category": "Tools",
+      "price": 8.99,
+      "quantity": 300,
+      "iconName": "safety-goggles"
+    },
+    {
+      "name": "Work Gloves - Nitrile Coated",
+      "description": "These work gloves provide grip and protection for handling tools and rough materials. Nitrile coating helps resist oils and improves hold on wet or dusty surfaces. The breathable backing reduces sweat buildup during longer jobs. They are flexible enough for tasks like screwing, lifting, and light cutting work. Choose the right size for better dexterity and safer handling.",
+      "category": "Tools",
+      "price": 11.49,
+      "quantity": 240,
+      "iconName": "hand-back-left"
+    },
+    {
+      "name": "Tool Box 18-inch with Tray",
+      "description": "This toolbox keeps hand tools organized and easy to transport between jobs. The removable tray helps separate small items like screws, bits, and connectors. A sturdy latch keeps the lid closed during movement and storage. The handle is shaped for comfortable carrying even when loaded. It is a reliable storage option for home garages and trade vehicles.",
+      "category": "Tools",
+      "price": 29.99,
+      "quantity": 130,
+      "iconName": "toolbox"
+    },
+    {
+      "name": "Step Ladder 4-Foot Aluminum",
+      "description": "This 4-foot step ladder helps you reach shelves, light fittings, and ceiling areas safely. Aluminum construction keeps it lightweight while still feeling stable underfoot. Wide steps provide better comfort and confidence compared with narrow rungs. Anti-slip feet help it stay planted on common indoor floors. Always lock it fully open and avoid leaning beyond the side rails.",
+      "category": "Tools",
+      "price": 59.99,
+      "quantity": 65,
+      "iconName": "ladder"
+    },
+    {
+      "name": "Garden Pruning Shears Bypass",
+      "description": "These bypass pruning shears make clean cuts on stems and small branches for healthier plants. The blades are designed to slice rather than crush, reducing damage to greenery. A safety lock keeps them closed when carrying or storing. The handle grip is shaped to reduce strain during repeated trimming. They are ideal for roses, herbs, and general garden maintenance.",
+      "category": "Tools",
+      "price": 19.49,
+      "quantity": 150,
+      "iconName": "content-cut"
+    },
+    {
+      "name": "Electric Lawn Mower 1400W (32cm)",
+      "description": "This electric mower is designed for small to medium lawns with consistent cutting power. The 32cm cutting width helps you cover ground efficiently while staying easy to maneuver. Adjustable cutting heights let you choose a neat finish or a longer cut in hotter months. A grass catcher helps reduce mess and speeds up cleanup after mowing. Use an outdoor-rated extension lead and keep the cable routed safely behind you.",
+      "category": "Tools",
+      "price": 189.99,
+      "quantity": 35,
+      "iconName": "grass"
+    },
+    {
+      "name": "Front Load Washing Machine 8kg EcoWash",
+      "description": "This 8kg front load washer is sized for small families and regular weekly loads. The eco cycles help reduce water and energy use while still cleaning effectively. A quick wash option is handy for lightly soiled clothes when you are short on time. The drum is designed to be gentle on fabrics to reduce wear over repeated washes. Use the delay start feature to run loads at convenient times and manage noise.",
+      "category": "Appliances",
+      "price": 699.0,
+      "quantity": 18,
+      "iconName": "washing-machine"
+    },
+    {
+      "name": "Top Load Washing Machine 10kg QuickFill",
+      "description": "This 10kg top loader makes it easy to add clothes mid-cycle with a convenient lid design. The larger capacity helps handle bulky items like towels and bedding more comfortably. Multiple wash programs let you tailor settings for delicates, heavy soil, and everyday loads. A fast spin helps remove more water to shorten drying time afterward. The control panel is simple to use and clearly labeled for quick selection.",
+      "category": "Appliances",
+      "price": 649.99,
+      "quantity": 14,
+      "iconName": "washing-machine"
+    },
+    {
+      "name": "Heat Pump Dryer 8kg DrySmart",
+      "description": "This heat pump dryer helps dry clothes efficiently at lower temperatures to protect fabrics. The 8kg capacity suits most households and reduces the number of drying cycles needed. Sensor drying detects moisture levels and stops automatically to prevent over-drying. A lint filter is easy to access so maintenance stays simple and performance stays strong. It is a great option for apartments where line drying is not always practical.",
+      "category": "Appliances",
+      "price": 799.0,
+      "quantity": 12,
+      "iconName": "tumble-dryer"
+    },
+    {
+      "name": "Robot Vacuum Cleaner RoboClean R2",
+      "description": "This robovac maps your rooms to clean more methodically instead of bouncing randomly. It can handle everyday dust and crumbs on hard floors and low-pile carpet. Scheduled cleaning lets it run while you are out so you come home to tidier floors. A slim body helps it reach under many sofas and beds where dirt collects. Empty the dustbin regularly and keep brushes clear for best suction.",
+      "category": "Appliances",
+      "price": 349.99,
+      "quantity": 22,
+      "iconName": "robot-vacuum"
+    },
+    {
+      "name": "Cordless Stick Vacuum 25V PowerLift",
+      "description": "This cordless stick vacuum offers strong suction for quick clean-ups without dragging a cord. A lightweight design makes it easier to carry between rooms and up stairs. The motorized floor head helps lift dust and pet hair from rugs more effectively. It converts to a handheld vacuum for couches, cars, and tight corners. Charge it after use so it is ready for daily spot cleaning.",
+      "category": "Appliances",
+      "price": 229.99,
+      "quantity": 28,
+      "iconName": "vacuum"
+    },
+    {
+      "name": "Bagless Upright Vacuum 2000W DeepClean",
+      "description": "This upright vacuum is built for deeper cleaning on carpets and larger floor areas. The bagless bin makes it easy to see when it is time to empty. A HEPA-style filter helps capture fine dust for a cleaner indoor environment. Height adjustment lets you switch between carpet and hard floors smoothly. Clean the filter on schedule to maintain airflow and suction performance.",
+      "category": "Appliances",
+      "price": 179.99,
+      "quantity": 20,
+      "iconName": "vacuum-outline"
+    },
+    {
+      "name": "Microwave Oven 25L QuickHeat",
+      "description": "This 25L microwave is sized for reheating meals, steaming vegetables, and quick cooking tasks. Preset programs simplify common jobs like popcorn, defrosting, and leftovers. A turntable helps heat food more evenly to reduce cold spots. The interior wipes clean easily after splatters and spills. Use a microwave-safe cover to keep the cavity cleaner and reduce drying out food.",
+      "category": "Appliances",
+      "price": 129.99,
+      "quantity": 35,
+      "iconName": "microwave"
+    },
+    {
+      "name": "Inverter Microwave 32L SmartDefrost",
+      "description": "This inverter microwave provides steadier power output for more even heating and defrosting. The larger 32L cavity fits wider plates and bigger containers for family meals. Sensor cooking can adjust time based on steam and humidity to prevent overcooking. The control panel offers clear presets for common foods and quick start options. It is ideal for kitchens that rely on fast, consistent reheating every day.",
+      "category": "Appliances",
+      "price": 219.0,
+      "quantity": 18,
+      "iconName": "microwave"
+    },
+    {
+      "name": "Rice Cooker 10-Cup Fuzzy Logic",
+      "description": "This rice cooker uses fuzzy logic to adjust temperature and timing for consistent results. It can cook white rice, brown rice, and porridge with dedicated modes. A keep-warm function helps maintain serving temperature without drying out rice too quickly. The non-stick inner pot makes cleanup easier after cooking. Rinse rice before cooking and measure water carefully for best texture.",
+      "category": "Appliances",
+      "price": 89.99,
+      "quantity": 40,
+      "iconName": "pot-steam"
+    },
+    {
+      "name": "Multi-Cooker Pressure Cooker 6L",
+      "description": "This multi-cooker combines pressure cooking, slow cooking, sautéing, and steaming in one appliance. Pressure mode speeds up meals like curries, stews, and beans without sacrificing tenderness. A delay start helps you plan meals around work or study schedules. The removable inner pot is easy to clean and can be hand-washed or placed in a dishwasher depending on the model. Follow safety instructions and release pressure carefully to avoid steam burns.",
+      "category": "Appliances",
+      "price": 139.99,
+      "quantity": 24,
+      "iconName": "pot"
+    },
+    {
+      "name": "Air Fryer 5.5L CrispyMax",
+      "description": "This air fryer cooks fries, chicken, and vegetables with less oil than deep frying. The 5.5L basket fits meals for couples or small families. Hot air circulation helps crisp the outside while keeping the inside tender. A timer and temperature dial make it simple to use without complicated menus. Shake the basket halfway through cooking for more even browning and crunch.",
+      "category": "Appliances",
+      "price": 119.99,
+      "quantity": 30,
+      "iconName": "air-fryer"
+    },
+    {
+      "name": "Toaster 4-Slice Wide Slot",
+      "description": "This 4-slice toaster handles breakfast for multiple people without long waiting. Wide slots fit thicker bread, bagels, and artisan slices more comfortably. Browning levels let you fine-tune toast from light to dark. A crumb tray slides out for quick cleaning and fewer burnt crumbs. Use the reheat function to warm toast without over-browning it.",
+      "category": "Appliances",
+      "price": 59.99,
+      "quantity": 45,
+      "iconName": "toaster"
+    },
+    {
+      "name": "Electric Kettle 1.7L RapidBoil",
+      "description": "This kettle boils water quickly for tea, coffee, and instant meals. Automatic shut-off improves safety when the water reaches boiling point. The water window makes it easier to measure the right amount without guesswork. A smooth spout helps pour cleanly with fewer splashes and drips. Descale periodically to maintain heating speed and keep water tasting fresh.",
+      "category": "Appliances",
+      "price": 39.99,
+      "quantity": 55,
+      "iconName": "kettle"
+    },
+    {
+      "name": "Blender 1000W SmoothBlend",
+      "description": "This blender is powerful enough to crush ice and blend frozen fruit for smoothies. Multiple speeds help you control texture for soups, sauces, and shakes. A sturdy jar design supports consistent blending without leaking at the base. The blades are designed to pull ingredients down to reduce chunks and uneven blending. Rinse immediately after use so cleaning takes only a few minutes.",
+      "category": "Appliances",
+      "price": 89.0,
+      "quantity": 26,
+      "iconName": "blender"
+    },
+    {
+      "name": "Hand Mixer 5-Speed BakeMate",
+      "description": "This hand mixer helps whip cream, beat eggs, and mix batter without heavy equipment. Five speeds let you start gently and increase power as mixtures thicken. The included beaters detach easily for quick cleaning after baking. A lightweight body reduces fatigue during longer mixing sessions. Use a lower speed first to avoid flour clouds and splashes in the bowl.",
+      "category": "Appliances",
+      "price": 34.99,
+      "quantity": 48,
+      "iconName": "mixer"
+    },
+    {
+      "name": "Espresso Machine 15-Bar BaristaMini",
+      "description": "This espresso machine delivers rich shots with crema using a 15-bar pump system. A steam wand helps you froth milk for lattes and cappuccinos at home. The compact footprint fits smaller kitchens without taking over the bench. A removable drip tray makes cleanup easier after brewing. Use fresh beans and clean the group area regularly for consistent taste.",
+      "category": "Appliances",
+      "price": 249.99,
+      "quantity": 16,
+      "iconName": "coffee-maker"
+    },
+    {
+      "name": "Drip Coffee Maker 1.25L BrewDay",
+      "description": "This drip coffee maker brews multiple cups efficiently for households or small offices. A programmable timer lets you wake up to fresh coffee without early prep. The warming plate keeps coffee hot for a set period to reduce waste. The water reservoir is easy to fill and shows clear measurement markings. Replace filters regularly and descale to maintain flavor and flow rate.",
+      "category": "Appliances",
+      "price": 69.99,
+      "quantity": 30,
+      "iconName": "coffee"
+    },
+    {
+      "name": "Air Purifier HEPA RoomFresh 25m²",
+      "description": "This air purifier helps filter dust, pollen, and pet dander for improved indoor comfort. A HEPA-style filter targets fine particles that can trigger allergies. Quiet modes are suitable for bedrooms so it can run overnight without distraction. An indicator light reminds you when filter replacement is due. Place it away from walls so air can circulate properly through the intake and outlet.",
+      "category": "Appliances",
+      "price": 159.99,
+      "quantity": 20,
+      "iconName": "air-filter"
+    },
+    {
+      "name": "Dehumidifier 12L MoistureControl",
+      "description": "This dehumidifier helps reduce humidity in damp rooms to limit mold and musty smells. A 12L per day rating suits bedrooms, laundries, and small living spaces. The water tank is easy to remove and empty, and it can also support continuous drainage. Auto shut-off prevents overflow when the tank is full. Use it consistently during wet seasons to keep walls, clothes, and furniture drier.",
+      "category": "Appliances",
+      "price": 219.99,
+      "quantity": 14,
+      "iconName": "water-percent"
+    },
+    {
+      "name": "Dishwasher 12-Place CompactClean",
+      "description": "This dishwasher fits 12 place settings for efficient cleanup after meals and gatherings. Multiple wash programs help you choose between quick cycles and intensive cleaning for pots. A heated dry option helps reduce water spots and improves drying performance. Adjustable racks make it easier to load taller glasses and larger plates. Scrape excess food before loading to keep filters cleaner and improve results.",
+      "category": "Appliances",
+      "price": 599.0,
+      "quantity": 10,
+      "iconName": "dishwasher"
+    }
+  ]
+}

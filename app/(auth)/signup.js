@@ -19,6 +19,49 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import AppIcon from "../../src/components/AppIcon";
 import { auth, db } from "../../src/firebase/firebaseConfig";
 import { useAppTheme } from "../../src/theme/useAppTheme";
+import {
+  buildBuyerEmailFromUsername,
+  sanitizeUsernameInput,
+  validatePasswordInput,
+  validateUsernameInput,
+} from "../../src/utils/authInput";
+
+const PASSWORD_REQUIREMENTS = [
+  {
+    key: "length",
+    label: "At least 8 characters",
+    test: (password) => password.length >= 8,
+  },
+  {
+    key: "uppercase",
+    label: "At least one uppercase letter",
+    test: (password) => /[A-Z]/.test(password),
+  },
+  {
+    key: "lowercase",
+    label: "At least one lowercase letter",
+    test: (password) => /[a-z]/.test(password),
+  },
+  {
+    key: "number",
+    label: "At least one number",
+    test: (password) => /\d/.test(password),
+  },
+  {
+    key: "symbol",
+    label: "At least one symbol",
+    test: (password) => /[^A-Za-z0-9]/.test(password),
+  },
+];
+
+const getPasswordRuleResults = (password) =>
+  PASSWORD_REQUIREMENTS.map((requirement) => ({
+    ...requirement,
+    met: requirement.test(password),
+  }));
+
+const isPasswordValid = (password) =>
+  PASSWORD_REQUIREMENTS.every((requirement) => requirement.test(password));
 
 export default function SignUp() {
   const router = useRouter();
@@ -28,10 +71,16 @@ export default function SignUp() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [pendingRoute, setPendingRoute] = useState(null);
+  const [passwordInput, setPasswordInput] = useState("");
+  const [isPasswordFocused, setIsPasswordFocused] = useState(false);
   const usernameRef = useRef("");
   const passwordRef = useRef("");
   const buttonAnim = useRef(new Animated.Value(0)).current;
   const styles = useMemo(() => createStyles(colors), [colors]);
+  const passwordRuleResults = useMemo(
+    () => getPasswordRuleResults(passwordInput),
+    [passwordInput],
+  );
 
   const buttonBg = useMemo(
     () =>
@@ -45,10 +94,26 @@ export default function SignUp() {
   const handleSignUp = async () => {
     setError("");
 
-    if (!usernameRef.current || !passwordRef.current) {
-      setError("All fields are required");
+    const usernameValidation = validateUsernameInput(usernameRef.current);
+    if (!usernameValidation.ok) {
+      setError(usernameValidation.error);
       return;
     }
+
+    const passwordValidation = validatePasswordInput(passwordRef.current);
+    if (!passwordValidation.ok) {
+      setError(passwordValidation.error);
+      return;
+    }
+
+    if (!isPasswordValid(passwordValidation.value)) {
+      setError(
+        "Password must include 8+ characters, uppercase, lowercase, number, and symbol.",
+      );
+      return;
+    }
+
+    const normalizedRole = role === "merchant" ? "merchant" : "customer";
 
     try {
       setLoading(true);
@@ -58,24 +123,25 @@ export default function SignUp() {
         useNativeDriver: false,
       }).start();
 
-      const email = `${usernameRef.current}@buyer.app`;
+      const email = buildBuyerEmailFromUsername(usernameValidation.value);
 
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         email,
-        passwordRef.current,
+        passwordValidation.value,
       );
 
       const uid = userCredential.user.uid;
+      const normalizedUsername = sanitizeUsernameInput(usernameValidation.value);
 
       await setDoc(doc(db, "users", uid), {
-        username: usernameRef.current,
-        name: usernameRef.current,
-        role,
+        username: normalizedUsername,
+        name: normalizedUsername,
+        role: normalizedRole,
         createdAt: serverTimestamp(),
       });
 
-      if (role === "merchant") {
+      if (normalizedRole === "merchant") {
         setPendingRoute("/merchant/dashboard");
       } else {
         setPendingRoute("/customer/home");
@@ -87,7 +153,14 @@ export default function SignUp() {
         useNativeDriver: false,
       }).start();
       setLoading(false);
-      setError(err.message);
+      const errorCode = String(err?.code || "");
+      if (errorCode === "auth/email-already-in-use") {
+        setError("Username is already taken");
+      } else if (errorCode === "auth/weak-password") {
+        setError("Choose a stronger password");
+      } else {
+        setError("Unable to create account. Please try again.");
+      }
     }
   };
 
@@ -116,6 +189,8 @@ export default function SignUp() {
               placeholder="Username"
               placeholderTextColor={colors.textSubtle}
               autoCapitalize="none"
+              autoCorrect={false}
+              maxLength={30}
               onChangeText={(text) => {
                 usernameRef.current = text;
               }}
@@ -126,10 +201,36 @@ export default function SignUp() {
               placeholder="Password"
               placeholderTextColor={colors.textSubtle}
               secureTextEntry
+              onFocus={() => setIsPasswordFocused(true)}
+              onBlur={() => setIsPasswordFocused(false)}
+              maxLength={128}
               onChangeText={(text) => {
                 passwordRef.current = text;
+                setPasswordInput(text);
               }}
             />
+            {isPasswordFocused ? (
+              <View style={styles.passwordRequirements}>
+                {passwordRuleResults.map((rule) => (
+                  <View key={rule.key} style={styles.passwordRequirementRow}>
+                    <AppIcon
+                      name={rule.met ? "check-circle" : "close-circle-outline"}
+                      variant="community"
+                      size={15}
+                      color={rule.met ? colors.success : colors.danger}
+                    />
+                    <Text
+                      style={[
+                        styles.passwordRequirementItem,
+                        rule.met && styles.passwordRequirementMet,
+                      ]}
+                    >
+                      {rule.label}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            ) : null}
 
             <Text style={styles.roleLabel}>I&apos;m signing up as a:</Text>
             <View style={styles.roleRow}>
@@ -265,6 +366,25 @@ const createStyles = (colors) =>
     padding: 12,
     marginBottom: 12,
     color: colors.text,
+  },
+  passwordRequirements: {
+    marginTop: -6,
+    marginBottom: 10,
+    paddingHorizontal: 2,
+    gap: 2,
+  },
+  passwordRequirementItem: {
+    fontSize: 13,
+    color: colors.textMuted,
+    lineHeight: 18,
+  },
+  passwordRequirementRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  passwordRequirementMet: {
+    color: colors.success,
   },
   roleRow: {
     flexDirection: "row",

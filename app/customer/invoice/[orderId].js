@@ -54,7 +54,11 @@ export default function InvoicePage() {
       .map(
         (item) => `
           <tr>
-            <td>${item.name}</td>
+            <td>${item.name}${
+              item.selectedOptionsLabel
+                ? `<div style="font-size:12px;color:#555;margin-top:2px;">${item.selectedOptionsLabel}</div>`
+                : ""
+            }</td>
             <td>${item.merchantName || "—"}</td>
             <td style="text-align:center;">${item.quantity}</td>
             <td style="text-align:right;">$${item.price.toFixed(2)}</td>

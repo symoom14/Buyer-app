@@ -15,6 +15,12 @@ import { useCart } from "../../src/context/CartContext";
 import { useFavorites } from "../../src/context/FavoritesContext";
 import { db } from "../../src/firebase/firebaseConfig";
 import { useAppTheme } from "../../src/theme/useAppTheme";
+import {
+  formatSelectedOptionsLabel,
+  getDefaultSelectedOptions,
+  resolveVariantUnitPrice,
+} from "../../src/utils/productVariants";
+import { fetchProductRatingSummaryMap } from "../../src/utils/reviews";
 import { getUserDisplayName } from "../../src/utils/userDisplayName";
 
 const DEFAULT_PRODUCT_ICON = "package-variant-closed";
@@ -29,6 +35,44 @@ const ICON_COLOR_POOL = [
 function getRandomIconColor() {
   const idx = Math.floor(Math.random() * ICON_COLOR_POOL.length);
   return ICON_COLOR_POOL[idx];
+}
+
+function toHexChannel(value) {
+  return Math.max(0, Math.min(255, Math.round(value)))
+    .toString(16)
+    .padStart(2, "0");
+}
+
+function getLightIconBackground(iconColor, fallbackColor) {
+  if (typeof iconColor !== "string" || !iconColor.startsWith("#")) {
+    return fallbackColor;
+  }
+
+  const compactHex = iconColor.slice(1);
+  const fullHex =
+    compactHex.length === 3
+      ? compactHex
+          .split("")
+          .map((ch) => `${ch}${ch}`)
+          .join("")
+      : compactHex;
+
+  if (fullHex.length !== 6) return fallbackColor;
+
+  const r = parseInt(fullHex.slice(0, 2), 16);
+  const g = parseInt(fullHex.slice(2, 4), 16);
+  const b = parseInt(fullHex.slice(4, 6), 16);
+
+  if ([r, g, b].every((channel) => channel <= 30)) {
+    return "#E5E7EB";
+  }
+
+  const mix = 0.78;
+  const bgR = r + (255 - r) * mix;
+  const bgG = g + (255 - g) * mix;
+  const bgB = b + (255 - b) * mix;
+
+  return `#${toHexChannel(bgR)}${toHexChannel(bgG)}${toHexChannel(bgB)}`;
 }
 
 export default function CustomerSavedProducts() {
@@ -53,6 +97,10 @@ export default function CustomerSavedProducts() {
         id: doc.id,
         ...doc.data(),
       }));
+      const productRatingsMap = await fetchProductRatingSummaryMap(
+        db,
+        rawProducts.map((product) => product.id),
+      );
 
       const storeSnapshot = await getDocs(collection(db, "stores"));
       const storeMap = {};
@@ -69,12 +117,20 @@ export default function CustomerSavedProducts() {
         }
       });
 
-      const enrichedProducts = rawProducts.map((product) => ({
-        ...product,
-        storeName: storeMap[product.storeId] || "Unknown Store",
-        sellerName: merchantMap[product.merchantId] || "Unknown Seller",
-        iconColor: getRandomIconColor(),
-      }));
+      const enrichedProducts = rawProducts.map((product) => {
+        const ratingSummary = productRatingsMap[product.id] || {
+          average: 0,
+          count: 0,
+        };
+        return {
+          ...product,
+          storeName: storeMap[product.storeId] || "Unknown Store",
+          sellerName: merchantMap[product.merchantId] || "Unknown Seller",
+          iconColor: getRandomIconColor(),
+          ratingAverage: Number(ratingSummary.average || 0),
+          ratingCount: Number(ratingSummary.count || 0),
+        };
+      });
 
       setAllProducts(enrichedProducts);
     } catch (error) {
@@ -100,15 +156,27 @@ export default function CustomerSavedProducts() {
   }, [allProducts, favoriteIds]);
 
   const handleQuickAddToCart = (product) => {
+    const selectedOptions = getDefaultSelectedOptions(product.variantGroups);
+    const resolvedPrice = resolveVariantUnitPrice(
+      Number(product.price) || 0,
+      product.variants,
+      selectedOptions,
+    );
     addToCart({
       productId: product.id,
       name: product.name,
-      price: Number(product.price) || 0,
+      price: Number(resolvedPrice) || 0,
       quantity: 1,
       storeId: product.storeId,
       storeName: product.storeName || "Unknown Store",
       merchantId: product.merchantId || "unknown",
       merchantName: product.sellerName || "Unknown Seller",
+      iconName: product.iconName || DEFAULT_PRODUCT_ICON,
+      selectedOptions,
+      selectedOptionsLabel: formatSelectedOptionsLabel(
+        selectedOptions,
+        product.variantGroups,
+      ),
     });
   };
 
@@ -137,27 +205,52 @@ export default function CustomerSavedProducts() {
               style={styles.productCardMain}
               onPress={() => router.push(`/customer/product/${item.id}`)}
             >
-              <View style={styles.iconWrap}>
+              <View
+                style={[
+                  styles.iconWrap,
+                  {
+                    backgroundColor: getLightIconBackground(
+                      item.iconColor,
+                      colors.surfaceMuted,
+                    ),
+                  },
+                ]}
+              >
                 <AppIcon
                   name={item.iconName || DEFAULT_PRODUCT_ICON}
                   variant="community"
-                  size={24}
+                  size={27}
                   color={item.iconColor || colors.text}
                 />
               </View>
 
               <View style={styles.contentWrap}>
+                <View style={styles.metaWrap}>
+                  <Text style={styles.sellerStoreText}>{item.sellerName}</Text>
+                </View>
                 <Text style={styles.productName}>{item.name}</Text>
-
-                <Text style={styles.meta}>
-                  Store: <Text style={styles.bold}>{item.storeName}</Text>
-                </Text>
-
-                <Text style={styles.meta}>
-                  Seller: <Text style={styles.bold}>{item.sellerName}</Text>
-                </Text>
-
-                <Text style={styles.price}>${item.price}</Text>
+                <View style={styles.priceRow}>
+                  <Text style={styles.price}>${Number(item.price || 0).toFixed(2)}</Text>
+                  <View style={styles.ratingPill}>
+                    <AppIcon
+                      name={
+                        Number(item.ratingCount || 0) > 0
+                          ? "star"
+                          : "star-settings-outline"
+                      }
+                      variant="community"
+                      size={12}
+                      color="#F4B400"
+                    />
+                    <Text style={styles.ratingPillText}>
+                      {Number(item.ratingCount || 0) > 0
+                        ? `${Number(item.ratingAverage || 0).toFixed(1)} (${Number(
+                            item.ratingCount || 0,
+                          )})`
+                        : "0"}
+                    </Text>
+                  </View>
+                </View>
               </View>
             </TouchableOpacity>
 
@@ -189,11 +282,11 @@ const createStyles = (colors) =>
   card: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 16,
+    padding: 12,
     borderWidth: 1,
-    borderColor: colors.borderSoft,
-    borderRadius: 8,
-    marginBottom: 12,
+    borderColor: colors.border,
+    borderRadius: 12,
+    marginBottom: 10,
     backgroundColor: colors.surface,
   },
   productCard: {
@@ -203,17 +296,17 @@ const createStyles = (colors) =>
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    padding: 16,
-    paddingRight: 10,
+    padding: 12,
+    paddingRight: 8,
   },
   iconWrap: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 42,
+    height: 42,
+    borderRadius: 999,
     backgroundColor: colors.surfaceMuted,
     alignItems: "center",
     justifyContent: "center",
-    marginRight: 15,
+    marginRight: 12,
   },
   contentWrap: {
     flex: 1,
@@ -221,33 +314,57 @@ const createStyles = (colors) =>
   pageTitle: {
     fontSize: 26,
     fontWeight: "700",
-    marginBottom: 16,
+    marginBottom: 12,
     color: colors.text,
   },
   productName: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: "600",
-    marginBottom: 6,
+    marginBottom: 2,
     color: colors.text,
   },
-  meta: {
-    fontSize: 14,
-    color: colors.textMuted,
+  metaWrap: {
+    marginTop: 2,
+    marginBottom: 4,
   },
-  bold: {
+  sellerStoreText: {
+    fontSize: 12,
+    color: colors.textSubtle,
     fontWeight: "500",
   },
   price: {
-    marginTop: 8,
-    fontSize: 17,
-    fontWeight: "600",
+    fontSize: 16,
+    fontWeight: "700",
     color: colors.text,
   },
+  priceRow: {
+    marginTop: 8,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    flexWrap: "wrap",
+  },
+  ratingPill: {
+    height: 22,
+    borderRadius: 11,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surfaceMuted,
+    paddingHorizontal: 7,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  ratingPillText: {
+    fontSize: 11,
+    color: colors.textMuted,
+    fontWeight: "600",
+  },
   quickAddButton: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    marginRight: 12,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    marginRight: 10,
     backgroundColor: colors.successSoft,
     alignItems: "center",
     justifyContent: "center",

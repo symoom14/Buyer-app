@@ -237,7 +237,11 @@ export default function CustomerOrderDetails() {
       .map(
         (item) => `
           <tr>
-            <td>${item.name}</td>
+            <td>${item.name}${
+              item.selectedOptionsLabel
+                ? `<div style="font-size:12px;color:#555;margin-top:2px;">${item.selectedOptionsLabel}</div>`
+                : ""
+            }</td>
             <td>${item.merchantName || "—"}</td>
             <td style="text-align:center;">${item.quantity}</td>
             <td style="text-align:right;">$${item.price.toFixed(2)}</td>
@@ -344,7 +348,7 @@ export default function CustomerOrderDetails() {
     0,
   );
   const canRequestRefund =
-    (status === "accepted" || status === "completed") &&
+    (status === "accepted" || status === "completed" || status === "cancelled") &&
     refundStatus !== "requested" &&
     refundStatus !== "processed";
   const canCancelPendingOrder = status === "pending" && !cancellingOrder;
@@ -633,45 +637,61 @@ export default function CustomerOrderDetails() {
           </Text>
         </View>
 
-        {items.map((item, i) => {
-          const iconColor = pickPaletteColor(item.productId || item.name || i);
-          return (
-            <View
-              key={`${item.productId || item.name}-${i}`}
-              style={styles.itemCard}
-            >
+        <View style={styles.itemsCard}>
+          {items.map((item, i) => {
+            const iconColor = pickPaletteColor(item.productId || item.name || i);
+            return (
               <View
+                key={`${item.productId || item.name}-${i}`}
                 style={[
-                  styles.itemIconWrap,
-                  {
-                    backgroundColor: getLightIconBackground(
-                      iconColor,
-                      colors.surfaceMuted,
-                    ),
-                  },
+                  styles.itemCard,
+                  i < items.length - 1 && styles.itemCardDivider,
                 ]}
               >
-                <AppIcon
-                  name={item.iconName || item.icon || DEFAULT_PRODUCT_ICON}
-                  variant="community"
-                  size={20}
-                  color={iconColor}
-                />
-              </View>
-              <View style={styles.itemMain}>
-                <Text style={styles.itemName} numberOfLines={1}>
-                  {item.name}
+                <View
+                  style={[
+                    styles.itemIconWrap,
+                    {
+                      backgroundColor: getLightIconBackground(
+                        iconColor,
+                        colors.surfaceMuted,
+                      ),
+                    },
+                  ]}
+                >
+                  <AppIcon
+                    name={item.iconName || item.icon || DEFAULT_PRODUCT_ICON}
+                    variant="community"
+                    size={20}
+                    color={iconColor}
+                  />
+                </View>
+                <View style={styles.itemMain}>
+                  <Text style={styles.itemName} numberOfLines={1}>
+                    {item.name}
+                  </Text>
+                  <Text style={styles.itemSub}>
+                    Qty {item.quantity} x ${Number(item.price).toFixed(2)}
+                  </Text>
+                  {item.selectedOptionsLabel ? (
+                    <Text style={styles.itemVariant} numberOfLines={1}>
+                      {item.selectedOptionsLabel}
+                    </Text>
+                  ) : null}
+                </View>
+                <Text style={styles.itemTotal}>
+                  ${(item.quantity * item.price).toFixed(2)}
                 </Text>
-                <Text style={styles.itemSub}>
-                  Qty {item.quantity} x ${Number(item.price).toFixed(2)}
-                </Text>
               </View>
-              <Text style={styles.itemTotal}>
-                ${(item.quantity * item.price).toFixed(2)}
-              </Text>
-            </View>
-          );
-        })}
+            );
+          })}
+          <View style={styles.itemsTotalRow}>
+            <Text style={styles.itemsTotalLabel}>Order total</Text>
+            <Text style={styles.itemsTotalValue}>
+              ${Number(merchantRefundAmount || 0).toFixed(2)}
+            </Text>
+          </View>
+        </View>
 
         {status === "pending" && (
           <>
@@ -700,6 +720,16 @@ export default function CustomerOrderDetails() {
         )}
 
         {status === "accepted" && (
+          <>
+            <Text style={styles.sectionTitle}>Actions</Text>
+            <View style={styles.refundCard}>
+              <Text style={styles.refundTitle}>Refund</Text>
+              {renderRefundContent()}
+            </View>
+          </>
+        )}
+
+        {status === "cancelled" && (
           <>
             <Text style={styles.sectionTitle}>Actions</Text>
             <View style={styles.refundCard}>
@@ -973,16 +1003,23 @@ const createStyles = (colors, isDark) =>
       marginTop: 6,
       marginBottom: 10,
     },
-    itemCard: {
-      flexDirection: "row",
-      alignItems: "center",
-      padding: 11,
+    itemsCard: {
       backgroundColor: colors.surface,
       borderRadius: 12,
       borderWidth: 1,
       borderColor: colors.border,
-      marginBottom: 10,
+      marginBottom: 12,
+      overflow: "hidden",
+    },
+    itemCard: {
+      flexDirection: "row",
+      alignItems: "center",
+      padding: 11,
       gap: 10,
+    },
+    itemCardDivider: {
+      borderBottomWidth: 1,
+      borderBottomColor: colors.borderSoft,
     },
     itemIconWrap: {
       width: 36,
@@ -1087,8 +1124,35 @@ const createStyles = (colors, isDark) =>
       color: colors.textSubtle,
       fontWeight: "600",
     },
+    itemVariant: {
+      marginTop: 2,
+      fontSize: 11,
+      color: colors.textMuted,
+    },
     itemTotal: {
       fontSize: 14,
+      fontWeight: "800",
+      color: colors.text,
+    },
+    itemsTotalRow: {
+      borderTopWidth: 1,
+      borderTopColor: colors.borderSoft,
+      backgroundColor: colors.surfaceMuted,
+      paddingHorizontal: 12,
+      paddingVertical: 10,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+    },
+    itemsTotalLabel: {
+      fontSize: 12,
+      fontWeight: "700",
+      color: colors.textSubtle,
+      textTransform: "uppercase",
+      letterSpacing: 0.2,
+    },
+    itemsTotalValue: {
+      fontSize: 15,
       fontWeight: "800",
       color: colors.text,
     },
