@@ -160,7 +160,7 @@ export default function MerchantOrderDetailsScreen() {
         isPartialUpdate,
       });
 
-      // optimistic update
+
       setOrder((prev) => ({
         ...prev,
         status: newStatus,
@@ -182,7 +182,7 @@ export default function MerchantOrderDetailsScreen() {
   const canUpdateToStatus = (targetStatus) => {
     const currentStatus = order?.status || "pending";
 
-    // Can't update if order is cancelled
+
     if (currentStatus === "cancelled") {
       return false;
     }
@@ -191,7 +191,7 @@ export default function MerchantOrderDetailsScreen() {
       return false;
     }
 
-    // Allow moving to any status in the timeline (forward or backward)
+
     return (
       STATUS_ORDER.includes(targetStatus) && targetStatus !== currentStatus
     );
@@ -353,12 +353,12 @@ export default function MerchantOrderDetailsScreen() {
 
   return (
     <ScreenContainer>
-      {/* Header */}
+      
       <View style={styles.header}>
         <Text style={styles.title}>Order Details</Text>
       </View>
 
-      {/* Timeline Stepper */}
+      
       {!isCancelled && outOfStockItems.length === 0 ? (
         <View style={styles.timelineContainer}>
           <View style={styles.timeline}>
@@ -369,14 +369,14 @@ export default function MerchantOrderDetailsScreen() {
 
               return (
                 <View key={status} style={styles.timelineStepWrapper}>
-                  {/* Connecting Line (before circle) */}
+                  
                   {index > 0 && (
                     <View
                       style={[styles.lineLeft, isActive && styles.lineActive]}
                     />
                   )}
 
-                  {/* Step Circle */}
+                  
                   <Pressable
                     style={styles.stepContainer}
                     onPress={() => handleStatusPress(status)}
@@ -398,7 +398,7 @@ export default function MerchantOrderDetailsScreen() {
                       />
                     </View>
 
-                    {/* Label */}
+                    
                     <Text
                       style={[
                         styles.stepLabel,
@@ -410,7 +410,7 @@ export default function MerchantOrderDetailsScreen() {
                     </Text>
                   </Pressable>
 
-                  {/* Connecting Line (after circle) */}
+                  
                   {index < STATUS_ORDER.length - 1 && (
                     <View
                       style={[styles.lineRight, isActive && styles.lineActive]}
@@ -421,7 +421,7 @@ export default function MerchantOrderDetailsScreen() {
             })}
           </View>
 
-          {/* Cancel Button */}
+          
           {canCancel && (
             <Pressable style={styles.cancelButton} onPress={handleCancelOrder}>
               <AppIcon
@@ -435,7 +435,7 @@ export default function MerchantOrderDetailsScreen() {
           )}
         </View>
       ) : (
-        // Cancelled Status Display
+
         <>
           {isCancelled ? (
             <View style={styles.cancelledBanner}>
@@ -469,7 +469,7 @@ export default function MerchantOrderDetailsScreen() {
         </>
       )}
 
-      {/* Meta */}
+      
       <View style={styles.metaBlock}>
         <Text style={styles.meta}>
           <Text style={styles.metaLabel}>Order ID: </Text>
@@ -533,7 +533,7 @@ export default function MerchantOrderDetailsScreen() {
         </View>
       )}
 
-      {/* Items table */}
+      
       <View style={styles.table}>
         <View style={styles.rowHeader}>
           <Text style={[styles.cell, styles.flex2]}>Item</Text>

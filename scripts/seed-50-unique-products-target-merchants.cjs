@@ -207,14 +207,14 @@ async function run() {
   );
 
   const plan = [];
-  // 10 per merchant -> total 50
+
   for (const merchant of targetMerchants) {
     for (let i = 0; i < 10; i += 1) {
       plan.push(merchant);
     }
   }
 
-  // Shuffle for better spread across merchants/stores
+
   plan.sort(() => Math.random() - 0.5);
 
   const created = [];
@@ -240,7 +240,7 @@ async function run() {
       }
     }
 
-    // If base names are exhausted, create unique variant names.
+
     if (!nameCandidate) {
       let suffixTry = 1;
       while (!nameCandidate && suffixTry <= 500) {

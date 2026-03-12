@@ -1,50 +1,134 @@
-# Welcome to your Expo app 👋
+# Buyer
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Buyer is a multi-role mobile commerce app built with Expo + React Native + Firebase.
+It supports three user roles in one codebase:
 
-## Get started
+- Customer: browse products, order, pay, track status, view invoices, review products.
+- Merchant: manage stores/products, fulfill orders, monitor sales and inventory.
+- Admin: monitor platform metrics, users, stores, products, and order performance.
 
-1. Install dependencies
+## Tech Stack
 
-   ```bash
-   npm install
-   ```
+- Expo SDK 54 + React Native 0.81
+- Expo Router (file-based routing)
+- Firebase Auth + Firestore + Storage
+- React Context for app state (auth, cart, favorites, theme preference)
+- Lottie animations and WebView/PDF preview utilities
 
-2. Start the app
+## Core Capabilities
 
-   ```bash
-   npx expo start
-   ```
+- Role-based auth flow and routing (`customer`, `merchant`, `admin`)
+- Product catalog with search, sorting, variants, and favorites
+- Cart + checkout workflow
+- Order lifecycle tracking (pending, accepted, completed, cancelled)
+- Merchant inventory and restock workflows
+- Admin dashboard with live operational metrics
+- PDF generation/preview for order/invoice related screens
+- Push-style in-app notifications model via Firestore collections
 
-In the output, you'll find options to open the app in a
+## Project Structure
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+- `app/`: route screens (Expo Router)
+- `src/components/`: reusable UI components
+- `src/context/`: global state providers
+- `src/firebase/`: Firebase initialization/config
+- `src/theme/`: theme system and status palettes
+- `src/utils/`: domain utilities (sorting, variants, notifications, reviews)
+- `scripts/`: maintenance, seeding, and data migration scripts
+- `assets/`: fonts, images, and animations
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## Prerequisites
 
-## Get a fresh project
+- Node.js 18+
+- npm 9+
+- Expo CLI tooling via `npx expo ...`
+- A Firebase project with Auth, Firestore, and Storage enabled
 
-When you're ready, run:
+## Environment Variables
+
+Create a `.env` file in the project root with:
 
 ```bash
-npm run reset-project
+EXPO_PUBLIC_FIREBASE_API_KEY=...
+EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN=...
+EXPO_PUBLIC_FIREBASE_PROJECT_ID=...
+EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET=...
+EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=...
+EXPO_PUBLIC_FIREBASE_APP_ID=...
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+These are consumed by `src/firebase/firebaseConfig.js`.
 
-## Learn more
+## Getting Started
 
-To learn more about developing your project with Expo, look at the following resources:
+1. Install dependencies:
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+```bash
+npm install
+```
 
-## Join the community
+2. Start the Expo dev server:
 
-Join our community of developers creating universal apps.
+```bash
+npm run start
+```
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+3. Run on a target platform:
+
+```bash
+npm run android
+npm run ios
+npm run web
+```
+
+## Useful Scripts
+
+- `npm run lint`: run Expo/ESLint checks
+- `npm run ios:weekly`: iOS prebuild + CocoaPods + open Xcode workflow
+- `npm run reset-project`: reset scaffold utility
+- `npm run dev:seed-dummy-products`: seed test product data
+- `npm run dev:seed-50-unique-products-target-merchants`: seed balanced merchant products
+- `npm run dev:validate-product-store-categories`: validate category mapping consistency
+- `npm run dev:export-admin-revenue-flow-audit`: export admin revenue flow audit JSON
+
+Additional maintenance and migration scripts are available under `scripts/` and exposed in `package.json`.
+
+## Routing Overview
+
+- `app/(auth)/*`: login/signup
+- `app/customer/*`: customer experience
+- `app/merchant/*`: merchant dashboard and operations
+- `app/admin/*`: admin control panel and analytics
+
+## UI/UX Showcase
+
+### Authentication
+
+![Login screen placeholder](./docs/media/login-placeholder.png)
+![Signup flow placeholder](./docs/media/signup-flow-placeholder.gif)
+
+### Customer Experience
+
+![Customer home placeholder](./docs/media/customer-home-placeholder.png)
+![Checkout flow placeholder](./docs/media/checkout-flow-placeholder.gif)
+
+### Merchant Experience
+
+![Merchant dashboard placeholder](./docs/media/merchant-dashboard-placeholder.png)
+![Order fulfillment placeholder](./docs/media/merchant-fulfillment-placeholder.gif)
+
+### Admin Experience
+
+![Admin panel placeholder](./docs/media/admin-panel-placeholder.png)
+![Merchant performance placeholder](./docs/media/admin-performance-placeholder.gif)
+
+## Notes for Contributors
+
+- Keep new UI logic in reusable `src/components` where possible.
+- Keep domain logic in `src/utils` and context providers in `src/context`.
+- Use existing theme hooks (`useAppTheme`) instead of hardcoding colors.
+- Prefer script-based data operations in `scripts/` for repeatable admin tasks.
+
+## License
+
+No license file is currently defined in this repository.

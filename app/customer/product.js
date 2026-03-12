@@ -31,11 +31,11 @@ import { getUserDisplayName } from "../../src/utils/userDisplayName";
 
 const DEFAULT_PRODUCT_ICON = "package-variant-closed";
 const ICON_COLOR_POOL = [
-  "#E53935", // red
-  "#2E7D32", // green
-  "#1E88E5", // blue
-  "#FFA700", // chrome yellow
-  "#F57C00", // orange
+  "#E53935",
+  "#2E7D32",
+  "#1E88E5",
+  "#FFA700",
+  "#F57C00",
 ];
 const SORT_OPTIONS = [
   { key: PRODUCT_SORT_MODES.RECOMMENDED, label: "Recommended" },
@@ -74,7 +74,7 @@ function getLightIconBackground(iconColor, fallbackColor) {
     return "#E5E7EB";
   }
 
-  const mix = 0.78; // blend toward white for a soft pastel tint
+  const mix = 0.78;
   const bgR = r + (255 - r) * mix;
   const bgG = g + (255 - g) * mix;
   const bgB = b + (255 - b) * mix;

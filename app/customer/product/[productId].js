@@ -47,11 +47,11 @@ const FAVORITE_ICON_SIZE = 21;
 const FAVORITE_ICON_WRAP_SIZE = FAVORITE_ICON_SIZE + 8;
 const PRODUCT_ACTIONS_HEIGHT = 96;
 const ICON_COLOR_POOL = [
-  "#E53935", // red
-  "#2E7D32", // green
-  "#1E88E5", // blue
-  "#FFA700", // chrome yellow
-  "#F57C00", // orange
+  "#E53935",
+  "#2E7D32",
+  "#1E88E5",
+  "#FFA700",
+  "#F57C00",
 ];
 
 function getReviewUsername(value) {
@@ -1102,6 +1102,7 @@ const createStyles = (colors) =>
       marginBottom: 20,
       fontSize: 15,
       lineHeight: 21,
+      color: colors.textMuted,
     },
     reviewsSection: {
       marginTop: 30,

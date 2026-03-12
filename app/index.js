@@ -8,7 +8,7 @@ export default function Index() {
     .trim()
     .toLowerCase();
 
-  // Still checking Firebase auth state
+
   if (loading) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
@@ -17,12 +17,12 @@ export default function Index() {
     );
   }
 
-  // Not logged in -> go to login
+
   if (!user) {
     return <Redirect href="/login" />;
   }
 
-  // Logged in -> route by role
+
   if (normalizedRole === "customer") {
     return <Redirect href="/customer/home" />;
   }
@@ -35,6 +35,6 @@ export default function Index() {
     return <Redirect href="/admin/panel" />;
   }
 
-  // Fallback
+
   return null;
 }

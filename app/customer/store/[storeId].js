@@ -31,11 +31,11 @@ import { getUserDisplayName } from "../../../src/utils/userDisplayName";
 
 const DEFAULT_PRODUCT_ICON = "package-variant-closed";
 const ICON_COLOR_POOL = [
-  "#E53935", // red
-  "#2E7D32", // green
-  "#1E88E5", // blue
-  "#FFA700", // chrome yellow
-  "#F57C00", // orange
+  "#E53935",
+  "#2E7D32",
+  "#1E88E5",
+  "#FFA700",
+  "#F57C00",
 ];
 
 export default function CustomerStorePage() {

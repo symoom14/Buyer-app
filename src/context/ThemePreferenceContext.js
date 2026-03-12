@@ -26,7 +26,7 @@ export function ThemePreferenceProvider({ children }) {
           setSchemeState(saved);
         }
       } catch (_err) {
-        // Keep default light theme if persistence fails.
+
       } finally {
         if (alive) setIsReady(true);
       }
@@ -44,7 +44,7 @@ export function ThemePreferenceProvider({ children }) {
     try {
       await AsyncStorage.setItem(STORAGE_KEY, normalized);
     } catch (_err) {
-      // Ignore persistence failure; in-memory preference still applies.
+
     }
   }, []);
 

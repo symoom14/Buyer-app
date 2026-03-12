@@ -221,7 +221,7 @@ export default function CustomerHome() {
             topByProduct[productId] = {
               id: productId,
               name: item.name || productData?.name || "Product",
-              // Keep historical order pricing immutable; never fallback to current catalog price.
+
               price: Number(item.price ?? 0),
               iconName:
                 item.iconName ||
@@ -760,7 +760,7 @@ export default function CustomerHome() {
         </Animated.View>
       </Animated.View>
 
-      {/* Dashboard content */}
+      
       <Animated.ScrollView
         style={styles.scroll}
         showsVerticalScrollIndicator={false}

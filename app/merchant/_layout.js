@@ -21,7 +21,7 @@ export default function MerchantLayout() {
             },
           }}
         >
-          {/* Merchant home dashboard */}
+          
           <Stack.Screen
             name="dashboard"
             options={{
@@ -33,7 +33,7 @@ export default function MerchantLayout() {
           <Stack.Screen name="profile" options={{ title: "Profile" }} />
           <Stack.Screen name="notifications" options={{ title: "Notifications" }} />
 
-          {/* Stores management */}
+          
           <Stack.Screen
             name="stores/manage"
             options={{
@@ -59,7 +59,7 @@ export default function MerchantLayout() {
             }}
           />
 
-          {/* Orders */}
+          
           <Stack.Screen
             name="orders"
             options={{
@@ -73,7 +73,7 @@ export default function MerchantLayout() {
             }}
           />
 
-          {/* Store page */}
+          
           <Stack.Screen
             name="store/[storeId]"
             options={{
@@ -87,7 +87,7 @@ export default function MerchantLayout() {
             }}
           />
 
-          {/* Add Product */}
+          
           <Stack.Screen
             name="store/add-product/[storeId]"
             options={{

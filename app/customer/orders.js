@@ -115,7 +115,7 @@ function startOfDay(dateInput) {
 
 function startOfWeek(dateInput) {
   const date = startOfDay(dateInput);
-  const day = date.getDay(); // Sunday = 0
+  const day = date.getDay();
   date.setDate(date.getDate() - day);
   return date;
 }

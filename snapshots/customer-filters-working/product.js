@@ -23,11 +23,11 @@ import { getUserDisplayName } from "../../src/utils/userDisplayName";
 
 const DEFAULT_PRODUCT_ICON = "package-variant-closed";
 const ICON_COLOR_POOL = [
-  "#E53935", // red
-  "#2E7D32", // green
-  "#1E88E5", // blue
-  "#FFA700", // chrome yellow
-  "#F57C00", // orange
+  "#E53935",
+  "#2E7D32",
+  "#1E88E5",
+  "#FFA700",
+  "#F57C00",
 ];
 
 export default function CustomerProducts() {
@@ -59,7 +59,7 @@ export default function CustomerProducts() {
         ...doc.data(),
       }));
 
-      // Fetch stores
+
       const storeSnapshot = await getDocs(collection(db, "stores"));
       const storeMap = {};
       const storeList = [];
@@ -74,7 +74,7 @@ export default function CustomerProducts() {
       });
       setStores(storeList);
 
-      // Fetch merchants
+
       const userSnapshot = await getDocs(collection(db, "users"));
       const merchantMap = {};
       const merchantList = [];

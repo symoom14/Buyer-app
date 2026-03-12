@@ -29,7 +29,7 @@ export default function PdfViewer({ visible, uri, onClose }) {
       >
         <View style={styles.viewerCard}>
           <View style={styles.header}>
-            <Text style={styles.title}>Invoice Preview</Text>
+            <Text style={styles.title}>Preview</Text>
             <TouchableOpacity style={styles.closeBtn} onPress={onClose}>
               <AppIcon
                 name="window-close"

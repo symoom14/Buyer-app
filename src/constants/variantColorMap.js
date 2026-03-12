@@ -5,7 +5,7 @@ export const VARIANT_COLOR_HEX_MAP = {
   yellow: "#FFA700",
   green: "#2E7D32",
 
-  // Additional reusable colour mapping
+
   black: "#121212",
   white: "#EAEAEA",
   grey: "#9E9E9E",

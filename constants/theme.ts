@@ -1,6 +1,4 @@
-/**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- */
+
 
 import { Platform } from "react-native";
 
@@ -86,13 +84,13 @@ export const Colors = {
 
 export const Fonts = Platform.select({
   ios: {
-    /** iOS `UIFontDescriptorSystemDesignDefault` */
+    
     sans: "system-ui",
-    /** iOS `UIFontDescriptorSystemDesignSerif` */
+    
     serif: "ui-serif",
-    /** iOS `UIFontDescriptorSystemDesignRounded` */
+    
     rounded: "ui-rounded",
-    /** iOS `UIFontDescriptorSystemDesignMonospaced` */
+    
     mono: "ui-monospace",
   },
   default: {
