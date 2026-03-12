@@ -81,18 +81,6 @@ npm run ios
 npm run web
 ```
 
-## Useful Scripts
-
-- `npm run lint`: run Expo/ESLint checks
-- `npm run ios:weekly`: iOS prebuild + CocoaPods + open Xcode workflow
-- `npm run reset-project`: reset scaffold utility
-- `npm run dev:seed-dummy-products`: seed test product data
-- `npm run dev:seed-50-unique-products-target-merchants`: seed balanced merchant products
-- `npm run dev:validate-product-store-categories`: validate category mapping consistency
-- `npm run dev:export-admin-revenue-flow-audit`: export admin revenue flow audit JSON
-
-Additional maintenance and migration scripts are available under `scripts/` and exposed in `package.json`.
-
 ## Routing Overview
 
 - `app/(auth)/*`: login/signup
