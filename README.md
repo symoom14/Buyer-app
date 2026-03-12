@@ -104,22 +104,22 @@ Additional maintenance and migration scripts are available under `scripts/` and 
 
 ### Authentication
 
-![Login screen placeholder](docs/media/Sign%20in.png)
+<img src="docs/media/Sign%20in.png" alt="Login screen" width="280" />
 
 ### Customer Experience
 
-![Customer home placeholder](docs/media/Customer%20home.png)
-![Checkout flow placeholder](docs/media/Customer%20order%20flow.gif)
+<img src="docs/media/Customer%20home.png" alt="Customer home" width="280" />
+<img src="docs/media/Customer%20order%20flow.gif" alt="Checkout flow" width="280" />
 
 ### Merchant Experience
 
-![Merchant dashboard placeholder](docs/media/Merchant%20home.png)
-![Order fulfillment placeholder](docs/media/Merchant%20order%20processing%20flow.gif)
+<img src="docs/media/Merchant%20home.png" alt="Merchant dashboard" width="280" />
+<img src="docs/media/Merchant%20order%20processing%20flow.gif" alt="Order fulfillment flow" width="280" />
 
 ### Admin Experience
 
-![Admin panel placeholder](docs/media/Admin%20home.png)
-![Merchant performance placeholder](docs/media/Admin%20analytics.gif)
+<img src="docs/media/Admin%20home.png" alt="Admin panel" width="280" />
+<img src="docs/media/Admin%20analytics.gif" alt="Merchant performance analytics" width="280" />
 
 ## Notes for Contributors
 
