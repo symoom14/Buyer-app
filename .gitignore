@@ -55,3 +55,7 @@ app-example
 # generated native folders
 /ios
 /android
+
+# local-only tooling and data scripts
+scripts/
+snapshots/
